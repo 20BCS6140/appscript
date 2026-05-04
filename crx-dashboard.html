@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRX Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Google Sans', Arial, sans-serif; background: #f0f4f9; min-height: 100vh; }
+
+    .top-bar { background: #1a73e8; color: white; padding: 0 24px; height: 64px; display: flex;
+      align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+    .top-bar .logo { font-size: 18px; font-weight: 500; }
+    .nav-links a { color: rgba(255,255,255,0.85); text-decoration: none; margin-left: 20px; font-size: 14px; }
+    .nav-links a:hover, .nav-links a.active { color: white; text-decoration: underline; }
+
+    .page { padding: 28px 32px; }
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .page-title { font-size: 22px; font-weight: 600; color: #202124; }
+    .btn-refresh { background: white; border: 1px solid #dadce0; padding: 8px 16px; border-radius: 6px;
+      font-size: 13px; cursor: pointer; color: #3c4043; display: flex; align-items: center; gap: 6px; }
+    .btn-refresh:hover { background: #f8f9fa; }
+
+    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: white; border-radius: 10px; padding: 18px 22px; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      border: 1px solid #e8eaed; }
+    .stat-card .val { font-size: 30px; font-weight: 700; }
+    .stat-card .lbl { font-size: 12px; color: #5f6368; margin-top: 2px; }
+    .stat-card.open .val { color: #ea4335; }
+    .stat-card.assigned .val { color: #fbbc04; }
+    .stat-card.resolved .val { color: #34a853; }
+
+    .filter-bar { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+    .filter-bar select { padding: 8px 12px; border: 1px solid #dadce0; border-radius: 6px;
+      font-size: 13px; outline: none; background: white; cursor: pointer; }
+    .filter-bar select:focus { border-color: #1a73e8; }
+
+    .table-wrap { background: white; border-radius: 12px; box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+      border: 1px solid #e8eaed; overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th { background: #f8f9fa; color: #5f6368; font-weight: 600; padding: 12px 14px;
+      text-align: left; border-bottom: 1px solid #e8eaed; white-space: nowrap; font-size: 11px; text-transform: uppercase; }
+    tbody tr { border-bottom: 1px solid #f1f3f4; transition: background 0.1s; }
+    tbody tr:hover { background: #f8f9fa; }
+    tbody td { padding: 12px 14px; color: #202124; vertical-align: middle; }
+    tbody tr:last-child { border-bottom: none; }
+
+    .badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 12px;
+      font-size: 11px; font-weight: 600; }
+    .badge.open { background: #fce8e6; color: #c5221f; }
+    .badge.assigned { background: #fef3e0; color: #b06000; }
+    .badge.resolved { background: #e6f4ea; color: #1e8e3e; }
+
+    .viol-chip { display: inline-block; background: #e8eaed; color: #3c4043; padding: 2px 8px;
+      border-radius: 10px; font-size: 11px; margin: 1px; }
+
+    .assign-select { padding: 6px 10px; border: 1px solid #dadce0; border-radius: 6px;
+      font-size: 12px; background: white; outline: none; min-width: 130px; cursor: pointer; }
+    .assign-select:focus { border-color: #1a73e8; }
+
+    .btn-resolve { background: #1a73e8; color: white; border: none; padding: 7px 14px;
+      border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 500; transition: background 0.15s; }
+    .btn-resolve:hover { background: #1557b0; }
+    .btn-resolved { background: #e6f4ea; color: #1e8e3e; border: 1px solid #b7dfbf;
+      padding: 7px 14px; border-radius: 6px; font-size: 12px; font-weight: 500; }
+
+    .empty-state { text-align: center; padding: 60px 20px; color: #5f6368; }
+    .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+
+    /* ── Resolve Overlay ── */
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+      z-index: 100; align-items: center; justify-content: center; }
+    .overlay.show { display: flex; }
+    .modal { background: white; border-radius: 16px; padding: 32px; width: 540px; max-width: 95vw;
+      max-height: 90vh; overflow-y: auto; box-shadow: 0 8px 40px rgba(0,0,0,0.2); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .modal-title { font-size: 18px; font-weight: 600; color: #202124; }
+    .btn-close { background: none; border: none; font-size: 22px; cursor: pointer; color: #5f6368; line-height: 1; }
+    .btn-close:hover { color: #202124; }
+    .context-box { background: #f8f9fa; border-radius: 8px; padding: 14px; margin-bottom: 20px;
+      border-left: 3px solid #1a73e8; font-size: 13px; color: #3c4043; line-height: 1.5; }
+    .context-box strong { color: #202124; }
+    .modal label { display: block; font-size: 13px; font-weight: 500; color: #3c4043; margin-bottom: 6px; }
+    .modal textarea, .modal select, .modal input[type="text"] {
+      width: 100%; padding: 10px 14px; border: 1px solid #dadce0; border-radius: 8px;
+      font-size: 14px; font-family: 'Google Sans', Arial, sans-serif; outline: none; margin-bottom: 16px; }
+    .modal textarea:focus, .modal select:focus, .modal input:focus {
+      border-color: #1a73e8; box-shadow: 0 0 0 2px rgba(26,115,232,0.15); }
+    .modal textarea { min-height: 90px; resize: vertical; }
+    .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 8px; }
+    .btn-cancel { padding: 10px 20px; background: white; border: 1px solid #dadce0;
+      border-radius: 8px; font-size: 14px; cursor: pointer; color: #3c4043; }
+    .btn-modal-submit { padding: 10px 22px; background: #1a73e8; color: white; border: none;
+      border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; }
+    .btn-modal-submit:hover { background: #1557b0; }
+
+    .toast { position: fixed; bottom: 24px; right: 24px; padding: 12px 18px; border-radius: 8px;
+      font-size: 14px; z-index: 200; opacity: 0; transition: all 0.3s; }
+    .toast.show { opacity: 1; }
+    .toast.success { background: #34a853; color: white; }
+    .toast.error { background: #d93025; color: white; }
+
+    .loading-row td { text-align: center; padding: 40px; color: #5f6368; }
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="logo">CRX Doubt Management</div>
+  <div class="nav-links">
+    <a href="https://script.google.com/macros/s/AKfycbw-F49hkvSpUvBAduT8qFtravWvQSnQ7FDAphM9UWBoF63tf0leJ8idXpdGQvHCAZWC/exec?page=l0">L0 Form</a>
+    <a href="https://script.google.com/macros/s/AKfycbw-F49hkvSpUvBAduT8qFtravWvQSnQ7FDAphM9UWBoF63tf0leJ8idXpdGQvHCAZWC/exec?page=crx" class="active">CRX Dashboard</a>
+    <a href="https://script.google.com/macros/s/AKfycbw-F49hkvSpUvBAduT8qFtravWvQSnQ7FDAphM9UWBoF63tf0leJ8idXpdGQvHCAZWC/exec?page=analytics">Analytics</a>
+  </div>
+</div>
+
+<div class="page">
+  <div class="page-header">
+    <div class="page-title">CRX Doubt Queue</div>
+    <button class="btn-refresh" onclick="loadDoubts()">↻ Refresh</button>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card open"><div class="val" id="cntOpen">—</div><div class="lbl">Open Doubts</div></div>
+    <div class="stat-card assigned"><div class="val" id="cntAssigned">—</div><div class="lbl">Assigned</div></div>
+    <div class="stat-card resolved"><div class="val" id="cntResolved">—</div><div class="lbl">Resolved Today</div></div>
+  </div>
+
+  <div class="filter-bar">
+    <select id="filterStatus" onchange="renderTable()">
+      <option value="All">All Statuses</option>
+      <option value="Open" selected>Open</option>
+      <option value="Assigned">Assigned</option>
+      <option value="Resolved">Resolved</option>
+    </select>
+    <select id="filterQueue" onchange="renderTable()">
+      <option value="All">All Queues</option>
+    </select>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Doubt ID</th>
+          <th>Submitted At</th>
+          <th>Extension ID</th>
+          <th>L0 Member</th>
+          <th>Violations</th>
+          <th>Queue</th>
+          <th>Status</th>
+          <th>Assign To</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <tr class="loading-row"><td colspan="9">Loading doubts…</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Resolve Overlay -->
+<div class="overlay" id="resolveOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Resolve Doubt</div>
+      <button class="btn-close" onclick="closeOverlay()">×</button>
+    </div>
+    <div class="context-box" id="contextBox">Loading context…</div>
+    <label>Your Name (CRX Member) <span style="color:red">*</span></label>
+    <select id="resolvedBy"></select>
+    <label>Clarification Details <span style="color:red">*</span></label>
+    <textarea id="clarification" placeholder="Provide a clear explanation to the L0 reviewer…"></textarea>
+    <label>Final Verdict <span style="color:red">*</span></label>
+    <input type="text" id="finalVerdict" placeholder="e.g. Confirmed Violation — Remove Extension / No Violation Found">
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeOverlay()">Cancel</button>
+      <button class="btn-modal-submit" onclick="submitResolve()">Submit Resolution & Email L0</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let allDoubts = [];
+  let crxMembers = [];
+  let currentDoubtId = null;
+
+  function showToast(msg, type) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast ${type} show`;
+    setTimeout(() => t.className = 'toast', 4000);
+  }
+
+  function loadDoubts() {
+  document.getElementById('tableBody').innerHTML =
+    '<tr class="loading-row"><td colspan="9">Loading doubts…</td></tr>';
+
+  // Step 1: Load config FIRST
+  google.script.run
+    .withSuccessHandler(function(config) {
+      if (!config) { config = {}; }
+
+      crxMembers = config.crxMembers || [];
+      console.log('CRX Members loaded:', crxMembers);
+
+      // Populate queue filter dropdown
+      var queueSel = document.getElementById('filterQueue');
+      var existing = Array.from(queueSel.options).map(function(o) { return o.value; });
+      (config.queueNames || []).forEach(function(q) {
+        if (!existing.includes(q)) {
+          var o = document.createElement('option');
+          o.value = q; o.textContent = q;
+          queueSel.appendChild(o);
+        }
+      });
+
+      // Populate "Resolved By" dropdown in modal
+      var rb = document.getElementById('resolvedBy');
+      rb.innerHTML = '<option value="">— Select your name —</option>';
+      crxMembers.forEach(function(m) {
+        var name = m.split('|')[0].trim();
+        var o = document.createElement('option');
+        o.value = name; o.textContent = name;
+        rb.appendChild(o);
+      });
+
+      // Step 2: Load doubts ONLY after config is ready
+      google.script.run
+        .withSuccessHandler(function(doubts) {
+          console.log('Doubts received:', doubts);
+          allDoubts = Array.isArray(doubts) ? doubts : [];
+          console.log('Total doubts:', allDoubts.length);
+          updateStats();
+          renderTable(); // crxMembers is guaranteed populated by now
+        })
+        .withFailureHandler(function(err) {
+          console.error('getDoubts error:', err);
+          allDoubts = [];
+          updateStats();
+          document.getElementById('tableBody').innerHTML =
+            '<tr class="loading-row"><td colspan="9">⚠️ Error loading doubts.</td></tr>';
+        })
+        .getDoubts();
+
+    })
+    .withFailureHandler(function(err) {
+      console.error('getConfig error:', err);
+      document.getElementById('tableBody').innerHTML =
+        '<tr class="loading-row"><td colspan="9">⚠️ Error loading config.</td></tr>';
+    })
+    .getConfig();
+}
+
+function updateStats() {
+  allDoubts = Array.isArray(allDoubts) ? allDoubts : [];
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('cntOpen').textContent = 
+    allDoubts.filter(d => d.Status === 'Open').length;
+  document.getElementById('cntAssigned').textContent = 
+    allDoubts.filter(d => d.Status === 'Assigned').length;
+  document.getElementById('cntResolved').textContent = 
+    allDoubts.filter(d => d.Status === 'Resolved' && 
+      (d.Assigned_At || '').toString().startsWith(today)).length;
+}
+
+  function renderTable() {
+    const statusF = document.getElementById('filterStatus').value;
+    const queueF = document.getElementById('filterQueue').value;
+
+    let rows = allDoubts.filter(d => {
+      if (statusF !== 'All' && d.Status !== statusF) return false;
+      if (queueF !== 'All' && d.Queue_Name !== queueF) return false;
+      return true;
+    });
+
+    if (rows.length === 0) {
+      document.getElementById('tableBody').innerHTML = `
+        <tr><td colspan="9" style="text-align:center;padding:50px;color:#5f6368">
+          <div style="font-size:32px;margin-bottom:10px">📋</div>
+          No doubts match the current filters.
+        </td></tr>`;
+      return;
+    }
+
+    const memberNames = crxMembers.map(m => m.split('|')[0].trim());
+
+    document.getElementById('tableBody').innerHTML = rows.map(d => {
+      const viols = d.Violations ? d.Violations.split(', ').map(v =>
+        `<span class="viol-chip">${v.trim()}</span>`).join('') : '—';
+      const submittedDate = d.Submitted_At ? new Date(d.Submitted_At).toLocaleString() : '—';
+      const statusBadge = `<span class="badge ${(d.Status||'open').toLowerCase()}">${d.Status || 'Open'}</span>`;
+
+      const assignOpts = `<option value="">— Assign to —</option>` +
+        memberNames.map(m => `<option ${d.Assigned_To === m ? 'selected' : ''} value="${m}">${m}</option>`).join('');
+
+      const actionBtn = d.Status === 'Resolved'
+        ? `<button class="btn-resolved">✓ Resolved</button>`
+        : `<button class="btn-resolve" onclick="openResolveOverlay('${d.Doubt_ID}')">Resolve</button>`;
+
+      return `<tr>
+        <td><code style="font-size:11px;color:#1a73e8">${d.Doubt_ID}</code></td>
+        <td style="white-space:nowrap;font-size:12px">${submittedDate}</td>
+        <td><code style="font-size:12px">${d.Extension_ID}</code></td>
+        <td><div style="font-weight:500">${d.L0_Name}</div><div style="font-size:11px;color:#5f6368">${d.L0_Email}</div></td>
+        <td>${viols}</td>
+        <td>${d.Queue_Name || '—'}</td>
+        <td>${statusBadge}</td>
+        <td>
+          <select class="assign-select" onchange="assignDoubt('${d.Doubt_ID}', this.value)">${assignOpts}</select>
+        </td>
+        <td>${actionBtn}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  function assignDoubt(doubtId, memberName) {
+    if (!memberName) return;
+    google.script.run
+      .withSuccessHandler(function(r) {
+        if (r.success) {
+          const d = allDoubts.find(x => x.Doubt_ID === doubtId);
+          if (d) { d.Assigned_To = memberName; d.Status = 'Assigned'; }
+          renderTable(); updateStats();
+          showToast(`✅ Assigned to ${memberName}`, 'success');
+        }
+      })
+      .assignDoubt(doubtId, memberName);
+  }
+
+  function openResolveOverlay(doubtId) {
+    currentDoubtId = doubtId;
+    const d = allDoubts.find(x => x.Doubt_ID === doubtId);
+    if (!d) return;
+    document.getElementById('contextBox').innerHTML = `
+      <strong>Doubt ID:</strong> ${d.Doubt_ID}<br>
+      <strong>Extension ID:</strong> ${d.Extension_ID}<br>
+      <strong>L0 Member:</strong> ${d.L0_Name} (${d.L0_Email})<br>
+      <strong>Violations:</strong> ${d.Violations}<br>
+      <strong>Doubt:</strong> ${d.Doubt_Details}`;
+    document.getElementById('clarification').value = '';
+    document.getElementById('finalVerdict').value = '';
+    document.getElementById('resolveOverlay').classList.add('show');
+  }
+
+  function closeOverlay() {
+    document.getElementById('resolveOverlay').classList.remove('show');
+    currentDoubtId = null;
+  }
+
+  function submitResolve() {
+    const resolvedBy = document.getElementById('resolvedBy').value;
+    const clarification = document.getElementById('clarification').value.trim();
+    const finalVerdict = document.getElementById('finalVerdict').value.trim();
+
+    if (!resolvedBy || !clarification || !finalVerdict) {
+      showToast('⚠️ Please fill in all fields.', 'error');
+      return;
+    }
+
+    google.script.run
+      .withSuccessHandler(function(r) {
+        if (r.success) {
+          closeOverlay();
+          const d = allDoubts.find(x => x.Doubt_ID === currentDoubtId);
+          if (d) d.Status = 'Resolved';
+          renderTable(); updateStats();
+          showToast('✅ Resolved & email sent to L0!', 'success');
+          loadDoubts();
+        } else {
+          showToast('❌ Error: ' + r.error, 'error');
+        }
+      })
+      .withFailureHandler(function(err) {
+        showToast('❌ Failed to resolve. Try again.', 'error');
+      })
+      .resolveDoubt({ doubtId: currentDoubtId, clarification, finalVerdict, resolvedBy });
+  }
+
+  // Load on start
+  loadDoubts();
+  // Auto-refresh every 60 seconds
+  setInterval(loadDoubts, 60000);
+</script>
+</body>
+</html>
