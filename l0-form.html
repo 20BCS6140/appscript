@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRX Doubt Submission</title>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Google Sans', Arial, sans-serif; background: #f0f4f9; min-height: 100vh; }
+
+    .top-bar { background: #1a73e8; color: white; padding: 0 24px; height: 64px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+    .top-bar .logo { display: flex; align-items: center; gap: 12px; font-size: 18px; font-weight: 500; }
+    .top-bar .logo svg { width: 28px; height: 28px; fill: white; }
+    .nav-links a { color: rgba(255,255,255,0.85); text-decoration: none; margin-left: 20px; font-size: 14px; }
+    .nav-links a:hover { color: white; }
+
+    .page { max-width: 680px; margin: 40px auto; padding: 0 16px 60px; }
+    .page-title { font-size: 24px; font-weight: 600; color: #202124; margin-bottom: 6px; }
+    .page-subtitle { font-size: 14px; color: #5f6368; margin-bottom: 28px; }
+
+    .card { background: white; border-radius: 12px; padding: 32px; box-shadow: 0 1px 6px rgba(0,0,0,0.08); border: 1px solid #e8eaed; }
+
+    .form-group { margin-bottom: 22px; }
+    label { display: block; font-size: 13px; font-weight: 500; color: #3c4043; margin-bottom: 8px; }
+    label .req { color: #d93025; margin-left: 2px; }
+
+    input[type="text"], input[type="email"], input[type="datetime-local"], select, textarea {
+      width: 100%; padding: 10px 14px; border: 1px solid #dadce0; border-radius: 8px;
+      font-size: 14px; font-family: 'Google Sans', Arial, sans-serif; color: #202124;
+      transition: border-color 0.2s, box-shadow 0.2s; outline: none; background: white;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: #1a73e8; box-shadow: 0 0 0 3px rgba(26,115,232,0.15);
+    }
+    textarea { min-height: 100px; resize: vertical; }
+
+    .violations-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .check-item { display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+      border: 1px solid #dadce0; border-radius: 8px; cursor: pointer; transition: all 0.15s; }
+    .check-item:hover { background: #e8f0fe; border-color: #1a73e8; }
+    .check-item input[type="checkbox"] { width: 16px; height: 16px; accent-color: #1a73e8; cursor: pointer; }
+    .check-item.selected { background: #e8f0fe; border-color: #1a73e8; }
+    .check-item label { font-size: 13px; cursor: pointer; margin: 0; }
+
+    .inline-group { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    .btn-submit { width: 100%; padding: 13px; background: #1a73e8; color: white; border: none;
+      border-radius: 8px; font-size: 15px; font-weight: 500; cursor: pointer; font-family: 'Google Sans', Arial, sans-serif;
+      transition: background 0.2s; margin-top: 8px; }
+    .btn-submit:hover { background: #1557b0; }
+    .btn-submit:disabled { background: #ccc; cursor: not-allowed; }
+
+    .toast { position: fixed; bottom: 24px; right: 24px; padding: 14px 20px; border-radius: 8px;
+      font-size: 14px; font-weight: 500; z-index: 1000; opacity: 0; transform: translateY(10px);
+      transition: all 0.3s; max-width: 340px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.success { background: #34a853; color: white; }
+    .toast.error { background: #d93025; color: white; }
+
+    .spinner { display: none; width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; 
+      margin: 0 auto; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .btn-submit.loading .btn-text { display: none; }
+    .btn-submit.loading .spinner { display: block; }
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="logo">
+    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+    CRX Doubt Management
+  </div>
+  <div class="nav-links">
+    <a href="https://script.google.com/macros/s/AKfycbw-F49hkvSpUvBAduT8qFtravWvQSnQ7FDAphM9UWBoF63tf0leJ8idXpdGQvHCAZWC/exec?page=crx">CRX Dashboard</a>
+    <a href="https://script.google.com/macros/s/AKfycbw-F49hkvSpUvBAduT8qFtravWvQSnQ7FDAphM9UWBoF63tf0leJ8idXpdGQvHCAZWC/exec?page=analytics">Analytics</a>
+  </div>
+</div>
+
+<div class="page">
+  <div class="page-title">Submit a Doubt</div>
+  <div class="page-subtitle">Fill in the details below to raise a doubt with the CRX review team.</div>
+
+  <div class="card">
+    <div class="inline-group">
+      <div class="form-group">
+        <label>Your Name <span class="req">*</span></label>
+        <input type="text" id="l0Name" placeholder="Enter your full name">
+      </div>
+      <div class="form-group">
+        <label>Your Email <span class="req">*</span></label>
+        <input type="email" id="l0Email" placeholder="yourname@google.com">
+      </div>
+    </div>
+
+    <div class="inline-group">
+      <div class="form-group">
+        <label>Extension Pickup Time <span class="req">*</span></label>
+        <input type="datetime-local" id="extensionPickupTime">
+      </div>
+      <div class="form-group">
+        <label>Extension ID <span class="req">*</span></label>
+        <input type="text" id="extensionId" placeholder="e.g. abcdefghijklmnop">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Queue Name <span class="req">*</span></label>
+      <select id="queueName">
+        <option value="">— Select Queue —</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Violations Observed <span class="req">*</span> <span style="color:#5f6368;font-weight:400">(select all that apply)</span></label>
+      <div class="violations-grid" id="violationsGrid">
+        <!-- populated by JS -->
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Doubt Details <span class="req">*</span></label>
+      <textarea id="doubtDetails" placeholder="Describe your doubt in detail. Include any specific behavior, screenshot references, or policy sections you're unsure about..."></textarea>
+    </div>
+
+    <button class="btn-submit" id="submitBtn" onclick="submitForm()">
+      <span class="btn-text">Submit Doubt to CRX Team</span>
+      <div class="spinner"></div>
+    </button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // Load config on page load
+  google.script.run
+    .withSuccessHandler(function(config) {
+      // Populate Queue dropdown
+      const queueSelect = document.getElementById('queueName');
+      config.queueNames.forEach(q => {
+        const opt = document.createElement('option');
+        opt.value = q; opt.textContent = q;
+        queueSelect.appendChild(opt);
+      });
+
+      // Populate violations checkboxes
+      const grid = document.getElementById('violationsGrid');
+      config.violations.forEach(v => {
+        const div = document.createElement('div');
+        div.className = 'check-item';
+        div.innerHTML = `
+          <input type="checkbox" id="v_${v}" value="${v}" onchange="toggleSelected(this)">
+          <label for="v_${v}">${v}</label>`;
+        grid.appendChild(div);
+      });
+    })
+    .getConfig();
+
+  function toggleSelected(cb) {
+    cb.closest('.check-item').classList.toggle('selected', cb.checked);
+  }
+
+  function showToast(msg, type) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast ${type} show`;
+    setTimeout(() => t.className = 'toast', 4000);
+  }
+
+  function submitForm() {
+    const l0Name = document.getElementById('l0Name').value.trim();
+    const l0Email = document.getElementById('l0Email').value.trim();
+    const extensionPickupTime = document.getElementById('extensionPickupTime').value;
+    const extensionId = document.getElementById('extensionId').value.trim();
+    const queueName = document.getElementById('queueName').value;
+    const doubtDetails = document.getElementById('doubtDetails').value.trim();
+    const violations = [...document.querySelectorAll('#violationsGrid input:checked')].map(c => c.value);
+
+    if (!l0Name || !l0Email || !extensionPickupTime || !extensionId || !queueName || !doubtDetails || violations.length === 0) {
+      showToast('⚠️ Please fill in all required fields and select at least one violation.', 'error');
+      return;
+    }
+    if (!l0Email.includes('@')) {
+      showToast('⚠️ Please enter a valid email address.', 'error');
+      return;
+    }
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.classList.add('loading');
+
+    google.script.run
+      .withSuccessHandler(function(result) {
+        btn.disabled = false;
+        btn.classList.remove('loading');
+        if (result.success) {
+          showToast(`✅ Doubt submitted! ID: ${result.doubtId}. CRX team has been notified.`, 'success');
+          // Reset form
+          document.getElementById('l0Name').value = '';
+          document.getElementById('l0Email').value = '';
+          document.getElementById('extensionPickupTime').value = '';
+          document.getElementById('extensionId').value = '';
+          document.getElementById('queueName').value = '';
+          document.getElementById('doubtDetails').value = '';
+          document.querySelectorAll('#violationsGrid input').forEach(c => { c.checked = false; });
+          document.querySelectorAll('.check-item').forEach(c => c.classList.remove('selected'));
+        } else {
+          showToast('❌ Error: ' + result.error, 'error');
+        }
+      })
+      .withFailureHandler(function(err) {
+        btn.disabled = false;
+        btn.classList.remove('loading');
+        showToast('❌ Submission failed. Please try again.', 'error');
+      })
+      .submitDoubt({ l0Name, l0Email, extensionPickupTime, extensionId, queueName, doubtDetails, violations });
+  }
+</script>
+</body>
+</html>
