@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>CRX Analytics</title>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/charts/loader.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Google Sans', Arial, sans-serif; background: #f0f4f9; min-height: 100vh; }
+
+    .top-bar { background: #1a73e8; color: white; padding: 0 24px; height: 64px; display: flex;
+      align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+    .top-bar .logo { font-size: 18px; font-weight: 500; }
+    .nav-links a { color: rgba(255,255,255,0.85); text-decoration: none; margin-left: 20px; font-size: 14px; }
+    .nav-links a:hover, .nav-links a.active { color: white; text-decoration: underline; }
+
+    .page { padding: 28px 32px; }
+    .page-title { font-size: 22px; font-weight: 600; color: #202124; margin-bottom: 20px; }
+
+    .filter-card { background: white; border-radius: 10px; padding: 20px 24px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08); border: 1px solid #e8eaed;
+      display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 24px; }
+    .filter-group { display: flex; flex-direction: column; gap: 5px; }
+    .filter-group label { font-size: 11px; font-weight: 600; color: #5f6368;
+      text-transform: uppercase; letter-spacing: 0.5px; }
+    .filter-group select,
+    .filter-group input[type="date"] {
+      padding: 8px 12px; border: 1px solid #dadce0; border-radius: 6px;
+      font-size: 13px; font-family: 'Google Sans', Arial, sans-serif;
+      outline: none; background: white; min-width: 150px; }
+    .filter-group select:focus,
+    .filter-group input:focus { border-color: #1a73e8; }
+    .btn-apply { padding: 9px 20px; background: #1a73e8; color: white; border: none;
+      border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; height: 36px; }
+    .btn-apply:hover { background: #1557b0; }
+    .btn-reset { padding: 9px 20px; background: white; color: #3c4043;
+      border: 1px solid #dadce0; border-radius: 6px; font-size: 13px; cursor: pointer; height: 36px; }
+    .btn-reset:hover { background: #f8f9fa; }
+
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: white; border-radius: 10px; padding: 20px 22px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08); border: 1px solid #e8eaed; }
+    .stat-card .val { font-size: 34px; font-weight: 700; }
+    .stat-card .lbl { font-size: 12px; color: #5f6368; margin-top: 4px; }
+    .s-total   .val { color: #1a73e8; }
+    .s-open    .val { color: #ea4335; }
+    .s-assigned .val { color: #fbbc04; }
+    .s-resolved .val { color: #34a853; }
+
+    .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+    .chart-card { background: white; border-radius: 10px; padding: 20px 24px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08); border: 1px solid #e8eaed; }
+    .chart-card.full { grid-column: 1 / -1; }
+    .chart-title { font-size: 14px; font-weight: 600; color: #202124; margin-bottom: 14px; }
+    .chart-area { height: 280px; }
+    .no-data { display: flex; align-items: center; justify-content: center;
+      height: 280px; color: #5f6368; font-size: 13px; flex-direction: column; gap: 8px; }
+    .no-data .icon { font-size: 32px; }
+
+    .loading-indicator { text-align: center; padding: 60px; color: #5f6368; }
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="logo">CRX Doubt Management</div>
+  <div class="nav-links">
+    <a href="https://script.google.com/macros/s/AKfycbw-F49hkvSpUvBAduT8qFtravWvQSnQ7FDAphM9UWBoF63tf0leJ8idXpdGQvHCAZWC/exec?page=l0">L0 Form</a>
+    <a href="https://script.google.com/macros/s/AKfycbw-F49hkvSpUvBAduT8qFtravWvQSnQ7FDAphM9UWBoF63tf0leJ8idXpdGQvHCAZWC/exec?page=crx">CRX Dashboard</a>
+    <a href="https://script.google.com/macros/s/AKfycbw-F49hkvSpUvBAduT8qFtravWvQSnQ7FDAphM9UWBoF63tf0leJ8idXpdGQvHCAZWC/exec?page=analytics" class="active">Analytics</a>
+  </div>
+</div>
+
+<div class="page">
+  <div class="page-title">Analytics Dashboard</div>
+
+  <div class="filter-card">
+    <div class="filter-group">
+      <label>From Date</label>
+      <input type="date" id="dateFrom">
+    </div>
+    <div class="filter-group">
+      <label>To Date</label>
+      <input type="date" id="dateTo">
+    </div>
+    <div class="filter-group">
+      <label>CRX Member</label>
+      <select id="crxMemberFilter">
+        <option value="All">All Members</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Violation Category</label>
+      <select id="violationFilter">
+        <option value="All">All Violations</option>
+      </select>
+    </div>
+    <button class="btn-apply" onclick="loadAnalytics()">Apply Filters</button>
+    <button class="btn-reset" onclick="resetFilters()">Reset</button>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card s-total">
+      <div class="val" id="sTotal">—</div>
+      <div class="lbl">Total Doubts</div>
+    </div>
+    <div class="stat-card s-open">
+      <div class="val" id="sOpen">—</div>
+      <div class="lbl">Open</div>
+    </div>
+    <div class="stat-card s-assigned">
+      <div class="val" id="sAssigned">—</div>
+      <div class="lbl">Assigned</div>
+    </div>
+    <div class="stat-card s-resolved">
+      <div class="val" id="sResolved">—</div>
+      <div class="lbl">Resolved</div>
+    </div>
+  </div>
+
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-title">Doubts by Violation Category</div>
+      <div id="chartViolation" class="chart-area">
+        <div class="loading-indicator">Loading…</div>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Doubts Resolved by CRX Member</div>
+      <div id="chartMember" class="chart-area">
+        <div class="loading-indicator">Loading…</div>
+      </div>
+    </div>
+    <div class="chart-card full">
+      <div class="chart-title">Resolution Trend Over Time</div>
+      <div id="chartTrend" class="chart-area">
+        <div class="loading-indicator">Loading…</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  var chartsReady = false;
+
+  // Load Google Charts first
+  google.charts.load('current', { packages: ['corechart'] });
+  google.charts.setOnLoadCallback(function() {
+    chartsReady = true;
+    initPage();
+  });
+
+  function initPage() {
+    // Set default date range — last 30 days
+    var today = new Date();
+    var from  = new Date();
+    from.setDate(from.getDate() - 30);
+    document.getElementById('dateTo').value   = formatDate(today);
+    document.getElementById('dateFrom').value = formatDate(from);
+
+    // Load config for filter dropdowns FIRST, then load analytics
+    google.script.run
+      .withSuccessHandler(function(config) {
+        if (!config) { config = {}; }
+
+        var memberSel = document.getElementById('crxMemberFilter');
+        (config.crxMembers || []).forEach(function(m) {
+          var name = m.split('|')[0].trim();
+          var o = document.createElement('option');
+          o.value = name; o.textContent = name;
+          memberSel.appendChild(o);
+        });
+
+        var violSel = document.getElementById('violationFilter');
+        (config.violations || []).forEach(function(v) {
+          var o = document.createElement('option');
+          o.value = v; o.textContent = v;
+          violSel.appendChild(o);
+        });
+
+        // Now load analytics data
+        loadAnalytics();
+      })
+      .withFailureHandler(function(err) {
+        console.error('Config error:', err);
+        loadAnalytics(); // still try
+      })
+      .getConfig();
+  }
+
+  function formatDate(d) {
+    var mm = String(d.getMonth() + 1).padStart(2, '0');
+    var dd = String(d.getDate()).padStart(2, '0');
+    return d.getFullYear() + '-' + mm + '-' + dd;
+  }
+
+  function resetFilters() {
+    var today = new Date();
+    var from  = new Date();
+    from.setDate(from.getDate() - 30);
+    document.getElementById('dateTo').value   = formatDate(today);
+    document.getElementById('dateFrom').value = formatDate(from);
+    document.getElementById('crxMemberFilter').value = 'All';
+    document.getElementById('violationFilter').value = 'All';
+    loadAnalytics();
+  }
+
+  function loadAnalytics() {
+    // Show loading state
+    ['chartViolation','chartMember','chartTrend'].forEach(function(id) {
+      document.getElementById(id).innerHTML = '<div class="loading-indicator">Loading…</div>';
+    });
+
+    var filters = {
+      dateFrom  : document.getElementById('dateFrom').value,
+      dateTo    : document.getElementById('dateTo').value,
+      crxMember : document.getElementById('crxMemberFilter').value,
+      violation : document.getElementById('violationFilter').value
+    };
+
+    console.log('Applying filters:', filters);
+
+    google.script.run
+      .withSuccessHandler(function(data) {
+        console.log('Analytics data received:', JSON.stringify(data));
+
+        if (!data) {
+          showAllEmpty();
+          return;
+        }
+
+        // ── Summary stats ──
+        var s = data.summary || {};
+        document.getElementById('sTotal').textContent    = s.total         || 0;
+        document.getElementById('sOpen').textContent     = s.totalOpen     || 0;
+        document.getElementById('sAssigned').textContent = s.totalAssigned || 0;
+        document.getElementById('sResolved').textContent = s.totalResolved || 0;
+
+        // ── Charts ──
+        if (chartsReady) {
+          drawPieChart('chartViolation', data.byViolation   || {});
+          drawBarChart('chartMember',    data.byCRXMember   || {});
+          drawLineChart('chartTrend',    data.trend         || []);
+        }
+      })
+      .withFailureHandler(function(err) {
+        console.error('getAnalyticsData error:', err);
+        showAllEmpty();
+      })
+      .getAnalyticsData(filters);
+  }
+
+  function showAllEmpty() {
+    document.getElementById('sTotal').textContent    = 0;
+    document.getElementById('sOpen').textContent     = 0;
+    document.getElementById('sAssigned').textContent = 0;
+    document.getElementById('sResolved').textContent = 0;
+    ['chartViolation','chartMember','chartTrend'].forEach(function(id) {
+      document.getElementById(id).innerHTML =
+        '<div class="no-data"><div class="icon">📊</div>No data available</div>';
+    });
+  }
+
+  // ── Chart Renderers ──────────────────────────────────────────
+
+  function drawPieChart(divId, dataObj) {
+    var entries = Object.entries(dataObj).filter(function(e) { return e[1] > 0; });
+    if (entries.length === 0) {
+      document.getElementById(divId).innerHTML =
+        '<div class="no-data"><div class="icon">📊</div>No data for selected filters</div>';
+      return;
+    }
+    var dt = new google.visualization.DataTable();
+    dt.addColumn('string', 'Violation');
+    dt.addColumn('number', 'Count');
+    entries.forEach(function(e) { dt.addRow([e[0], e[1]]); });
+
+    var chart = new google.visualization.PieChart(document.getElementById(divId));
+    chart.draw(dt, {
+      pieHole: 0.4,
+      legend : { position: 'right', textStyle: { fontName: 'Google Sans', fontSize: 11 } },
+      chartArea: { width: '65%', height: '88%' },
+      colors: ['#4285f4','#34a853','#fbbc04','#ea4335','#ff6d00','#ab47bc','#26c6da','#66bb6a','#ffa726'],
+      fontName: 'Google Sans',
+      tooltip: { textStyle: { fontName: 'Google Sans' } }
+    });
+  }
+
+  function drawBarChart(divId, dataObj) {
+    var entries = Object.entries(dataObj).filter(function(e) { return e[1] > 0; });
+    if (entries.length === 0) {
+      document.getElementById(divId).innerHTML =
+        '<div class="no-data"><div class="icon">📊</div>No data for selected filters</div>';
+      return;
+    }
+    var dt = new google.visualization.DataTable();
+    dt.addColumn('string', 'Member');
+    dt.addColumn('number', 'Resolved');
+    entries.forEach(function(e) { dt.addRow([e[0], e[1]]); });
+
+    var chart = new google.visualization.ColumnChart(document.getElementById(divId));
+    chart.draw(dt, {
+      legend    : { position: 'none' },
+      chartArea : { width: '75%', height: '78%' },
+      colors    : ['#1a73e8'],
+      fontName  : 'Google Sans',
+      bar       : { groupWidth: '50%' },
+      vAxis     : { format: '0', minValue: 0,
+        textStyle: { fontName: 'Google Sans', fontSize: 11 } },
+      hAxis     : { textStyle: { fontName: 'Google Sans', fontSize: 11 } }
+    });
+  }
+
+  function drawLineChart(divId, trend) {
+    if (!trend || trend.length === 0) {
+      document.getElementById(divId).innerHTML =
+        '<div class="no-data"><div class="icon">📈</div>No trend data for selected filters</div>';
+      return;
+    }
+    var dt = new google.visualization.DataTable();
+    dt.addColumn('string', 'Date');
+    dt.addColumn('number', 'Doubts Resolved');
+    trend.forEach(function(t) { dt.addRow([t.date, t.count]); });
+
+    var chart = new google.visualization.LineChart(document.getElementById(divId));
+    chart.draw(dt, {
+      legend    : { position: 'none' },
+      chartArea : { width: '88%', height: '78%' },
+      colors    : ['#1a73e8'],
+      fontName  : 'Google Sans',
+      lineWidth : 2,
+      pointSize : 5,
+      curveType : 'function',
+      vAxis     : { format: '0', minValue: 0,
+        textStyle: { fontName: 'Google Sans', fontSize: 11 } },
+      hAxis     : { textStyle: { fontName: 'Google Sans', fontSize: 11 } }
+    });
+  }
+</script>
+</body>
+</html>
