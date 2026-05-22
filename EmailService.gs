@@ -46,10 +46,7 @@ function sendResolutionEmail(data) {
         <div class="value">${data.extensionId}</div>
       </div>
 
-      <div class="field">
-        <label>Violations Flagged</label>
-        <div class="value">${data.violations}</div>
-      </div>
+      
 
       <div class="field">
         <label>Your Original Doubt</label>
