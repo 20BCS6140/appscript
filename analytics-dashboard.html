@@ -68,7 +68,7 @@
   <div class="nav-links">
     <a href="https://script.google.com/macros/s/AKfycbw-F49hkvSpUvBAduT8qFtravWvQSnQ7FDAphM9UWBoF63tf0leJ8idXpdGQvHCAZWC/exec?page=l0">L0 Form</a>
     <a href="https://script.google.com/macros/s/AKfycbw-F49hkvSpUvBAduT8qFtravWvQSnQ7FDAphM9UWBoF63tf0leJ8idXpdGQvHCAZWC/exec?page=crx">CRX Dashboard</a>
-    <a href="https://script.google.com/macros/s/AKfycbw-F49hkvSpUvBAduT8qFtravWvQSnQ7FDAphM9UWBoF63tf0leJ8idXpdGQvHCAZWC/exec?page=analytics" class="active">Analytics</a>
+    
   </div>
 </div>
 
@@ -142,6 +142,8 @@
 </div>
 
 <script>
+
+  const VIOLATIONS_LIST = ['malware', 'spam', 'misleading', 'SPP', 'RHC'];
   var chartsReady = false;
 
   // Load Google Charts first
@@ -152,42 +154,39 @@
   });
 
   function initPage() {
-    // Set default date range — last 30 days
-    var today = new Date();
-    var from  = new Date();
-    from.setDate(from.getDate() - 30);
-    document.getElementById('dateTo').value   = formatDate(today);
-    document.getElementById('dateFrom').value = formatDate(from);
+  var today = new Date();
+  var from  = new Date();
+  from.setDate(from.getDate() - 30);
+  document.getElementById('dateTo').value   = formatDate(today);
+  document.getElementById('dateFrom').value = formatDate(from);
 
-    // Load config for filter dropdowns FIRST, then load analytics
-    google.script.run
-      .withSuccessHandler(function(config) {
-        if (!config) { config = {}; }
+  // Populate violation filter from static array (no longer from config)
+  var violSel = document.getElementById('violationFilter');
+  VIOLATIONS_LIST.forEach(function(v) {
+    var o = document.createElement('option');
+    o.value = v; o.textContent = v;
+    violSel.appendChild(o);
+  });
 
-        var memberSel = document.getElementById('crxMemberFilter');
-        (config.crxMembers || []).forEach(function(m) {
-          var name = m.split('|')[0].trim();
-          var o = document.createElement('option');
-          o.value = name; o.textContent = name;
-          memberSel.appendChild(o);
-        });
-
-        var violSel = document.getElementById('violationFilter');
-        (config.violations || []).forEach(function(v) {
-          var o = document.createElement('option');
-          o.value = v; o.textContent = v;
-          violSel.appendChild(o);
-        });
-
-        // Now load analytics data
-        loadAnalytics();
-      })
-      .withFailureHandler(function(err) {
-        console.error('Config error:', err);
-        loadAnalytics(); // still try
-      })
-      .getConfig();
-  }
+  // Load config only for CRX members filter
+  google.script.run
+    .withSuccessHandler(function(config) {
+      if (!config) { config = {}; }
+      var memberSel = document.getElementById('crxMemberFilter');
+      (config.crxMembers || []).forEach(function(m) {
+        var name = m.split('|')[0].trim();
+        var o = document.createElement('option');
+        o.value = name; o.textContent = name;
+        memberSel.appendChild(o);
+      });
+      loadAnalytics();
+    })
+    .withFailureHandler(function(err) {
+      console.error('Config error:', err);
+      loadAnalytics(); // still try even if config fails
+    })
+    .getConfig();
+}
 
   function formatDate(d) {
     var mm = String(d.getMonth() + 1).padStart(2, '0');
@@ -245,7 +244,7 @@
         }
       })
       .withFailureHandler(function(err) {
-        console.error('getAnalyticsData error:', err);
+        console.error('see getAnalyticsData error:', err);
         showAllEmpty();
       })
       .getAnalyticsData(filters);
