@@ -2,7 +2,7 @@
 // CHATSERVICE.GS — Google Chat Webhook Notifications
 // ============================================================
 
-function sendChatNotification(doubtId, formData) {
+function sendChatNotification(doubtId, formData,timestamp) {
   try {
     const violationsStr = formData.violations.join(', ');
     
@@ -78,13 +78,18 @@ function sendChatNotification(doubtId, formData) {
       }]
     };
 
-    const options = {
-      method: 'POST',
-      contentType: 'application/json',
-      payload: JSON.stringify(message)
-    };
+    // const options = {
+    //   method: 'POST',
+    //   contentType: 'application/json',
+    //   payload: JSON.stringify(message)
+    // };
 
-    UrlFetchApp.fetch(CHAT_WEBHOOK_URL, options);
+    // UrlFetchApp.fetch(CHAT_WEBHOOK_URL, options);
+    MailApp.sendEmail({
+    to: "TEst@google.com",  // Send to the CRX-form-notifier email address
+    subject: `📩 New Form Submission - ${timestamp}`,
+    body: message  // Plain text message body
+  });
   } catch (err) {
     Logger.log('Chat notification error: ' + err.message);
   }
