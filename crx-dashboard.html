@@ -95,13 +95,79 @@
       border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; }
     .btn-modal-submit:hover { background: #1557b0; }
 
-    .toast { position: fixed; bottom: 24px; right: 24px; padding: 12px 18px; border-radius: 8px;
-      font-size: 14px; z-index: 200; opacity: 0; transition: all 0.3s; }
-    .toast.show { opacity: 1; }
+    /* Replace your toast CSS with this */
+    .toast { 
+      position: fixed; bottom: 24px; right: 24px; padding: 12px 18px; border-radius: 8px;
+      font-size: 14px; z-index: 200; opacity: 0; transition: all 0.3s;
+      pointer-events: none; /* ← invisible toast won't block clicks */
+    }
+    .toast.show { 
+      opacity: 1; 
+      pointer-events: auto; /* ← visible toast is clickable/visible normally */
+    }
     .toast.success { background: #34a853; color: white; }
     .toast.error { background: #d93025; color: white; }
 
     .loading-row td { text-align: center; padding: 40px; color: #5f6368; }
+
+    .multi-select-wrap { position: relative; margin-bottom: 16px; }
+.ms-box { min-height: 40px; padding: 6px 10px; border: 1px solid #dadce0;
+  border-radius: 8px; background: white; cursor: text; display: flex;
+  flex-wrap: wrap; gap: 4px; align-items: center; }
+.ms-box:focus-within { border-color: #1a73e8; box-shadow: 0 0 0 2px rgba(26,115,232,0.15); }
+.ms-chip { background: #e8f0fe; color: #1a73e8; padding: 3px 8px; border-radius: 12px;
+  font-size: 12px; display: flex; align-items: center; gap: 4px; }
+.ms-chip span { cursor: pointer; font-size: 14px; line-height: 1; }
+.ms-chip span:hover { color: #d93025; }
+.ms-input { border: none; outline: none; font-size: 13px;
+  font-family: 'Google Sans', Arial, sans-serif; min-width: 100px; flex: 1;
+  background: transparent; padding: 2px 4px; }
+.ms-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: white;
+  border: 1px solid #dadce0; border-radius: 8px; max-height: 180px; overflow-y: auto;
+  z-index: 200; box-shadow: 0 4px 12px rgba(0,0,0,0.12); display: none; margin-top: 2px; }
+.ms-dropdown.open { display: block; }
+.ms-option { padding: 8px 14px; font-size: 13px; cursor: pointer; }
+.ms-option:hover { background: #e8f0fe; }
+.ms-option.selected { color: #34a853; font-weight: 500; }
+.ms-option.selected::after { content: ' ✓'; }
+.ms-empty { padding: 10px 14px; font-size: 13px; color: #80868b; }
+
+.ctx-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 4px; }
+.ctx-block { background: white; border: 1px solid #e8eaed; border-radius: 8px; padding: 10px 12px; }
+.ctx-block.full { grid-column: 1 / -1; }
+/* .ctx-label { font-size: 10px; font-weight: 600; color: #5f6368; text-transform: uppercase;
+  letter-spacing: 0.5px; margin-bottom: 4px; } */
+.ctx-value { font-size: 13px; color: #202124; word-break: break-word; }
+
+/* .ctx-doubt-text { font-size: 13px; color: #202124; max-height: 120px; overflow-y: auto;
+  word-break: break-word; white-space: pre-wrap; line-height: 1.5;
+  padding-right: 32px; /* room for copy btn */ } */
+/* .btn-copy { position: absolute; top: 0; right: 0; background: #e8f0fe; border: none;
+  border-radius: 6px; padding: 4px 8px; font-size: 11px; color: #1a73e8; cursor: pointer;
+  font-family: 'Google Sans', Arial, sans-serif; font-weight: 500; } */
+/* .btn-copy:hover { background: #d2e3fc; }
+.btn-copy.copied { background: #e6f4ea; color: #34a853; } */
+
+/* REPLACE these in your <style> block */
+.ctx-label { 
+  font-size: 10px; font-weight: 600; color: #5f6368; text-transform: uppercase;
+  letter-spacing: 0.5px; margin-bottom: 4px;
+  display: flex; justify-content: space-between; align-items: center; /* ← flex, no relative needed */
+}
+.ctx-doubt-text { 
+  font-size: 13px; color: #202124; max-height: 120px; overflow-y: auto;
+  word-break: break-word; white-space: pre-wrap; line-height: 1.5;
+  /* REMOVE padding-right: 32px */
+}
+.btn-copy { 
+  background: #e8f0fe; border: none; border-radius: 6px; padding: 3px 8px; 
+  font-size: 11px; color: #1a73e8; cursor: pointer; flex-shrink: 0;
+  font-family: 'Google Sans', Arial, sans-serif; font-weight: 500;
+  /* REMOVE position/top/right — no longer needed */
+}
+.btn-copy:hover { background: #d2e3fc; }
+.btn-copy.copied { background: #e6f4ea; color: #34a853; }
+/* REMOVE .ctx-doubt-wrap entirely */
   </style>
 </head>
 <body>
@@ -110,7 +176,7 @@
   <div class="logo">CRX Doubt Management</div>
   <div class="nav-links">
     <a href="https://script.google.com/macros/s/AKfycbw-F49hkvSpUvBAduT8qFtravWvQSnQ7FDAphM9UWBoF63tf0leJ8idXpdGQvHCAZWC/exec?page=l0">L0 Form</a>
-    <a href="https://script.google.com/macros/s/AKfycbw-F49hkvSpUvBAduT8qFtravWvQSnQ7FDAphM9UWBoF63tf0leJ8idXpdGQvHCAZWC/exec?page=crx" class="active">CRX Dashboard</a>
+    
     <a href="https://script.google.com/macros/s/AKfycbw-F49hkvSpUvBAduT8qFtravWvQSnQ7FDAphM9UWBoF63tf0leJ8idXpdGQvHCAZWC/exec?page=analytics">Analytics</a>
   </div>
 </div>
@@ -118,7 +184,10 @@
 <div class="page">
   <div class="page-header">
     <div class="page-title">CRX Doubt Queue</div>
-    <button class="btn-refresh" onclick="loadDoubts()">↻ Refresh</button>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span id="syncBadge" style="font-size:12px;color:#34a853;font-weight:500">● Live</span>
+      <button class="btn-refresh" onclick="loadDoubts()">↻ Refresh</button>
+    </div>
   </div>
 
   <div class="stats-row">
@@ -169,12 +238,78 @@
       <button class="btn-close" onclick="closeOverlay()">×</button>
     </div>
     <div class="context-box" id="contextBox">Loading context…</div>
-    <label>Your Name (CRX Member) <span style="color:red">*</span></label>
+
+    <label>Your Name (L2 LDAP) <span style="color:red">*</span></label>
     <select id="resolvedBy"></select>
-    <label>Clarification Details <span style="color:red">*</span></label>
-    <textarea id="clarification" placeholder="Provide a clear explanation to the L0 reviewer…"></textarea>
-    <label>Final Verdict <span style="color:red">*</span></label>
-    <input type="text" id="finalVerdict" placeholder="e.g. Confirmed Violation — Remove Extension / No Violation Found">
+
+    <label>Type of Consult <span style="color:red">*</span></label>
+    <select id="typeOfConsult">
+      <option value="">— Select —</option>
+      <option value="easy">Easy</option>
+      <option value="medium">Medium</option>
+      <option value="complex">Complex</option>
+    </select>
+
+    <label>Escalated due to lack of tools? <span style="color:red">*</span></label>
+    <select id="escalatedDueToTools">
+      <option value="">— Select —</option>
+      <option value="yes">Yes</option>
+      <option value="no">No</option>
+    </select>
+
+    <label>Escalation validity <span style="color:red">*</span></label>
+    <select id="escalationValidity">
+      <option value="">— Select —</option>
+      <option value="yes">Yes</option>
+      <option value="no">No</option>
+    </select>
+
+    <label>Was the query clear from L0? <span style="color:red">*</span></label>
+    <select id="queryClarity">
+      <option value="">— Select —</option>
+      <option value="yes">Yes</option>
+      <option value="no">No</option>
+    </select>
+
+    <label>Is this a new scenario for DCR? <span style="color:red">*</span></label>
+    <select id="newScenario">
+      <option value="">— Select —</option>
+      <option value="yes">Yes</option>
+      <option value="no">No</option>
+    </select>
+
+    <label>L0 Area of Improvement <span style="color:red">*</span></label>
+    <select id="l0AreaOfImprovement">
+      <option value="">— Select —</option>
+      <option value="static analysis">Static Analysis</option>
+      <option value="dynamic analysis">Dynamic Analysis</option>
+    </select>
+
+    <label>L0 Approach Validation <span style="color:red">*</span></label>
+    <select id="l0ApproachValidation">
+      <option value="">— Select —</option>
+      <option value="valid doubt">Valid Doubt</option>
+      <option value="invalid doubt">Invalid Doubt</option>
+    </select>
+
+    <label>Provided Verdict <span style="color:red">*</span> <span style="color:#5f6368;font-weight:400;font-size:11px">(sent to L0 via email)</span></label>
+    <textarea id="providedVerdict" placeholder="Enter the final verdict for the L0…"></textarea>
+
+    <label>L2 Confirmation (Violations) <span style="color:red">*</span></label>
+    <div class="multi-select-wrap" id="l2ConfWrap">
+      <div class="ms-box" id="l2ConfBox" onclick="document.getElementById('l2ConfSearch').focus()">
+        <input class="ms-input" id="l2ConfSearch" placeholder="Search violations…"
+               oninput="filterL2Options()" onfocus="openL2Dropdown()" autocomplete="off">
+      </div>
+      <div class="ms-dropdown" id="l2ConfDropdown"></div>
+    </div>
+
+    <label style="margin-top:16px">Clarification Details <span style="color:red">*</span></label>
+    <textarea id="clarification" placeholder="Provide a clear explanation…"></textarea>
+
+    <label>L2 Additional Comments</label>
+    <input type="text" id="l2AdditionalComments" placeholder="Optional remarks…">
+
     <div class="modal-footer">
       <button class="btn-cancel" onclick="closeOverlay()">Cancel</button>
       <button class="btn-modal-submit" onclick="submitResolve()">Submit Resolution & Email L0</button>
@@ -185,139 +320,165 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  let allDoubts = [];
-  let crxMembers = [];
-  let currentDoubtId = null;
+  const VIOLATIONS_LIST = ['malware', 'spam', 'misleading', 'SPP', 'RHC'];
+  let selectedL2Conf = [];
 
+  let allDoubts = [], crxMembers = [], currentDoubtId = null;
+
+  // ── L2 Confirmation multi-select ─────────────────────────
+  function buildL2Options(filter) {
+    const dd = document.getElementById('l2ConfDropdown');
+    const q  = (filter || '').toLowerCase();
+    const filtered = VIOLATIONS_LIST.filter(v => v.toLowerCase().includes(q));
+    if (!filtered.length) { dd.innerHTML = '<div class="ms-empty">No matches</div>'; return; }
+    dd.innerHTML = filtered.map(v =>
+      `<div class="ms-option ${selectedL2Conf.includes(v) ? 'selected' : ''}"
+            onclick="toggleL2Conf('${v}')">${v}</div>`).join('');
+  }
+  function openL2Dropdown() {
+    buildL2Options(document.getElementById('l2ConfSearch').value);
+    document.getElementById('l2ConfDropdown').classList.add('open');
+  }
+  function filterL2Options() {
+    buildL2Options(document.getElementById('l2ConfSearch').value);
+    document.getElementById('l2ConfDropdown').classList.add('open');
+  }
+  function toggleL2Conf(v) {
+    const idx = selectedL2Conf.indexOf(v);
+    if (idx === -1) selectedL2Conf.push(v); else selectedL2Conf.splice(idx, 1);
+    renderL2Chips(); buildL2Options(document.getElementById('l2ConfSearch').value);
+  }
+  function removeL2Conf(v) {
+    selectedL2Conf = selectedL2Conf.filter(x => x !== v);
+    renderL2Chips(); buildL2Options(document.getElementById('l2ConfSearch').value);
+  }
+  function renderL2Chips() {
+    const box = document.getElementById('l2ConfBox');
+    const inp = document.getElementById('l2ConfSearch');
+    box.querySelectorAll('.ms-chip').forEach(c => c.remove());
+    selectedL2Conf.forEach(v => {
+      const chip = document.createElement('div');
+      chip.className = 'ms-chip';
+      chip.innerHTML = `${v}<span onclick="removeL2Conf('${v}')">×</span>`;
+      box.insertBefore(chip, inp);
+    });
+  }
+  document.addEventListener('click', function(e) {
+    if (!document.getElementById('l2ConfWrap').contains(e.target))
+      document.getElementById('l2ConfDropdown').classList.remove('open');
+  });
+
+  // ── Toast ──────────────────────────────────────────────────
   function showToast(msg, type) {
     const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.className = `toast ${type} show`;
+    t.textContent = msg; t.className = `toast ${type} show`;
     setTimeout(() => t.className = 'toast', 4000);
   }
 
+  // ── Load doubts ────────────────────────────────────────────
   function loadDoubts() {
-  document.getElementById('tableBody').innerHTML =
-    '<tr class="loading-row"><td colspan="9">Loading doubts…</td></tr>';
+    document.getElementById('tableBody').innerHTML =
+      '<tr class="loading-row"><td colspan="9">Loading doubts…</td></tr>';
 
-  // Step 1: Load config FIRST
-  google.script.run
-    .withSuccessHandler(function(config) {
-      if (!config) { config = {}; }
+    google.script.run
+      .withSuccessHandler(function(config) {
+        if (!config) config = {};
+        crxMembers = config.crxMembers || [];
 
-      crxMembers = config.crxMembers || [];
-      console.log('CRX Members loaded:', crxMembers);
+        var queueSel = document.getElementById('filterQueue');
+        var existing = Array.from(queueSel.options).map(o => o.value);
+        ['RE','NBR','HQ'].forEach(function(q) { // ← mirrors QUEUE_NAMES
+          if (!existing.includes(q)) {
+            var o = document.createElement('option'); o.value = q; o.textContent = q;
+            queueSel.appendChild(o);
+          }
+        });
 
-      // Populate queue filter dropdown
-      var queueSel = document.getElementById('filterQueue');
-      var existing = Array.from(queueSel.options).map(function(o) { return o.value; });
-      (config.queueNames || []).forEach(function(q) {
-        if (!existing.includes(q)) {
-          var o = document.createElement('option');
-          o.value = q; o.textContent = q;
-          queueSel.appendChild(o);
-        }
-      });
+        var rb = document.getElementById('resolvedBy');
+        rb.innerHTML = '<option value="">— Select your name —</option>';
+        crxMembers.forEach(function(m) {
+          var name = m.split('|')[0].trim();
+          var o = document.createElement('option'); o.value = name; o.textContent = name;
+          rb.appendChild(o);
+        });
 
-      // Populate "Resolved By" dropdown in modal
-      var rb = document.getElementById('resolvedBy');
-      rb.innerHTML = '<option value="">— Select your name —</option>';
-      crxMembers.forEach(function(m) {
-        var name = m.split('|')[0].trim();
-        var o = document.createElement('option');
-        o.value = name; o.textContent = name;
-        rb.appendChild(o);
-      });
+        google.script.run
+          .withSuccessHandler(function(doubts) {
+            allDoubts = Array.isArray(doubts) ? doubts : [];
+            updateStats(); renderTable();
+          })
+          .withFailureHandler(function(err) {
+            console.error('getDoubts error:', err); allDoubts = []; updateStats();
+            document.getElementById('tableBody').innerHTML =
+              '<tr class="loading-row"><td colspan="9">⚠️ Error loading doubts.</td></tr>';
+          })
+          .getDoubts();
+      })
+      .withFailureHandler(function(err) {
+        console.error('getConfig error:', err);
+        document.getElementById('tableBody').innerHTML =
+          '<tr class="loading-row"><td colspan="9">⚠️ Error loading config.</td></tr>';
+      })
+      .getConfig();
+  }
 
-      // Step 2: Load doubts ONLY after config is ready
-      google.script.run
-        .withSuccessHandler(function(doubts) {
-          console.log('Doubts received:', doubts);
-          allDoubts = Array.isArray(doubts) ? doubts : [];
-          console.log('Total doubts:', allDoubts.length);
-          updateStats();
-          renderTable(); // crxMembers is guaranteed populated by now
-        })
-        .withFailureHandler(function(err) {
-          console.error('getDoubts error:', err);
-          allDoubts = [];
-          updateStats();
-          document.getElementById('tableBody').innerHTML =
-            '<tr class="loading-row"><td colspan="9">⚠️ Error loading doubts.</td></tr>';
-        })
-        .getDoubts();
+  // ── Stats ──────────────────────────────────────────────────
+  function updateStats() {
+    allDoubts = Array.isArray(allDoubts) ? allDoubts : [];
+    document.getElementById('cntOpen').textContent =
+      allDoubts.filter(d => d.Status === 'Open').length;
+    document.getElementById('cntAssigned').textContent =
+      allDoubts.filter(d => d.Status === 'Assigned').length;
+    document.getElementById('cntResolved').textContent =
+      allDoubts.filter(d => d.Status === 'Resolved').length;
+  }
 
-    })
-    .withFailureHandler(function(err) {
-      console.error('getConfig error:', err);
-      document.getElementById('tableBody').innerHTML =
-        '<tr class="loading-row"><td colspan="9">⚠️ Error loading config.</td></tr>';
-    })
-    .getConfig();
-}
-
-function updateStats() {
-  allDoubts = Array.isArray(allDoubts) ? allDoubts : [];
-  const today = new Date().toISOString().split('T')[0];
-  document.getElementById('cntOpen').textContent = 
-    allDoubts.filter(d => d.Status === 'Open').length;
-  document.getElementById('cntAssigned').textContent = 
-    allDoubts.filter(d => d.Status === 'Assigned').length;
-  document.getElementById('cntResolved').textContent = 
-    allDoubts.filter(d => d.Status === 'Resolved' && 
-      (d.Assigned_At || '').toString().startsWith(today)).length;
-}
-
+  // ── Render table ───────────────────────────────────────────
   function renderTable() {
     const statusF = document.getElementById('filterStatus').value;
-    const queueF = document.getElementById('filterQueue').value;
-
+    const queueF  = document.getElementById('filterQueue').value;
     let rows = allDoubts.filter(d => {
       if (statusF !== 'All' && d.Status !== statusF) return false;
-      if (queueF !== 'All' && d.Queue_Name !== queueF) return false;
+      if (queueF  !== 'All' && d.Queue_Name !== queueF) return false;
       return true;
     });
-
-    if (rows.length === 0) {
-      document.getElementById('tableBody').innerHTML = `
-        <tr><td colspan="9" style="text-align:center;padding:50px;color:#5f6368">
-          <div style="font-size:32px;margin-bottom:10px">📋</div>
-          No doubts match the current filters.
-        </td></tr>`;
+    if (!rows.length) {
+      document.getElementById('tableBody').innerHTML =
+        '<tr><td colspan="9" style="text-align:center;padding:50px;color:#5f6368">' +
+        '<div style="font-size:32px;margin-bottom:10px">📋</div>No doubts match the current filters.</td></tr>';
       return;
     }
-
     const memberNames = crxMembers.map(m => m.split('|')[0].trim());
-
     document.getElementById('tableBody').innerHTML = rows.map(d => {
-      const viols = d.Violations ? d.Violations.split(', ').map(v =>
-        `<span class="viol-chip">${v.trim()}</span>`).join('') : '—';
+      const viols = d.Violations
+        ? d.Violations.split(', ').map(v => `<span class="viol-chip">${v.trim()}</span>`).join('')
+        : '—';
       const submittedDate = d.Submitted_At ? new Date(d.Submitted_At).toLocaleString() : '—';
-      const statusBadge = `<span class="badge ${(d.Status||'open').toLowerCase()}">${d.Status || 'Open'}</span>`;
-
-      const assignOpts = `<option value="">— Assign to —</option>` +
-        memberNames.map(m => `<option ${d.Assigned_To === m ? 'selected' : ''} value="${m}">${m}</option>`).join('');
-
+      const statusBadge = `<span class="badge ${(d.Status||'open').toLowerCase()}">${d.Status||'Open'}</span>`;
+      const assignOpts  = '<option value="">— Assign to —</option>' +
+        memberNames.map(m =>
+          `<option ${d.Assigned_To === m ? 'selected' : ''} value="${m}">${m}</option>`).join('');
       const actionBtn = d.Status === 'Resolved'
         ? `<button class="btn-resolved">✓ Resolved</button>`
-        : `<button class="btn-resolve" onclick="openResolveOverlay('${d.Doubt_ID}')">Resolve</button>`;
-
+        : `<button class="btn-resolve" onclick="openResolveOverlay(this.dataset.id)"
+             data-id="${d.Doubt_ID}">Resolve</button>`;
       return `<tr>
         <td><code style="font-size:11px;color:#1a73e8">${d.Doubt_ID}</code></td>
         <td style="white-space:nowrap;font-size:12px">${submittedDate}</td>
         <td><code style="font-size:12px">${d.Extension_ID}</code></td>
-        <td><div style="font-weight:500">${d.L0_Name}</div><div style="font-size:11px;color:#5f6368">${d.L0_Email}</div></td>
+        <td><div style="font-weight:500">${d.L0_Name}</div>
+            <div style="font-size:11px;color:#5f6368">${d.L0_Email}</div></td>
         <td>${viols}</td>
         <td>${d.Queue_Name || '—'}</td>
         <td>${statusBadge}</td>
-        <td>
-          <select class="assign-select" onchange="assignDoubt('${d.Doubt_ID}', this.value)">${assignOpts}</select>
-        </td>
+        <td><select class="assign-select" data-id="${d.Doubt_ID}"
+              onchange="assignDoubt(this.dataset.id, this.value)">${assignOpts}</select></td>
         <td>${actionBtn}</td>
       </tr>`;
     }).join('');
   }
 
+  // ── Assign ─────────────────────────────────────────────────
   function assignDoubt(doubtId, memberName) {
     if (!memberName) return;
     google.script.run
@@ -326,39 +487,126 @@ function updateStats() {
           const d = allDoubts.find(x => x.Doubt_ID === doubtId);
           if (d) { d.Assigned_To = memberName; d.Status = 'Assigned'; }
           renderTable(); updateStats();
-          showToast(`✅ Assigned to ${memberName}`, 'success');
+          showToast('✅ Assigned to ' + memberName, 'success');
+          silentRefresh();
+        } else {
+          showToast('❌ Assignment failed: ' + (r.error || ''), 'error');
         }
+      })
+      .withFailureHandler(function(err) {
+        showToast('❌ Assignment failed. Try again.', 'error');
+        console.error('assignDoubt error:', err);
       })
       .assignDoubt(doubtId, memberName);
   }
 
+  // ── Open resolve overlay ───────────────────────────────────
   function openResolveOverlay(doubtId) {
-    currentDoubtId = doubtId;
-    const d = allDoubts.find(x => x.Doubt_ID === doubtId);
-    if (!d) return;
-    document.getElementById('contextBox').innerHTML = `
-      <strong>Doubt ID:</strong> ${d.Doubt_ID}<br>
-      <strong>Extension ID:</strong> ${d.Extension_ID}<br>
-      <strong>L0 Member:</strong> ${d.L0_Name} (${d.L0_Email})<br>
-      <strong>Violations:</strong> ${d.Violations}<br>
-      <strong>Doubt:</strong> ${d.Doubt_Details}`;
-    document.getElementById('clarification').value = '';
-    document.getElementById('finalVerdict').value = '';
-    document.getElementById('resolveOverlay').classList.add('show');
-  }
+  currentDoubtId = doubtId;
+  const d = allDoubts.find(x => x.Doubt_ID === doubtId);
+  if (!d) return;
+
+  // Build structured context blocks
+  document.getElementById('contextBox').innerHTML = `
+    <div class="ctx-grid">
+      <div class="ctx-block">
+        <div class="ctx-label">Doubt ID</div>
+        <div class="ctx-value" style="color:#1a73e8;font-weight:500">${d.Doubt_ID}</div>
+      </div>
+      <div class="ctx-block">
+        <div class="ctx-label">Extension ID</div>
+        <div class="ctx-value"><code>${d.Extension_ID || '—'}</code></div>
+      </div>
+      <div class="ctx-block">
+        <div class="ctx-label">L0 Member</div>
+        <div class="ctx-value">
+          <div style="font-weight:500">${d.L0_Name}</div>
+          <div style="font-size:11px;color:#5f6368">${d.L0_Email}</div>
+        </div>
+      </div>
+      <div class="ctx-block">
+        <div class="ctx-label">L0 Approach Opinion</div>
+        <div class="ctx-value">
+          <span style="background:#fef3e0;color:#b06000;padding:2px 8px;border-radius:10px;font-size:12px">
+            ${d['L0 Approach opinion'] || '—'}
+          </span>
+        </div>
+      </div>
+      <div class="ctx-block full">
+        <div class="ctx-label">Violations</div>
+        <div class="ctx-value">
+          ${d.Violations
+            ? d.Violations.split(', ').map(v =>
+                `<span class="viol-chip">${v.trim()}</span>`).join(' ')
+            : '—'}
+        </div>
+      </div>
+      <div class="ctx-block full">
+        <div class="ctx-label">Doubt Details
+          <button class="btn-copy" id="copyBtn" onclick="copyDoubtDetails()">📋 Copy</button>
+        </div>
+        <div class="ctx-doubt-text" id="doubtDetailsText">${d.Doubt_Details || '—'}</div>
+      </div>
+    </div>`;
+
+  // Reset all modal fields
+  ['typeOfConsult','escalatedDueToTools','escalationValidity','queryClarity',
+   'newScenario','l0AreaOfImprovement','l0ApproachValidation'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  ['providedVerdict','clarification','l2AdditionalComments'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  selectedL2Conf = []; renderL2Chips(); buildL2Options('');
+  document.getElementById('resolveOverlay').classList.add('show');
+}
+
+function copyDoubtDetails() {
+  const text = document.getElementById('doubtDetailsText').innerText;
+  navigator.clipboard.writeText(text).then(function() {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = '✅ Copied';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '📋 Copy'; btn.classList.remove('copied'); }, 2000);
+  }).catch(function() {
+    // Fallback for older browsers
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = '✅ Copied';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '📋 Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
 
   function closeOverlay() {
     document.getElementById('resolveOverlay').classList.remove('show');
     currentDoubtId = null;
   }
 
+  // ── Submit resolve ─────────────────────────────────────────
   function submitResolve() {
-    const resolvedBy = document.getElementById('resolvedBy').value;
-    const clarification = document.getElementById('clarification').value.trim();
-    const finalVerdict = document.getElementById('finalVerdict').value.trim();
+    const resolvedBy          = document.getElementById('resolvedBy').value;
+    const typeOfConsult       = document.getElementById('typeOfConsult').value;
+    const escalatedDueToTools = document.getElementById('escalatedDueToTools').value;
+    const escalationValidity  = document.getElementById('escalationValidity').value;
+    const queryClarity        = document.getElementById('queryClarity').value;
+    const newScenario         = document.getElementById('newScenario').value;
+    const l0AreaOfImprovement = document.getElementById('l0AreaOfImprovement').value;
+    const l0ApproachValidation= document.getElementById('l0ApproachValidation').value;
+    const providedVerdict     = document.getElementById('providedVerdict').value.trim();
+    const l2Confirmation      = selectedL2Conf.slice();
+    const clarification       = document.getElementById('clarification').value.trim();
+    const l2AdditionalComments= document.getElementById('l2AdditionalComments').value.trim();
 
-    if (!resolvedBy || !clarification || !finalVerdict) {
-      showToast('⚠️ Please fill in all fields.', 'error');
+    if (!resolvedBy || !typeOfConsult || !escalatedDueToTools || !escalationValidity ||
+        !queryClarity || !newScenario || !l0AreaOfImprovement || !l0ApproachValidation ||
+        !providedVerdict || !clarification) {
+      showToast('⚠️ Please fill in all required fields.', 'error');
       return;
     }
 
@@ -370,21 +618,106 @@ function updateStats() {
           if (d) d.Status = 'Resolved';
           renderTable(); updateStats();
           showToast('✅ Resolved & email sent to L0!', 'success');
-          loadDoubts();
+          silentRefresh();
         } else {
           showToast('❌ Error: ' + r.error, 'error');
         }
       })
-      .withFailureHandler(function(err) {
+      .withFailureHandler(function() {
         showToast('❌ Failed to resolve. Try again.', 'error');
       })
-      .resolveDoubt({ doubtId: currentDoubtId, clarification, finalVerdict, resolvedBy });
+      .resolveDoubt({
+        doubtId: currentDoubtId,
+        resolvedBy, typeOfConsult, escalatedDueToTools, escalationValidity,
+        queryClarity, newScenario, l0AreaOfImprovement, l0ApproachValidation,
+        providedVerdict, l2Confirmation, clarification, l2AdditionalComments
+      });
   }
 
-  // Load on start
-  loadDoubts();
-  // Auto-refresh every 60 seconds
-  setInterval(loadDoubts, 60000);
+  // Load on start + auto-refresh
+  // loadDoubts();
+  // ── Silent background poller ────────────────────────────────
+// Runs every 20s, never clears the table, only patches changes
+
+let lastRefreshed = null;
+let knownLastUpdated = null;
+
+function silentRefresh() {
+  google.script.run
+    .withSuccessHandler(function(freshDoubts) {
+      if (!Array.isArray(freshDoubts)) return;
+
+      let newCount    = 0;
+      let changeCount = 0;
+
+      // 1. Update existing rows that changed
+      freshDoubts.forEach(function(newD) {
+        const existing = allDoubts.find(function(d) {
+          return d.Doubt_ID === newD.Doubt_ID;
+        });
+        if (existing) {
+          if (existing.Status !== newD.Status ||
+              existing.Assigned_To !== newD.Assigned_To ||
+              existing.Violations !== newD.Violations) {
+            Object.assign(existing, newD); // patch in-place
+            changeCount++;
+          }
+        } else {
+          allDoubts.push(newD); // new doubt arrived
+          newCount++;
+        }
+      });
+
+      // 2. If anything changed, re-render silently (no loading flash)
+      if (newCount > 0 || changeCount > 0) {
+        updateStats();
+        renderTable();
+        if (newCount > 0) {
+          showToast('🔔 ' + newCount + ' new doubt' + (newCount > 1 ? 's' : '') + ' added', 'success');
+        } else {
+          showToast('🔄 ' + changeCount + ' update' + (changeCount > 1 ? 's' : '') + ' synced', 'success');
+        }
+      }
+
+      // 3. Update "last synced" indicator
+      lastRefreshed = new Date();
+      updateSyncBadge();
+    })
+    .withFailureHandler(function(err) {
+      console.warn('Background sync failed:', err);
+    })
+    .getDoubts();
+}
+
+function updateSyncBadge() {
+  const el = document.getElementById('syncBadge');
+  if (!el || !lastRefreshed) return;
+  const secs = Math.round((new Date() - lastRefreshed) / 1000);
+  el.textContent = secs < 2 ? '● Live' : '● ' + secs + 's ago';
+}
+
+
+
+function checkForUpdates() {
+  google.script.run
+    .withSuccessHandler(function(ts) {
+      if (knownLastUpdated && ts !== knownLastUpdated) {
+        silentRefresh();
+      }
+      knownLastUpdated = ts;
+      lastRefreshed = new Date();
+      updateSyncBadge();
+    })
+    .withFailureHandler(function() {
+      // silent fail — just try again in 5s
+    })
+    .getLastUpdated();
+}
+
+setInterval(updateSyncBadge, 2000);       // updates badge text only, no server call
+setInterval(checkForUpdates, 5000);       // lightweight check every 5s
+loadDoubts(); 
+
 </script>
 </body>
 </html>
