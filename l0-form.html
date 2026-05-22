@@ -64,6 +64,30 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     .btn-submit.loading .btn-text { display: none; }
     .btn-submit.loading .spinner { display: block; }
+
+    .multi-select-wrap { position: relative; }
+  .ms-box { min-height: 44px; padding: 6px 10px; border: 1px solid #dadce0;
+    border-radius: 8px; background: white; cursor: text; display: flex;
+    flex-wrap: wrap; gap: 4px; align-items: center; transition: border-color 0.2s; }
+  .ms-box:focus-within { border-color: #1a73e8; box-shadow: 0 0 0 3px rgba(26,115,232,0.15); }
+  .ms-chip { background: #e8f0fe; color: #1a73e8; padding: 3px 8px; border-radius: 12px;
+    font-size: 12px; display: flex; align-items: center; gap: 4px; }
+  .ms-chip span { cursor: pointer; font-size: 14px; line-height: 1; }
+  .ms-chip span:hover { color: #d93025; }
+  .ms-input { border: none; outline: none; font-size: 14px; font-family: 'Google Sans', Arial, sans-serif;
+    min-width: 120px; flex: 1; background: transparent; padding: 2px 4px; }
+  .ms-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: white;
+    border: 1px solid #dadce0; border-radius: 8px; max-height: 200px; overflow-y: auto;
+    z-index: 50; box-shadow: 0 4px 12px rgba(0,0,0,0.12); display: none; margin-top: 4px; }
+  .ms-dropdown.open { display: block; }
+  .ms-option { padding: 9px 14px; font-size: 13px; cursor: pointer; color: #202124; }
+  .ms-option:hover, .ms-option.highlighted { background: #e8f0fe; color: #1a73e8; }
+  .ms-option.selected { color: #34a853; font-weight: 500; }
+  .ms-option.selected::after { content: ' ✓'; }
+  .ms-empty { padding: 12px 14px; font-size: 13px; color: #80868b; }
+
+
+
   </style>
 </head>
 <body>
@@ -73,10 +97,10 @@
     <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
     CRX Doubt Management
   </div>
-  <div class="nav-links">
+  <!-- <div class="nav-links">
     <a href="https://script.google.com/macros/s/AKfycbw-F49hkvSpUvBAduT8qFtravWvQSnQ7FDAphM9UWBoF63tf0leJ8idXpdGQvHCAZWC/exec?page=crx">CRX Dashboard</a>
     <a href="https://script.google.com/macros/s/AKfycbw-F49hkvSpUvBAduT8qFtravWvQSnQ7FDAphM9UWBoF63tf0leJ8idXpdGQvHCAZWC/exec?page=analytics">Analytics</a>
-  </div>
+  </div> -->
 </div>
 
 <div class="page">
@@ -87,11 +111,11 @@
     <div class="inline-group">
       <div class="form-group">
         <label>Your Name <span class="req">*</span></label>
-        <input type="text" id="l0Name" placeholder="Enter your full name">
+        <input type="text" id="l0Name" placeholder="LDAP" readonly>
       </div>
       <div class="form-group">
         <label>Your Email <span class="req">*</span></label>
-        <input type="email" id="l0Email" placeholder="yourname@google.com">
+        <input type="email" id="l0Email" placeholder="yourname@google.com" readonly>
       </div>
     </div>
 
@@ -106,17 +130,90 @@
       </div>
     </div>
 
+    <div class="inline-group">
+      <div class="form-group">
+        <label>Revision ID <span class="req">*</span></label>
+        <input type="text" id="revisionID" placeholder="e.g. 00001">
+      </div>
+      <div class="form-group">
+        <label>Task ID <span class="req">*</span></label>
+        <input type="text" id="taskID" placeholder="e.g. abcdefghijklmnop">
+      </div>
+    </div>
+
+    <div class="inline-group">
+      <div class="form-group">
+        <label>Item's Functionality <span class="req">*</span></label>
+        <select id="itemsFunctionality">
+          <option value="">— Select Queue —</option>
+          <option value="game">Game</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Queue Name <span class="req">*</span></label>
+        <select id="queueName">
+          <option value="">— Select Queue —</option>
+          <!-- populated by JS from QUEUE_NAMES array -->
+        </select>
+      </div>
+    </div>
+
+    <div class="inline-group">
+      <div class="form-group">
+        <label>Category <span class="req">*</span></label>
+        <select id="Category">
+         <option value="">— Select Queue —</option>
+         <option value="VerdictConfirmation">Verdict Confirmation</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Sub Category <span class="req">*</span></label>
+        <select id="SubCategory">
+         <option value="">— Select Queue —</option>
+         <option value="RHC">RHC</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="inline-group">
+      <div class="form-group">
+        <label>Stage of query<span class="req">*</span></label>
+        <select id="StageOfQuery">
+         <option value="">— Select Queue —</option>
+         <option value="Static">Static Analysis</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label> DCR Docs Link <span class="req">*</span></label>
+         <input type="text" id="DocLink" placeholder="e.g. abcdefghijklmnop">
+        
+      </div>
+    </div>
+
+    <!-- L0 Approach opinion — NEW -->
     <div class="form-group">
-      <label>Queue Name <span class="req">*</span></label>
-      <select id="queueName">
-        <option value="">— Select Queue —</option>
+      <label>L0 Approach Opinion <span class="req">*</span></label>
+      <select id="l0ApproachOpinion">
+        <option value="">— Select —</option>
+        <option value="reject">Reject</option>
+        <option value="no abuse">No Abuse</option>
+        <option value="escalate">Escalate</option>
       </select>
     </div>
 
     <div class="form-group">
-      <label>Violations Observed <span class="req">*</span> <span style="color:#5f6368;font-weight:400">(select all that apply)</span></label>
-      <div class="violations-grid" id="violationsGrid">
-        <!-- populated by JS -->
+      <label>Violations Observed <span class="req">*</span>
+        <span style="color:#5f6368;font-weight:400">(search & select all that apply)</span>
+      </label>
+      <div class="multi-select-wrap" id="violationsWrap">
+        <div class="ms-box" id="msBox" onclick="focusSearch()">
+          <!-- chips injected here -->
+          <input class="ms-input" id="msSearch" placeholder="Search violations…"
+             oninput="filterOptions()" onfocus="openDropdown()" autocomplete="off">
+        </div>
+        <div class="ms-dropdown" id="msDropdown"></div>
       </div>
     </div>
 
@@ -135,34 +232,106 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  // Load config on page load
-  google.script.run
-    .withSuccessHandler(function(config) {
-      // Populate Queue dropdown
-      const queueSelect = document.getElementById('queueName');
-      config.queueNames.forEach(q => {
-        const opt = document.createElement('option');
-        opt.value = q; opt.textContent = q;
-        queueSelect.appendChild(opt);
-      });
+  // ── Static data (mirrors Code.gs arrays) ─────────────────
+  const QUEUE_NAMES     = ['RE', 'NBR', 'HQ'];
+  const VIOLATIONS_LIST = ['malware', 'spam', 'misleading', 'SPP', 'RHC'];
 
-      // Populate violations checkboxes
-      const grid = document.getElementById('violationsGrid');
-      config.violations.forEach(v => {
-        const div = document.createElement('div');
-        div.className = 'check-item';
-        div.innerHTML = `
-          <input type="checkbox" id="v_${v}" value="${v}" onchange="toggleSelected(this)">
-          <label for="v_${v}">${v}</label>`;
-        grid.appendChild(div);
-      });
-    })
-    .getConfig();
+  let selectedViolations = [];
 
-  function toggleSelected(cb) {
-    cb.closest('.check-item').classList.toggle('selected', cb.checked);
+  // ── Populate Queue dropdown ───────────────────────────────
+  (function populateQueues() {
+    const sel = document.getElementById('queueName');
+    QUEUE_NAMES.forEach(q => {
+      const o = document.createElement('option');
+      o.value = q; o.textContent = q;
+      sel.appendChild(o);
+    });
+  })();
+
+  // ── Violations multi-select logic ─────────────────────────
+  function buildOptions(filter) {
+    const dd = document.getElementById('msDropdown');
+    const q  = (filter || '').toLowerCase();
+    const filtered = VIOLATIONS_LIST.filter(v => v.toLowerCase().includes(q));
+    if (!filtered.length) {
+      dd.innerHTML = '<div class="ms-empty">No matches</div>';
+      return;
+    }
+    dd.innerHTML = filtered.map(v => `
+      <div class="ms-option ${selectedViolations.includes(v) ? 'selected' : ''}"
+           onclick="toggleViolation('${v}')">${v}</div>`).join('');
   }
 
+  function openDropdown() {
+    buildOptions(document.getElementById('msSearch').value);
+    document.getElementById('msDropdown').classList.add('open');
+  }
+
+  function filterOptions() {
+    buildOptions(document.getElementById('msSearch').value);
+    document.getElementById('msDropdown').classList.add('open');
+  }
+
+  function focusSearch() { document.getElementById('msSearch').focus(); }
+
+  function toggleViolation(v) {
+    const idx = selectedViolations.indexOf(v);
+    if (idx === -1) selectedViolations.push(v);
+    else selectedViolations.splice(idx, 1);
+    renderChips();
+    buildOptions(document.getElementById('msSearch').value);
+  }
+
+  function removeViolation(v) {
+    selectedViolations = selectedViolations.filter(x => x !== v);
+    renderChips();
+    buildOptions(document.getElementById('msSearch').value);
+  }
+
+  function renderChips() {
+    const box   = document.getElementById('msBox');
+    const input = document.getElementById('msSearch');
+    // Remove old chips
+    box.querySelectorAll('.ms-chip').forEach(c => c.remove());
+    // Add chips before the input
+    selectedViolations.forEach(v => {
+      const chip = document.createElement('div');
+      chip.className = 'ms-chip';
+      chip.innerHTML = `${v}<span onclick="removeViolation('${v}')">×</span>`;
+      box.insertBefore(chip, input);
+    });
+  }
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', function(e) {
+    if (!document.getElementById('violationsWrap').contains(e.target)) {
+      document.getElementById('msDropdown').classList.remove('open');
+    }
+  });
+
+  // ── Auto-fill email ───────────────────────────────────────
+  google.script.run
+    .withSuccessHandler(function(email) {
+      if (email) {
+        const el = document.getElementById('l0Email');
+        el.value = email;
+        el.readOnly = true;
+        el.style.backgroundColor = '#f1f3f4';
+
+        const el1 = document.getElementById('l0Name');
+        const ldap = email.split('@')[0].toLowerCase();
+        el1.value = ldap;
+        el1.readOnly = true;
+        el1.style.backgroundColor = '#f1f3f4';
+      }
+    })
+    .withFailureHandler(err => console.warn('Email fetch failed:', err))
+    .getUserEmail();
+
+  // ── Load config (only crxMembers now; queues/violations are static) ──
+  // No getConfig() call needed for this page anymore
+
+  // ── Toast ─────────────────────────────────────────────────
   function showToast(msg, type) {
     const t = document.getElementById('toast');
     t.textContent = msg;
@@ -170,21 +339,28 @@
     setTimeout(() => t.className = 'toast', 4000);
   }
 
+  // ── Submit ────────────────────────────────────────────────
   function submitForm() {
-    const l0Name = document.getElementById('l0Name').value.trim();
-    const l0Email = document.getElementById('l0Email').value.trim();
+    const l0Name              = document.getElementById('l0Name').value.trim();
+    const l0Email             = document.getElementById('l0Email').value.trim();
     const extensionPickupTime = document.getElementById('extensionPickupTime').value;
-    const extensionId = document.getElementById('extensionId').value.trim();
-    const queueName = document.getElementById('queueName').value;
-    const doubtDetails = document.getElementById('doubtDetails').value.trim();
-    const violations = [...document.querySelectorAll('#violationsGrid input:checked')].map(c => c.value);
+    const extensionId         = document.getElementById('extensionId').value.trim();
+    const revisionId          = document.getElementById('revisionID').value.trim();
+    const taskId              = document.getElementById('taskID').value.trim();
+    const itemsFunctionality  = document.getElementById('itemsFunctionality').value;
+    const queueName           = document.getElementById('queueName').value;
+    const category            = document.getElementById('Category').value;
+    const subCategory         = document.getElementById('SubCategory').value;
+    const stageOfQuery        = document.getElementById('StageOfQuery').value;
+    const docLink             = document.getElementById('DocLink').value.trim();
+    const l0ApproachOpinion   = document.getElementById('l0ApproachOpinion').value;
+    const doubtDetails        = document.getElementById('doubtDetails').value.trim();
+    const violations          = selectedViolations.slice(); // copy
 
-    if (!l0Name || !l0Email || !extensionPickupTime || !extensionId || !queueName || !doubtDetails || violations.length === 0) {
+    if (!l0Name || !l0Email || !extensionPickupTime || !extensionId || !revisionId ||
+        !taskId || !itemsFunctionality || !queueName || !category || !subCategory ||
+        !stageOfQuery || !docLink || !l0ApproachOpinion || !doubtDetails || violations.length === 0) {
       showToast('⚠️ Please fill in all required fields and select at least one violation.', 'error');
-      return;
-    }
-    if (!l0Email.includes('@')) {
-      showToast('⚠️ Please enter a valid email address.', 'error');
       return;
     }
 
@@ -197,26 +373,27 @@
         btn.disabled = false;
         btn.classList.remove('loading');
         if (result.success) {
-          showToast(`✅ Doubt submitted! ID: ${result.doubtId}. CRX team has been notified.`, 'success');
-          // Reset form
-          document.getElementById('l0Name').value = '';
-          document.getElementById('l0Email').value = '';
-          document.getElementById('extensionPickupTime').value = '';
-          document.getElementById('extensionId').value = '';
-          document.getElementById('queueName').value = '';
-          document.getElementById('doubtDetails').value = '';
-          document.querySelectorAll('#violationsGrid input').forEach(c => { c.checked = false; });
-          document.querySelectorAll('.check-item').forEach(c => c.classList.remove('selected'));
+          showToast('✅ Doubt submitted! ID: ' + result.doubtId, 'success');
+          // Reset
+          ['l0Name','extensionPickupTime','extensionId','revisionID','taskID','DocLink','doubtDetails']
+            .forEach(id => document.getElementById(id).value = '');
+          ['itemsFunctionality','queueName','Category','SubCategory','StageOfQuery','l0ApproachOpinion']
+            .forEach(id => document.getElementById(id).value = '');
+          selectedViolations = [];
+          renderChips();
+          buildOptions('');
         } else {
           showToast('❌ Error: ' + result.error, 'error');
         }
       })
-      .withFailureHandler(function(err) {
+      .withFailureHandler(function() {
         btn.disabled = false;
         btn.classList.remove('loading');
         showToast('❌ Submission failed. Please try again.', 'error');
       })
-      .submitDoubt({ l0Name, l0Email, extensionPickupTime, extensionId, queueName, doubtDetails, violations });
+      .submitDoubt({ l0Name, l0Email, extensionPickupTime, extensionId, revisionId,
+                     taskId, itemsFunctionality, queueName, category, subCategory,
+                     stageOfQuery, docLink, l0ApproachOpinion, doubtDetails, violations });
   }
 </script>
 </body>
