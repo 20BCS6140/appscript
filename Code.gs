@@ -365,6 +365,69 @@ function resolveDoubt(resolveData) {
   }
 }
 
+// ── GET A SINGLE RESOLVED DOUBT (for edit overlay) ───────────
+
+function getResolvedDoubt(doubtId) {
+  try {
+    const ss    = SpreadsheetApp.openById(SHEET_ID);
+    const sheet = ss.getSheetByName('Resolved');
+    const data  = sheet.getDataRange().getValues();
+    const headers = data[0];
+    for (let i = 1; i < data.length; i++) {
+      if (data[i][0].toString() === doubtId.toString()) {
+        const obj = {};
+        headers.forEach((h, idx) => {
+          let val = data[i][idx];
+          if (val instanceof Date) val = val.toISOString();
+          else if (val === null || val === undefined) val = '';
+          else val = val.toString();
+          obj[h.toString().trim()] = val;
+        });
+        return obj;
+      }
+    }
+    return null;
+  } catch (err) {
+    Logger.log('getResolvedDoubt ERROR: ' + err.message);
+    return null;
+  }
+}
+
+// ── UPDATE AN EXISTING RESOLVED ROW ─────────────────────────
+function updateResolvedDoubt(updateData) {
+  try {
+    const ss    = SpreadsheetApp.openById(SHEET_ID);
+    const sheet = ss.getSheetByName('Resolved');
+    const data  = sheet.getDataRange().getValues();
+    for (let i = 1; i < data.length; i++) {
+      if (data[i][0].toString() === updateData.doubtId.toString()) {
+        const row = i + 1;
+        const l2Str = Array.isArray(updateData.l2Confirmation)
+          ? updateData.l2Confirmation.join(', ')
+          : (updateData.l2Confirmation || '');
+        // Resolved sheet cols 21-32 are CRX-filled fields (1-indexed)
+        sheet.getRange(row, 21).setValue(updateData.typeOfConsult);
+        sheet.getRange(row, 22).setValue(updateData.escalatedDueToTools);
+        sheet.getRange(row, 23).setValue(updateData.escalationValidity);
+        sheet.getRange(row, 24).setValue(updateData.queryClarity);
+        sheet.getRange(row, 25).setValue(updateData.newScenario);
+        sheet.getRange(row, 26).setValue(updateData.l0AreaOfImprovement);
+        sheet.getRange(row, 27).setValue(updateData.l0ApproachValidation);
+        sheet.getRange(row, 28).setValue(updateData.providedVerdict);
+        sheet.getRange(row, 29).setValue(l2Str);
+        sheet.getRange(row, 30).setValue(updateData.clarification);
+        sheet.getRange(row, 31).setValue(updateData.l2AdditionalComments);
+        sheet.getRange(row, 32).setValue(updateData.resolvedBy);
+        updateMeta();
+        return { success: true };
+      }
+    }
+    return { success: false, error: 'Resolved doubt not found' };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
 function formatDuration(ms) {
   if (!ms || ms < 0) return '0h 0m';
   const totalMins = Math.floor(ms / 60000);
