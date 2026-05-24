@@ -84,6 +84,17 @@ function doGet(e) {
     .addMetaTag('viewport', 'width=device-width, initial-scale=1');
 }
 
+
+// ── Helper: parse "Xh Ym" → minutes ──────────────────────────
+function parseDurationToMinutes(str) {
+  if (!str) return 0;
+  const s = str.toString();
+  const h = s.match(/(\d+)h/); const m = s.match(/(\d+)m/);
+  return (h ? parseInt(h[1]) : 0) * 60 + (m ? parseInt(m[1]) : 0);
+}
+
+
+
 // ── CRX Access Check ──────────────────────────────────────────
 function checkCRXAccess() {
   try {
@@ -215,6 +226,34 @@ function submitDoubt(formData) {
 }
 
 // ── GET ALL DOUBTS ────────────────────────────────────────────
+// function getDoubts() {
+//   try {
+//     const ss    = SpreadsheetApp.openById(SHEET_ID);
+//     const sheet = ss.getSheetByName('Doubts');
+//     if (!sheet) return [];
+//     const data = sheet.getDataRange().getValues();
+//     if (data.length <= 1) return [];
+//     const headers = data[0];
+//     return data.slice(1).map(row => {
+//       const obj = {};
+//       headers.forEach((h, i) => {
+//         const key = h.toString().trim();
+//         let val = row[i];
+//         if (val instanceof Date) val = val.toISOString();
+//         else if (val === null || val === undefined) val = '';
+//         else val = val.toString();
+//         obj[key] = val;
+//       });
+//       return obj;
+//     });
+//   } catch (err) {
+//     Logger.log('getDoubts ERROR: ' + err.message);
+//     return [];
+//   }
+// }
+
+
+// ── MODIFIED getDoubts — last 30 days only ────────────────────
 function getDoubts() {
   try {
     const ss    = SpreadsheetApp.openById(SHEET_ID);
@@ -223,18 +262,27 @@ function getDoubts() {
     const data = sheet.getDataRange().getValues();
     if (data.length <= 1) return [];
     const headers = data[0];
-    return data.slice(1).map(row => {
-      const obj = {};
-      headers.forEach((h, i) => {
-        const key = h.toString().trim();
-        let val = row[i];
-        if (val instanceof Date) val = val.toISOString();
-        else if (val === null || val === undefined) val = '';
-        else val = val.toString();
-        obj[key] = val;
+
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 30); // 30-day window
+
+    return data.slice(1)
+      .filter(row => {
+        const d = row[1] instanceof Date ? row[1] : new Date(row[1]);
+        return !isNaN(d) && d >= cutoff;
+      })
+      .map(row => {
+        const obj = {};
+        headers.forEach((h, i) => {
+          const key = h.toString().trim();
+          let val = row[i];
+          if (val instanceof Date) val = val.toISOString();
+          else if (val === null || val === undefined) val = '';
+          else val = val.toString();
+          obj[key] = val;
+        });
+        return obj;
       });
-      return obj;
-    });
   } catch (err) {
     Logger.log('getDoubts ERROR: ' + err.message);
     return [];
@@ -394,6 +442,7 @@ function getResolvedDoubt(doubtId) {
 }
 
 // ── UPDATE AN EXISTING RESOLVED ROW ─────────────────────────
+// ── MODIFIED updateResolvedDoubt — optional email resend ──────
 function updateResolvedDoubt(updateData) {
   try {
     const ss    = SpreadsheetApp.openById(SHEET_ID);
@@ -405,7 +454,6 @@ function updateResolvedDoubt(updateData) {
         const l2Str = Array.isArray(updateData.l2Confirmation)
           ? updateData.l2Confirmation.join(', ')
           : (updateData.l2Confirmation || '');
-        // Resolved sheet cols 21-32 are CRX-filled fields (1-indexed)
         sheet.getRange(row, 21).setValue(updateData.typeOfConsult);
         sheet.getRange(row, 22).setValue(updateData.escalatedDueToTools);
         sheet.getRange(row, 23).setValue(updateData.escalationValidity);
@@ -418,11 +466,127 @@ function updateResolvedDoubt(updateData) {
         sheet.getRange(row, 30).setValue(updateData.clarification);
         sheet.getRange(row, 31).setValue(updateData.l2AdditionalComments);
         sheet.getRange(row, 32).setValue(updateData.resolvedBy);
+
+        // Optionally re-send email to L0
+        if (updateData.resendEmail) {
+          sendResolutionEmail({
+            l0Email:      data[i][4],
+            l0Name:       data[i][3],
+            extensionId:  data[i][5],
+            violations:   data[i][16],
+            doubtDetails: data[i][15],
+            clarification: updateData.clarification,
+            finalVerdict:  updateData.providedVerdict,
+            resolvedBy:    updateData.resolvedBy,
+            doubtId:       data[i][0]
+          });
+        }
         updateMeta();
         return { success: true };
       }
     }
     return { success: false, error: 'Resolved doubt not found' };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
+
+// ── GET TEAM STATUS ──────────────────────────────────────────
+function getTeamStatus() {
+  try {
+    const ss      = SpreadsheetApp.openById(SHEET_ID);
+    const today   = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
+
+    // All CRX members from Config
+    const cfgData = ss.getSheetByName('Config').getDataRange().getValues();
+    const crxMembers = [];
+    for (let i = 1; i < cfgData.length; i++) {
+      if (cfgData[i][0] && cfgData[i][0].toString().trim())
+        crxMembers.push(cfgData[i][0].toString().trim());
+    }
+
+    // Today's presence from Presence sheet
+    const presSheet = ss.getSheetByName('Presence');
+    const presData  = presSheet ? presSheet.getDataRange().getValues() : [];
+    const todayPres = {};
+    for (let i = 1; i < presData.length; i++) {
+      let rd = presData[i][0];
+      rd = rd instanceof Date
+        ? Utilities.formatDate(rd, Session.getScriptTimeZone(), 'yyyy-MM-dd')
+        : rd.toString().split('T')[0];
+      if (rd === today) {
+        todayPres[presData[i][1].toString().trim()] = {
+          status:     presData[i][2].toString().trim().toLowerCase(),
+          customNote: presData[i][3] ? presData[i][3].toString().trim() : ''
+        };
+      }
+    }
+
+    // Active doubt assignments (Status === 'Assigned')
+    const dData   = ss.getSheetByName('Doubts').getDataRange().getValues();
+    const active  = {};
+    for (let i = 1; i < dData.length; i++) {
+      if (dData[i][17].toString().trim() === 'Assigned') {
+        const assignee = dData[i][18].toString().trim();
+        if (assignee) {
+          if (!active[assignee]) active[assignee] = [];
+          active[assignee].push(dData[i][0].toString());
+        }
+      }
+    }
+
+    const team = crxMembers.map(member => {
+      const p  = todayPres[member] || { status: 'absent', customNote: '' };
+      const ad = active[member]    || [];
+      const isPresent       = p.status === 'present';
+      const isBusyWithDoubt = ad.length > 0;
+      const isBusyOther     = isPresent && p.customNote !== '';
+      return {
+        member,
+        isPresent,
+        customNote:     p.customNote,
+        activeDoubts:   ad,
+        isBusyWithDoubt,
+        isBusyOther,
+        isAvailable: isPresent && !isBusyWithDoubt && !isBusyOther
+      };
+    });
+
+    return { team, today };
+  } catch (err) {
+    Logger.log('getTeamStatus ERROR: ' + err.message);
+    return { team: [], today: '' };
+  }
+}
+
+
+// ── MARK PRESENCE ─────────────────────────────────────────────
+function markPresence(memberName, status, customNote) {
+  try {
+    const ss    = SpreadsheetApp.openById(SHEET_ID);
+    const sheet = ss.getSheetByName('Presence');
+    if (!sheet) return { success: false, error: 'Presence sheet not found. Create it first.' };
+
+    const today    = new Date();
+    const todayStr = Utilities.formatDate(today, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+    const data     = sheet.getDataRange().getValues();
+
+    for (let i = 1; i < data.length; i++) {
+      let rd = data[i][0];
+      rd = rd instanceof Date
+        ? Utilities.formatDate(rd, Session.getScriptTimeZone(), 'yyyy-MM-dd')
+        : rd.toString().split('T')[0];
+      if (rd === todayStr && data[i][1].toString().trim() === memberName.trim()) {
+        sheet.getRange(i + 1, 3).setValue(status);
+        sheet.getRange(i + 1, 4).setValue(customNote || '');
+        updateMeta();
+        return { success: true };
+      }
+    }
+    sheet.appendRow([today, memberName, status, customNote || '']);
+    updateMeta();
+    return { success: true };
   } catch (err) {
     return { success: false, error: err.message };
   }
@@ -437,6 +601,9 @@ function formatDuration(ms) {
 // ── ANALYTICS DATA ────────────────────────────────────────────
 // Doubts: Status=index17, Violations=index16
 // Resolved: L2 LDAP=index30, Resolved_At=index31
+// ── MODIFIED getAnalyticsData ─────────────────────────────────
+// Uses L2 Confirmation (col 28) for violations
+// Adds memberStats + violationCounts tables
 function getAnalyticsData(filters) {
   try {
     const ss = SpreadsheetApp.openById(SHEET_ID);
@@ -451,16 +618,10 @@ function getAnalyticsData(filters) {
     const totalResolved = resolvedData.length > 1 ? resolvedData.length - 1 : 0;
     const total         = allDoubts.length;
 
-    const doubtIdToViolations = {};
-    allDoubts.forEach(r => {
-      const dId = r[0].toString().trim();
-      if (dId) doubtIdToViolations[dId] = r[16] ? r[16].toString().trim() : '';
-    });
+    const empty = { summary: { total, totalOpen, totalAssigned, totalResolved: 0 },
+                    byViolation:{}, byCRXMember:{}, trend:[], memberStats:[], violationCounts:[] };
 
-    if (resolvedData.length <= 1) {
-      return { summary: { total, totalOpen, totalAssigned, totalResolved: 0 },
-               byViolation: {}, byCRXMember: {}, trend: [] };
-    }
+    if (resolvedData.length <= 1) return empty;
 
     const resolvedRows = resolvedData.slice(1);
     const dateFrom = filters?.dateFrom ? new Date(filters.dateFrom) : null;
@@ -469,50 +630,88 @@ function getAnalyticsData(filters) {
     const violationFilter = filters?.violation !== 'All' ? filters.violation?.toLowerCase().trim() : null;
 
     const filtered = resolvedRows.filter(r => {
-      let metricDate = r[32]; // Resolved_At
-      if (!(metricDate instanceof Date)) metricDate = new Date(metricDate);
-      if (isNaN(metricDate)) return false;
-      if (dateFrom && metricDate < dateFrom) return false;
-      if (dateTo   && metricDate > dateTo)   return false;
-      if (memberFilter && r[31].toString().trim() !== memberFilter) return false; // L2 LDAP
+      let d = r[32]; // Resolved_At
+      if (!(d instanceof Date)) d = new Date(d);
+      if (isNaN(d)) return false;
+      if (dateFrom && d < dateFrom) return false;
+      if (dateTo   && d > dateTo)   return false;
+      if (memberFilter && r[31].toString().trim() !== memberFilter) return false;
       if (violationFilter) {
-        const viols = (doubtIdToViolations[r[0].toString().trim()] || '').toLowerCase();
-        if (!viols.includes(violationFilter)) return false;
+        const l2 = (r[28] || '').toString().toLowerCase();
+        if (!l2.includes(violationFilter)) return false;
       }
       return true;
     });
 
+    // ── Violations from L2 Confirmation (col 28) ──
     const byViolation = {};
     filtered.forEach(r => {
-      const viols = (doubtIdToViolations[r[0].toString().trim()] || '').split(',');
-      viols.forEach(v => { v = v.trim(); if (v) byViolation[v] = (byViolation[v] || 0) + 1; });
+      (r[28] || '').toString().split(',').forEach(v => {
+        v = v.trim(); if (v) byViolation[v] = (byViolation[v] || 0) + 1;
+      });
     });
 
+    // ── By CRX Member ──
     const byCRXMember = {};
     filtered.forEach(r => {
-      const m = r[31].toString().trim() || 'Unassigned'; // L2 LDAP
+      const m = r[31].toString().trim() || 'Unassigned';
       byCRXMember[m] = (byCRXMember[m] || 0) + 1;
     });
 
+    // ── Daily Trend ──
     const byDate = {};
     filtered.forEach(r => {
-      let d = r[32]; // Resolved_At
+      let d = r[32];
       d = d instanceof Date
         ? Utilities.formatDate(d, Session.getScriptTimeZone(), 'yyyy-MM-dd')
         : d.toString().split('T')[0];
       if (d) byDate[d] = (byDate[d] || 0) + 1;
     });
-
     const trend = Object.entries(byDate)
       .sort((a, b) => a[0].localeCompare(b[0]))
       .map(([date, count]) => ({ date, count }));
 
+    // ── Member Stats Table ──
+    const msMap = {};
+    filtered.forEach(r => {
+      const m  = r[31].toString().trim() || 'Unassigned';
+      const ct = r[20].toString().trim().toLowerCase();
+      const esc = r[21].toString().trim().toLowerCase() === 'yes';
+      if (!msMap[m]) msMap[m] = { total:0, easy:0, medium:0, complex:0, escalated:0, aht:0, wait:0 };
+      msMap[m].total++;
+      if (ct === 'easy') msMap[m].easy++;
+      else if (ct === 'medium') msMap[m].medium++;
+      else if (ct === 'complex') msMap[m].complex++;
+      if (esc) msMap[m].escalated++;
+      msMap[m].aht  += parseDurationToMinutes(r[35] ? r[35].toString() : '');
+      msMap[m].wait += parseDurationToMinutes(r[36] ? r[36].toString() : '');
+    });
+    const memberStats = Object.entries(msMap)
+      .sort((a, b) => b[1].total - a[1].total)
+      .map(([member, s]) => ({
+        member, total: s.total, easy: s.easy, medium: s.medium,
+        complex: s.complex, escalated: s.escalated,
+        avgAHT:  s.total > 0 ? formatDuration((s.aht  / s.total) * 60000) : '—',
+        avgWait: s.total > 0 ? formatDuration((s.wait / s.total) * 60000) : '—'
+      }));
+
+    // ── Violation Counts Table ──
+    const vcMap = {};
+    filtered.forEach(r => {
+      (r[28] || '').toString().split(',').forEach(v => {
+        v = v.trim(); if (v) vcMap[v] = (vcMap[v] || 0) + 1;
+      });
+    });
+    const violationCounts = Object.entries(vcMap)
+      .sort((a, b) => b[1] - a[1])
+      .map(([violation, count]) => ({ violation, count }));
+
     return { summary: { total, totalOpen, totalAssigned, totalResolved },
-             byViolation, byCRXMember, trend };
+             byViolation, byCRXMember, trend, memberStats, violationCounts };
   } catch (err) {
     Logger.log('getAnalyticsData ERROR: ' + err.message);
-    return { summary: { total:0, totalOpen:0, totalAssigned:0, totalResolved:0 },
-             byViolation:{}, byCRXMember:{}, trend:[] };
+    return { summary:{total:0,totalOpen:0,totalAssigned:0,totalResolved:0},
+             byViolation:{}, byCRXMember:{}, trend:[], memberStats:[], violationCounts:[] };
   }
 }
 
