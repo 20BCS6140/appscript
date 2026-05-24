@@ -9,358 +9,539 @@
     /* ── Reset & Base ── */
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    
 
-  body {
-    font-family: 'Google Sans', Arial, sans-serif;
-    background: #f0f4f9;
-    min-height: 100vh;
-    overflow-y: auto;
-    overflow-x: hidden;
-  }
+    body 
+    {
+      font-family: 'Google Sans', Arial, sans-serif;
+      background: #f0f4f9;
+      min-height: 100vh;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
 
     /* ── Top Bar ── */
-    .top-bar {
+    .top-bar 
+    {
       position: sticky;
       top: 0;
       z-index: 1000;
       background: linear-gradient(135deg, #1a73e8 0%, #1557b0 100%);
-      color: white; padding: 0 24px; height: 56px;
+      color: white; padding: 0 24px; height: 50px;
       display: flex; align-items: center; justify-content: space-between;
       box-shadow: 0 2px 8px rgba(26,115,232,0.4);
     }
-    .top-bar .logo { font-size: 17px; font-weight: 600; letter-spacing: -0.3px; }
-    .nav-links a {
-      color: rgba(255,255,255,0.85); text-decoration: none;
-      margin-left: 20px; font-size: 13px; font-weight: 500;
-      padding: 4px 0; border-bottom: 2px solid transparent; transition: all 0.15s;
+    .top-bar .logo 
+    { 
+      font-size: 17px; 
+      font-weight: 600; 
+      letter-spacing: -0.3px; 
     }
-    .nav-links a:hover, .nav-links a.active { color: white; border-bottom-color: white; }
+    .nav-links a 
+    {
+      color: rgba(255,255,255,0.85); 
+      text-decoration: none;
+      margin-left: 20px; 
+      font-size: 13px; 
+      font-weight: 500;
+      padding: 4px 0; 
+      border-bottom: 2px solid transparent; 
+      transition: all 0.15s;
+    }
+    .nav-links a:hover, .nav-links a.active 
+    { 
+      color: white; 
+      border-bottom-color: white; 
+      }
 
     /* ── Page Layout — flex column, fills remaining viewport ── */
     
 
-  .page {
-    display: flex;
-    flex-direction: column;
-    padding: 20px 24px 40px;
-  }
-
-    /* ── Page Header ── */
-    .page-header {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 16px; flex-shrink: 0;
-    }
-    .page-title { font-size: 20px; font-weight: 600; color: #202124; }
-    .header-right { display: flex; align-items: center; gap: 10px; }
-    .btn-refresh {
-      background: white; border: 1px solid #dadce0; padding: 7px 14px;
-      border-radius: 6px; font-size: 13px; cursor: pointer; color: #3c4043;
-      display: flex; align-items: center; gap: 6px; transition: background 0.15s;
-    }
-    .btn-refresh:hover { background: #f8f9fa; }
-
-    /* ── Stats Row ── */
-    .stats-row {
-      display: grid; grid-template-columns: repeat(3, 1fr);
-      gap: 12px; margin-bottom: 14px; 
-      /* flex-shrink: 0; */
-      margin-bottom: 18px;
-    }
-    
-
-    .stat-card {
-      background: white;
-      border-radius: 14px;
-      padding: 22px 24px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-      border: 1px solid #e8eaed;
+    .page 
+    {
       display: flex;
-      align-items: center;
-      gap: 18px;
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      flex-direction: column;
+      padding: 20px 24px 40px;
     }
-    .stat-icon {
-      width: 38px; height: 38px; border-radius: 10px;
-      display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;
-    }
-    .stat-card.open   .stat-icon { background: #fce8e6; }
-    .stat-card.assigned .stat-icon { background: #fef3e0; }
-    .stat-card.resolved .stat-icon { background: #e6f4ea; }
-    .stat-card .val { font-size: 26px; font-weight: 700; line-height: 1; }
-    .stat-card .lbl { font-size: 11px; color: #5f6368; margin-top: 2px; }
-    .stat-card.open     .val { color: #ea4335; }
-    .stat-card.assigned .val { color: #f09300; }
-    .stat-card.resolved .val { color: #34a853; }
 
-    /* ── Filter Bar ── */
-    .filter-bar {
-      display: flex; gap: 10px; margin-bottom: 12px;
-      flex-wrap: wrap; flex-shrink: 0;
-    }
-    .filter-bar select {
-      padding: 7px 11px; border: 1px solid #dadce0; border-radius: 6px;
-      font-size: 13px; outline: none; background: white; cursor: pointer;
-      font-family: 'Google Sans', Arial, sans-serif;
-    }
-    .filter-bar select:focus { border-color: #1a73e8; }
+      /* ── Page Header ── */
+      .page-header 
+      {
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center;
+        margin-bottom: 16px; 
+        flex-shrink: 0;
+      }
+      .page-title 
+      { 
+        font-size: 20px; 
+        font-weight: 600; 
+        color: #202124; 
+      }
+      
+      .header-right 
+      { 
+        display: flex; 
+        align-items: center; 
+        gap: 10px; 
+      }
+      
+      .btn-refresh 
+      {
+        background: white; 
+        border: 1px solid #dadce0; 
+        padding: 7px 14px;
+        border-radius: 6px; 
+        font-size: 13px; 
+        cursor: pointer; 
+        color: #3c4043;
+        display: flex; 
+        align-items: center; 
+        gap: 6px; 
+        transition: background 0.15s;
+      }
+    
+      .btn-refresh:hover 
+      { 
+        background: #f8f9fa; 
+      }
 
-    /* ── Table Outer — THE scrollable container ── */
+      /* ── Stats Row ── */
+      .stats-row 
+      {
+        display: grid; 
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px; 
+        margin-bottom: 14px; 
+        margin-bottom: 18px;
+      }
+    
+      .stat-card 
+      {
+        background: white;
+        border-radius: 14px;
+        padding: 22px 24px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        border: 1px solid #e8eaed;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      }
+    
+      .stat-icon 
+      {
+        width: 38px; 
+        height: 38px; 
+        border-radius: 10px;
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        font-size: 18px; 
+        flex-shrink: 0;
+      }
+
+      .stat-card.open   .stat-icon { background: #fce8e6; }
+      .stat-card.assigned .stat-icon { background: #fef3e0; }
+      .stat-card.resolved .stat-icon { background: #e6f4ea; }
+      .stat-card .val { font-size: 26px; font-weight: 700; line-height: 1; }
+      .stat-card .lbl { font-size: 11px; color: #5f6368; margin-top: 2px; }
+      .stat-card.open     .val { color: #ea4335; }
+      .stat-card.assigned .val { color: #f09300; }
+      .stat-card.resolved .val { color: #34a853; }
+
+      /* ── Filter Bar ── */
+      .filter-bar 
+      {
+        display: flex; 
+        gap: 10px; 
+        margin-bottom: 12px;
+        flex-wrap: wrap; 
+        flex-shrink: 0;
+      }
+      
+      .filter-bar select 
+      {
+        padding: 7px 11px; 
+        border: 1px solid #dadce0; 
+        border-radius: 6px;
+        font-size: 13px; 
+        outline: none; 
+        background: white; 
+        cursor: pointer;
+        font-family: 'Google Sans', Arial, sans-serif;
+      }
+      
+      .filter-bar select:focus 
+      { 
+        border-color: #1a73e8; 
+      }
+
+      /* ── Table Outer — THE scrollable container ── */
     
 
-    .table-outer {
-      height: 75vh;
-      min-height: 600px;
-      overflow: auto;
-      border-radius: 10px;
-      border: 1px solid #e8eaed;
-      box-shadow: 0 1px 6px rgba(0,0,0,0.07);
-      background: white;
-    }
+      .table-outer 
+      {
+        height: 75vh;
+        min-height: 600px;
+        overflow: auto;
+        border-radius: 10px;
+        border: 1px solid #e8eaed;
+        box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+        background: white;
+      }
 
-    /* ── Table ── */
-    table {
-      width: max-content;   /* expands beyond viewport → enables horizontal scroll */
-      min-width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-    }
+      /* ── Table ── */
+      table 
+      {
+        width: max-content;   /* expands beyond viewport → enables horizontal scroll */
+        min-width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+      }
 
-    /* Sticky header inside the scrollable container */
-    thead th {
-      position: sticky; top: 0; z-index: 10;
-      background: #f8f9fa; color: #5f6368; font-weight: 600;
-      padding: 10px 12px; text-align: left;
-      border-bottom: 2px solid #e8eaed;
-      white-space: nowrap; font-size: 11px; text-transform: uppercase; letter-spacing: 0.3px;
-    }
+      /* Sticky header inside the scrollable container */
+      thead th 
+      {
+        position: sticky; top: 0; z-index: 10;
+        background: #f8f9fa; color: #5f6368; font-weight: 600;
+        padding: 10px 12px; text-align: left;
+        border-bottom: 2px solid #e8eaed;
+        white-space: nowrap; font-size: 11px; text-transform: uppercase; letter-spacing: 0.3px;
+      }
 
-    /* Fixed row height — rows NEVER expand */
-    tbody tr { height: 58px; border-bottom: 1px solid #f1f3f4; transition: background 0.1s; }
-    tbody tr:hover { background: #f8faff; }
-    tbody tr:last-child { border-bottom: none; }
+      /* Fixed row height — rows NEVER expand */
+      
+      tbody tr { height: 58px; border-bottom: 1px solid #f1f3f4; transition: background 0.1s; }
+      tbody tr:hover { background: #f8faff; }
+      tbody tr:last-child { border-bottom: none; }
 
-    tbody td {
-      padding: 0 12px;
-      height: 58px; max-height: 58px;
-      overflow: hidden;
-      vertical-align: middle;
-      color: #202124;
-    }
+      tbody td 
+      {
+        padding: 0 12px;
+        height: 58px; max-height: 58px;
+        overflow: hidden;
+        vertical-align: middle;
+        color: #202124;
+      }
 
-    /* ── Column width definitions via <col> ── */
-    col.c-id       { width: 108px; }
-    col.c-time     { width: 148px; }
-    col.c-ext      { width: 158px; }
-    col.c-member   { width: 188px; }
-    col.c-viol     { width: 190px; }
-    col.c-queue    { width: 230px; }
-    col.c-status   { width: 95px;  }
-    col.c-assign   { width: 162px; }
-    col.c-action   { width: 210px; }
+      /* ── Column width definitions via <col> ── */
+      col.c-id       { width: 108px; }
+      col.c-time     { width: 148px; }
+      col.c-ext      { width: 158px; }
+      col.c-member   { width: 188px; }
+      col.c-viol     { width: 190px; }
+      col.c-queue    { width: 230px; }
+      col.c-status   { width: 95px;  }
+      col.c-assign   { width: 162px; }
+      col.c-action   { width: 210px; }
 
-    /* ── Cell content helpers ── */
+      /* ── Cell content helpers ── */
 
-    /* Single-line, truncates with ellipsis */
-    .nowrap { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+      /* Single-line, truncates with ellipsis */
+      .nowrap { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
 
-    /* Doubt ID — two-line monospace */
-    .doubt-id-cell { font-family: 'Roboto Mono', monospace; font-size: 11px; line-height: 1.4; }
-    .doubt-id-cell .did-prefix { color: #9aa0a6; font-size: 10px; }
-    .doubt-id-cell .did-num   { color: #1a73e8; font-weight: 500; }
+      /* Doubt ID — two-line monospace */
+      .doubt-id-cell { font-family: 'Roboto Mono', monospace; font-size: 11px; line-height: 1.4; }
+      .doubt-id-cell .did-prefix { color: #9aa0a6; font-size: 10px; }
+      .doubt-id-cell .did-num   { color: #1a73e8; font-weight: 500; }
 
-    /* Violations — chip wrap, max 2 rows */
-    .viols-wrap {
-      display: flex; flex-wrap: wrap; gap: 2px;
-      max-height: 42px;   /* 2 rows of chips (≈20px each + gap) */
-      overflow: hidden;
-      align-content: flex-start;
-    }
-    .viol-chip {
-      display: inline-block; background: #e8eaed; color: #3c4043;
-      padding: 2px 7px; border-radius: 10px; font-size: 11px;
-      white-space: nowrap;
-    }
+      /* Violations — chip wrap, max 2 rows */
+      .viols-wrap 
+      {
+        display: flex; flex-wrap: wrap; gap: 2px;
+        max-height: 42px;   /* 2 rows of chips (≈20px each + gap) */
+        overflow: hidden;
+        align-content: flex-start;
+      }
+      
+      .viol-chip 
+      {
+        display: inline-block; background: #e8eaed; color: #3c4043;
+        padding: 2px 7px; border-radius: 10px; font-size: 11px;
+        white-space: nowrap;
+      }
 
-    /* ── Badges ── */
-    .badge {
-      display: inline-flex; align-items: center; padding: 3px 9px;
-      border-radius: 12px; font-size: 11px; font-weight: 600; white-space: nowrap;
-    }
-    .badge.open     { background: #fce8e6; color: #c5221f; }
-    .badge.assigned { background: #fef3e0; color: #b06000; }
-    .badge.resolved { background: #e6f4ea; color: #1e8e3e; }
+      /* ── Badges ── */
+      .badge 
+      {
+        display: inline-flex; align-items: center; padding: 3px 9px;
+        border-radius: 12px; font-size: 11px; font-weight: 600; white-space: nowrap;
+      }
+    
+      .badge.open     { background: #fce8e6; color: #c5221f; }
+      .badge.assigned { background: #fef3e0; color: #b06000; }
+      .badge.resolved { background: #e6f4ea; color: #1e8e3e; }
 
-    /* ── Assign Select ── */
-    .assign-select {
-      padding: 5px 8px; border: 1px solid #dadce0; border-radius: 6px;
-      font-size: 12px; background: white; outline: none;
-      width: 138px; cursor: pointer; font-family: 'Google Sans', Arial, sans-serif;
-    }
-    .assign-select:focus { border-color: #1a73e8; }
+      /* ── Assign Select ── */
+    
+      .assign-select 
+      {
+        padding: 5px 8px; border: 1px solid #dadce0; border-radius: 6px;
+        font-size: 12px; background: white; outline: none;
+        width: 138px; cursor: pointer; font-family: 'Google Sans', Arial, sans-serif;
+      }
+      .assign-select:focus { border-color: #1a73e8; }
 
-    /* ── Action Buttons ── */
-    .action-cell { display: flex; align-items: center; gap: 6px; }
+      /* ── Action Buttons ── */
+      
+      .action-cell { display: flex; align-items: center; gap: 6px; }
 
-    .btn-resolve {
-      background: #1a73e8; color: white; border: none; padding: 6px 12px;
-      border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 500;
-      white-space: nowrap; transition: background 0.15s;
-      font-family: 'Google Sans', Arial, sans-serif;
-    }
-    .btn-resolve:hover { background: #1557b0; }
+      .btn-resolve 
+      {
+        background: #1a73e8; color: white; border: none; padding: 6px 12px;
+        border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 500;
+        white-space: nowrap; transition: background 0.15s;
+        font-family: 'Google Sans', Arial, sans-serif;
+      }
+    
+      .btn-resolve:hover { background: #1557b0; }
 
-    .btn-resolved {
-      background: #e6f4ea; color: #1e8e3e; border: 1px solid #c3e6cb;
-      padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 500;
-      white-space: nowrap; cursor: default;
-    }
+      .btn-resolved 
+      {
+        background: #e6f4ea; color: #1e8e3e; border: 1px solid #c3e6cb;
+        padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 500;
+        white-space: nowrap; cursor: default;
+      }
 
-    .btn-edit {
-      background: white; color: #5f6368; border: 1px solid #dadce0;
-      padding: 6px 10px; border-radius: 6px; font-size: 12px; cursor: pointer;
-      font-weight: 500; white-space: nowrap; transition: all 0.15s;
-      font-family: 'Google Sans', Arial, sans-serif;
-    }
-    .btn-edit:hover { background: #f8f9fa; border-color: #1a73e8; color: #1a73e8; }
+      .btn-edit 
+      {
+        background: white; color: #5f6368; border: 1px solid #dadce0;
+        padding: 6px 10px; border-radius: 6px; font-size: 12px; cursor: pointer;
+        font-weight: 500; white-space: nowrap; transition: all 0.15s;
+        font-family: 'Google Sans', Arial, sans-serif;
+      }
+      
+      .btn-edit:hover { background: #f8f9fa; border-color: #1a73e8; color: #1a73e8; }
 
-    /* ── Empty / Loading states ── */
-    .loading-row td { text-align: center; padding: 48px; color: #5f6368; }
+      /* ── Empty / Loading states ── */
+      .loading-row td { text-align: center; padding: 48px; color: #5f6368; }
 
-    /* ── Overlays ── */
-    .overlay {
-      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
-      z-index: 100; align-items: center; justify-content: center;
-    }
-    .overlay.show { display: flex; }
+      /* ── Overlays ── */
+      .overlay 
+      {
+        display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+        z-index: 100; align-items: center; justify-content: center;
+      }
+      .overlay.show { display: flex; }
 
-    .modal {
-      background: white; border-radius: 16px; padding: 28px 32px;
-      width: 580px; max-width: 95vw; max-height: 92vh; overflow-y: auto;
-      box-shadow: 0 12px 48px rgba(0,0,0,0.22);
-    }
-    .modal-header {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 18px;
-    }
-    .modal-title { font-size: 17px; font-weight: 600; color: #202124; }
-    .btn-close {
-      background: none; border: none; font-size: 22px; cursor: pointer;
-      color: #5f6368; line-height: 1; padding: 0 4px;
-    }
-    .btn-close:hover { color: #202124; }
+      .modal 
+      {
+        background: white; border-radius: 16px; padding: 28px 32px;
+        width: 580px; max-width: 95vw; max-height: 92vh; overflow-y: auto;
+        box-shadow: 0 12px 48px rgba(0,0,0,0.22);
+      }
 
-    /* Context grid in modal */
-    .ctx-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 20px; }
-    .ctx-block {
-      background: #f8f9fa; border: 1px solid #e8eaed; border-radius: 8px;
-      padding: 10px 12px;
-    }
-    .ctx-block.full { grid-column: 1 / -1; }
-    .ctx-label {
-      font-size: 10px; font-weight: 600; color: #5f6368; text-transform: uppercase;
-      letter-spacing: 0.5px; margin-bottom: 4px;
-      display: flex; justify-content: space-between; align-items: center;
-    }
-    .ctx-value { font-size: 13px; color: #202124; word-break: break-word; }
-    .ctx-doubt-text {
-      font-size: 13px; color: #202124; max-height: 100px; overflow-y: auto;
-      word-break: break-word; white-space: pre-wrap; line-height: 1.5;
-    }
+      .modal-header 
+      {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 18px;
+      }
+    
+      .modal-title { font-size: 17px; font-weight: 600; color: #202124; }
+    
+      .btn-close 
+      { 
+        background: none; border: none; font-size: 22px; cursor: pointer;
+        color: #5f6368; line-height: 1; padding: 0 4px;
+      }
+      .btn-close:hover { color: #202124; }
 
-    .btn-copy {
-      background: #e8f0fe; border: none; border-radius: 6px; padding: 3px 8px;
-      font-size: 11px; color: #1a73e8; cursor: pointer; flex-shrink: 0;
-      font-family: 'Google Sans', Arial, sans-serif; font-weight: 500;
-    }
-    .btn-copy:hover  { background: #d2e3fc; }
-    .btn-copy.copied { background: #e6f4ea; color: #34a853; }
+      /* Context grid in modal */
+      .ctx-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 20px; }
+      .ctx-block 
+      {
+        background: #f8f9fa; border: 1px solid #e8eaed; border-radius: 8px;
+        padding: 10px 12px;
+      }
+      
+      .ctx-block.full { grid-column: 1 / -1; }
+      .ctx-label 
+      {
+        font-size: 10px; font-weight: 600; color: #5f6368; text-transform: uppercase;
+        letter-spacing: 0.5px; margin-bottom: 4px;
+        display: flex; justify-content: space-between; align-items: center;
+      }
 
-    /* Modal form fields */
-    .modal label {
-      display: block; font-size: 13px; font-weight: 500;
-      color: #3c4043; margin-bottom: 5px;
-    }
-    .modal textarea, .modal select, .modal input[type="text"] {
-      width: 100%; padding: 9px 12px; border: 1px solid #dadce0; border-radius: 8px;
-      font-size: 14px; font-family: 'Google Sans', Arial, sans-serif;
-      outline: none; margin-bottom: 14px;
-    }
-    .modal textarea:focus, .modal select:focus, .modal input:focus {
-      border-color: #1a73e8; box-shadow: 0 0 0 2px rgba(26,115,232,0.15);
-    }
-    .modal textarea { min-height: 80px; resize: vertical; }
+      .ctx-value 
+      { 
+        font-size: 13px; color: #202124; word-break: break-word; 
+      }
 
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .form-row .fg { display: flex; flex-direction: column; }
-    .form-row .fg label { margin-bottom: 5px; }
-    .form-row .fg select { margin-bottom: 0; }
+      .ctx-doubt-text 
+      {
+        font-size: 13px; color: #202124; max-height: 100px; overflow-y: auto;
+        word-break: break-word; white-space: pre-wrap; line-height: 1.5;
+      }
 
-    .modal-footer {
-      display: flex; gap: 10px; justify-content: flex-end;
-      margin-top: 12px; padding-top: 16px; border-top: 1px solid #f1f3f4;
-    }
-    .btn-cancel {
-      padding: 9px 20px; background: white; border: 1px solid #dadce0;
-      border-radius: 8px; font-size: 14px; cursor: pointer; color: #3c4043;
-      font-family: 'Google Sans', Arial, sans-serif;
-    }
-    .btn-modal-submit {
-      padding: 9px 20px; background: #1a73e8; color: white; border: none;
-      border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;
-      font-family: 'Google Sans', Arial, sans-serif;
-    }
-    .btn-modal-submit:hover { background: #1557b0; }
+      .btn-copy 
+      {
+        background: #e8f0fe; border: none; border-radius: 6px; padding: 3px 8px;
+        font-size: 11px; color: #1a73e8; cursor: pointer; flex-shrink: 0;
+        font-family: 'Google Sans', Arial, sans-serif; font-weight: 500;
+      }
 
-    /* ── Multi-select ── */
-    .multi-select-wrap { position: relative; margin-bottom: 14px; }
-    .ms-box {
-      min-height: 40px; padding: 5px 10px; border: 1px solid #dadce0;
-      border-radius: 8px; background: white; cursor: text;
-      display: flex; flex-wrap: wrap; gap: 4px; align-items: center;
-    }
-    .ms-box:focus-within { border-color: #1a73e8; box-shadow: 0 0 0 2px rgba(26,115,232,0.15); }
-    .ms-chip {
-      background: #e8f0fe; color: #1a73e8; padding: 2px 8px; border-radius: 10px;
-      font-size: 12px; display: flex; align-items: center; gap: 3px;
-    }
-    .ms-chip span { cursor: pointer; font-size: 14px; line-height: 1; }
-    .ms-chip span:hover { color: #d93025; }
-    .ms-input {
-      border: none; outline: none; font-size: 13px;
-      font-family: 'Google Sans', Arial, sans-serif;
-      min-width: 100px; flex: 1; background: transparent; padding: 2px 4px;
-    }
-    .ms-dropdown {
-      position: absolute; top: 100%; left: 0; right: 0; background: white;
-      border: 1px solid #dadce0; border-radius: 8px; max-height: 160px;
-      overflow-y: auto; z-index: 300; box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-      display: none; margin-top: 2px;
-    }
-    .ms-dropdown.open { display: block; }
-    .ms-option { padding: 8px 14px; font-size: 13px; cursor: pointer; }
-    .ms-option:hover { background: #e8f0fe; }
-    .ms-option.selected { color: #34a853; font-weight: 500; }
-    .ms-option.selected::after { content: ' ✓'; }
-    .ms-empty { padding: 10px 14px; font-size: 13px; color: #80868b; }
+      .btn-copy:hover  { background: #d2e3fc; }
+      .btn-copy.copied { background: #e6f4ea; color: #34a853; }
 
-    /* ── Toast ── */
-    .toast {
-      position: fixed; bottom: 20px; right: 20px; padding: 11px 16px;
-      border-radius: 8px; font-size: 13px; z-index: 500;
-      opacity: 0; transition: opacity 0.3s;
-      pointer-events: none;   /* never blocks clicks when invisible */
-    }
-    .toast.show { opacity: 1; pointer-events: auto; }
-    .toast.success { background: #34a853; color: white; }
-    .toast.error   { background: #d93025; color: white; }
+      /* Modal form fields */
+      .modal label 
+      {
+        display: block; font-size: 13px; font-weight: 500;
+        color: #3c4043; margin-bottom: 5px;
+      }
+    
+      .modal textarea, .modal select, .modal input[type="text"] 
+      {
+        width: 100%; padding: 9px 12px; border: 1px solid #dadce0; border-radius: 8px;
+        font-size: 14px; font-family: 'Google Sans', Arial, sans-serif;
+        outline: none; margin-bottom: 14px;
+      }
+      
+      
+      .modal textarea:focus, .modal select:focus, .modal input:focus 
+      {
+        border-color: #1a73e8; box-shadow: 0 0 0 2px rgba(26,115,232,0.15);
+      }
+      .modal textarea { min-height: 80px; resize: vertical; }
 
-    /* ── Section divider in modal ── */
-    .section-divider {
-      font-size: 11px; font-weight: 600; color: #5f6368; text-transform: uppercase;
-      letter-spacing: 0.5px; margin: 4px 0 12px; padding-bottom: 6px;
-      border-bottom: 1px solid #e8eaed;
-    }
+      .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      .form-row .fg { display: flex; flex-direction: column; }
+      .form-row .fg label { margin-bottom: 5px; }
+      .form-row .fg select { margin-bottom: 0; }
+
+      .modal-footer 
+      {
+        display: flex; gap: 10px; justify-content: flex-end;
+        margin-top: 12px; padding-top: 16px; border-top: 1px solid #f1f3f4;
+      }
+    
+      .btn-cancel 
+      {
+        padding: 9px 20px; background: white; border: 1px solid #dadce0;
+        border-radius: 8px; font-size: 14px; cursor: pointer; color: #3c4043;
+        font-family: 'Google Sans', Arial, sans-serif;
+      }
+
+      .btn-modal-submit 
+      {
+        padding: 9px 20px; background: #1a73e8; color: white; border: none;
+        border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;
+        font-family: 'Google Sans', Arial, sans-serif;
+      }
+
+      .btn-modal-submit:hover { background: #1557b0; }
+
+      /* ── Multi-select ── */
+      .multi-select-wrap { position: relative; margin-bottom: 14px; }
+      .ms-box 
+      {
+        min-height: 40px; padding: 5px 10px; border: 1px solid #dadce0;
+        border-radius: 8px; background: white; cursor: text;
+        display: flex; flex-wrap: wrap; gap: 4px; align-items: center;
+      }
+    
+      .ms-box:focus-within { border-color: #1a73e8; box-shadow: 0 0 0 2px rgba(26,115,232,0.15); }
+      .ms-chip 
+      {
+        background: #e8f0fe; color: #1a73e8; padding: 2px 8px; border-radius: 10px;
+        font-size: 12px; display: flex; align-items: center; gap: 3px;
+      }
+      .ms-chip span { cursor: pointer; font-size: 14px; line-height: 1; }
+      .ms-chip span:hover { color: #d93025; }
+      .ms-input 
+      {
+        border: none; outline: none; font-size: 13px;
+        font-family: 'Google Sans', Arial, sans-serif;
+        min-width: 100px; flex: 1; background: transparent; padding: 2px 4px;
+      }
+    
+      .ms-dropdown 
+      {
+        position: absolute; top: 100%; left: 0; right: 0; background: white;
+        border: 1px solid #dadce0; border-radius: 8px; max-height: 160px;
+        overflow-y: auto; z-index: 300; box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        display: none; margin-top: 2px;
+      }
+
+      .ms-dropdown.open { display: block; }
+      .ms-option { padding: 8px 14px; font-size: 13px; cursor: pointer; }
+      .ms-option:hover { background: #e8f0fe; }
+      .ms-option.selected { color: #34a853; font-weight: 500; }
+      .ms-option.selected::after { content: ' ✓'; }
+      .ms-empty { padding: 10px 14px; font-size: 13px; color: #80868b; }
+
+      /* ── Toast ── */
+      .toast 
+      {
+        position: fixed; bottom: 20px; right: 20px; padding: 11px 16px;
+        border-radius: 8px; font-size: 13px; z-index: 500;
+        opacity: 0; transition: opacity 0.3s;
+        pointer-events: none;   /* never blocks clicks when invisible */
+      }
+      .toast.show { opacity: 1; pointer-events: auto; }
+      .toast.success { background: #34a853; color: white; }
+      .toast.error   { background: #d93025; color: white; }
+
+      /* ── Section divider in modal ── */
+      .section-divider 
+      {
+        font-size: 11px; font-weight: 600; color: #5f6368; text-transform: uppercase;
+        letter-spacing: 0.5px; margin: 4px 0 12px; padding-bottom: 6px;
+        border-bottom: 1px solid #e8eaed;
+      }
+
+
+      /* Team Status overlay */
+      .status-table { width:100%; border-collapse:collapse; font-size:13px; margin-top:8px; }
+      .status-table th 
+      {
+        background:#f8f9fa; color:#5f6368; font-weight:600; padding:9px 12px;
+        text-align:left; border-bottom:2px solid #e8eaed;
+        font-size:11px; text-transform:uppercase;
+      }
+
+      .status-table td { padding:9px 12px; border-bottom:1px solid #f1f3f4; vertical-align:middle; }
+      .status-table tr:last-child td { border-bottom:none; }
+      .status-table tr:hover td { background:#f8faff; }
+
+      .attendance-row 
+      {
+        display:flex; gap:10px; align-items:center; margin-bottom:10px; flex-wrap:wrap;
+      }
+
+      .btn-present 
+      {
+        background:#34a853; color:white; border:none; padding:7px 14px;
+        border-radius:6px; font-size:13px; cursor:pointer; font-weight:500;
+        font-family:'Google Sans',Arial,sans-serif; white-space:nowrap;
+      }
+
+      .btn-absent 
+      {
+        background:#ea4335; color:white; border:none; padding:7px 14px;
+        border-radius:6px; font-size:13px; cursor:pointer; font-weight:500;
+        font-family:'Google Sans',Arial,sans-serif; white-space:nowrap;
+      }
+
+      .btn-status-update 
+      {
+        background:white; color:#1a73e8; border:1px solid #1a73e8; padding:7px 14px;
+        border-radius:6px; font-size:13px; cursor:pointer; font-weight:500;
+        font-family:'Google Sans',Arial,sans-serif; white-space:nowrap;
+      }
+
+      /* DCR link chip */
+      .dcr-link 
+      {
+        display:inline-block; background:#e8f0fe; color:#1a73e8; padding:3px 8px;
+        border-radius:6px; font-size:11px; font-weight:500; text-decoration:none;
+        white-space:nowrap;
+      }
+      
+      .dcr-link:hover { background:#d2e3fc; }
+
+
   </style>
 </head>
 <body>
@@ -380,6 +561,9 @@
     <div class="page-title">CRX Doubt Queue</div>
     <div class="header-right">
       <span id="syncBadge" style="font-size:12px;color:#34a853;font-weight:500">● Live</span>
+      <button class="btn-refresh" onclick="openTeamStatusOverlay()" style="background:#1a73e8;color:white;        border-color:#1a73e8">
+        👥 Team Status
+      </button>
       <button class="btn-refresh" onclick="loadDoubts()">↻ Refresh</button>
     </div>
   </div>
@@ -423,6 +607,7 @@
         <col class="c-member">
         <col class="c-viol">
         <col class="c-queue">
+        <col class="c-dcr" style="width:90px">
         <col class="c-status">
         <col class="c-assign">
         <col class="c-action">
@@ -435,13 +620,14 @@
           <th>L0 Member</th>
           <th>Violations</th>
           <th>Queue</th>
+          <th>DCR Link</th>
           <th>Status</th>
           <th>Assign To</th>
           <th>Action</th>
         </tr>
       </thead>
       <tbody id="tableBody">
-        <tr class="loading-row"><td colspan="9">Loading doubts…</td></tr>
+        <tr class="loading-row"><td colspan="10">Loading doubts…</td></tr>
       </tbody>
     </table>
   </div>
@@ -644,9 +830,54 @@
     <label>L2 Additional Comments</label>
     <input type="text" id="editL2AdditionalComments" placeholder="Optional remarks…">
 
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;padding:10px;background:#e8f0fe;border-radius:8px">
+      <input type="checkbox" id="editResendEmail" style="width:16px;height:16px;accent-color:#1a73e8">
+      <label for="editResendEmail" style="font-size:13px;cursor:pointer;color:#1a73e8;font-weight:500">
+        Re-send updated verdict email to L0
+      </label>
+    </div>
+
     <div class="modal-footer">
       <button class="btn-cancel" onclick="closeEditOverlay()">Cancel</button>
       <button class="btn-modal-submit" onclick="submitEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+///////////////////////////////////
+//Attendance overlay//////////////
+
+<div class="overlay" id="teamStatusOverlay">
+  <div class="modal" style="width:660px">
+    <div class="modal-header">
+      <div class="modal-title">👥 Team Status — Today</div>
+      <button class="btn-close" onclick="closeTeamStatusOverlay()">×</button>
+    </div>
+
+    <div class="section-divider">Mark Your Attendance</div>
+
+    <div class="attendance-row">
+      <select id="attendanceMember" style="flex:1;padding:8px 12px;border:1px solid #dadce0;border-radius:6px;font-size:13px;font-family:'Google Sans',Arial,sans-serif;outline:none">
+        <option value="">— Select your name —</option>
+      </select>
+      <button class="btn-present" onclick="markPresent()">✓ Present</button>
+      <button class="btn-absent"  onclick="markAbsent()">✗ Absent</button>
+    </div>
+
+    <div class="attendance-row">
+      <input type="text" id="customStatusNote" placeholder="Busy with other work? Describe here (leave empty if free)"
+        style="flex:1;padding:8px 12px;border:1px solid #dadce0;border-radius:6px;font-size:13px;font-family:'Google Sans',Arial,sans-serif;outline:none">
+      <button class="btn-status-update" onclick="updateCustomStatus()">Update Status</button>
+    </div>
+
+    <div class="section-divider" style="margin-top:8px">Team Overview</div>
+    <div id="teamStatusTableDiv">
+      <div style="text-align:center;padding:20px;color:#5f6368">Loading…</div>
+    </div>
+
+    <div class="modal-footer" style="justify-content:space-between">
+      <span style="font-size:12px;color:#80868b" id="teamStatusLastRefreshed"></span>
+      <button class="btn-cancel" onclick="closeTeamStatusOverlay()">Close</button>
     </div>
   </div>
 </div>
@@ -658,122 +889,88 @@
 <script>
 const VIOLATIONS_LIST = ['malware', 'spam', 'misleading', 'SPP', 'RHC'];
 
-let allDoubts = [], crxMembers = [], currentDoubtId = null, currentEditDoubtId = null;
+let allDoubts = [], crxMembers = [], teamStatus = [], availableMembers = [];
+let currentDoubtId = null, currentEditDoubtId = null;
 let selectedL2Conf = [], selectedEditL2Conf = [];
 let lastRefreshed = null, knownLastUpdated = null;
 
-// ════════════════════════════════════════════
-// TOAST
-// ════════════════════════════════════════════
+// ── Toast ────────────────────────────────────────────────────
 function showToast(msg, type) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.className = 'toast ' + type + ' show';
   setTimeout(() => t.className = 'toast', 4000);
 }
 
-// ════════════════════════════════════════════
-// RESOLVE L2 MULTI-SELECT
-// ════════════════════════════════════════════
+// ── Resolve L2 multi-select ──────────────────────────────────
 function buildL2Options(filter) {
   const dd = document.getElementById('l2ConfDropdown');
-  const q = (filter || '').toLowerCase();
-  const filtered = VIOLATIONS_LIST.filter(v => v.toLowerCase().includes(q));
-  if (!filtered.length) { dd.innerHTML = '<div class="ms-empty">No matches</div>'; return; }
-  dd.innerHTML = filtered.map(v =>
-    '<div class="ms-option ' + (selectedL2Conf.includes(v) ? 'selected' : '') +
+  const q = (filter||'').toLowerCase();
+  const f = VIOLATIONS_LIST.filter(v => v.toLowerCase().includes(q));
+  if (!f.length) { dd.innerHTML = '<div class="ms-empty">No matches</div>'; return; }
+  dd.innerHTML = f.map(v => '<div class="ms-option ' + (selectedL2Conf.includes(v)?'selected':'') +
     '" onclick="toggleL2Conf(\'' + v + '\')">' + v + '</div>').join('');
 }
 function openL2Dropdown()  { buildL2Options(document.getElementById('l2ConfSearch').value); document.getElementById('l2ConfDropdown').classList.add('open'); }
 function filterL2Options() { buildL2Options(document.getElementById('l2ConfSearch').value); document.getElementById('l2ConfDropdown').classList.add('open'); }
 function toggleL2Conf(v) {
-  const idx = selectedL2Conf.indexOf(v);
-  if (idx === -1) selectedL2Conf.push(v); else selectedL2Conf.splice(idx, 1);
+  const i = selectedL2Conf.indexOf(v);
+  if (i===-1) selectedL2Conf.push(v); else selectedL2Conf.splice(i,1);
   renderL2Chips(); buildL2Options(document.getElementById('l2ConfSearch').value);
 }
-function removeL2Conf(v) {
-  selectedL2Conf = selectedL2Conf.filter(x => x !== v);
-  renderL2Chips(); buildL2Options(document.getElementById('l2ConfSearch').value);
-}
+function removeL2Conf(v) { selectedL2Conf=selectedL2Conf.filter(x=>x!==v); renderL2Chips(); buildL2Options(document.getElementById('l2ConfSearch').value); }
 function renderL2Chips() {
-  const box = document.getElementById('l2ConfBox');
-  const inp = document.getElementById('l2ConfSearch');
-  box.querySelectorAll('.ms-chip').forEach(c => c.remove());
-  selectedL2Conf.forEach(v => {
-    const chip = document.createElement('div');
-    chip.className = 'ms-chip';
-    chip.innerHTML = v + '<span onclick="removeL2Conf(\'' + v + '\')">×</span>';
-    box.insertBefore(chip, inp);
-  });
+  const box=document.getElementById('l2ConfBox'), inp=document.getElementById('l2ConfSearch');
+  box.querySelectorAll('.ms-chip').forEach(c=>c.remove());
+  selectedL2Conf.forEach(v=>{ const c=document.createElement('div'); c.className='ms-chip'; c.innerHTML=v+'<span onclick="removeL2Conf(\''+v+'\')">×</span>'; box.insertBefore(c,inp); });
 }
 
-// ════════════════════════════════════════════
-// EDIT L2 MULTI-SELECT (separate state)
-// ════════════════════════════════════════════
+// ── Edit L2 multi-select ─────────────────────────────────────
 function buildEditL2Options(filter) {
-  const dd = document.getElementById('editL2ConfDropdown');
-  const q = (filter || '').toLowerCase();
-  const filtered = VIOLATIONS_LIST.filter(v => v.toLowerCase().includes(q));
-  if (!filtered.length) { dd.innerHTML = '<div class="ms-empty">No matches</div>'; return; }
-  dd.innerHTML = filtered.map(v =>
-    '<div class="ms-option ' + (selectedEditL2Conf.includes(v) ? 'selected' : '') +
-    '" onclick="toggleEditL2Conf(\'' + v + '\')">' + v + '</div>').join('');
+  const dd=document.getElementById('editL2ConfDropdown');
+  const q=(filter||'').toLowerCase();
+  const f=VIOLATIONS_LIST.filter(v=>v.toLowerCase().includes(q));
+  if (!f.length) { dd.innerHTML='<div class="ms-empty">No matches</div>'; return; }
+  dd.innerHTML=f.map(v=>'<div class="ms-option '+(selectedEditL2Conf.includes(v)?'selected':'')+'" onclick="toggleEditL2Conf(\''+v+'\')">'+v+'</div>').join('');
 }
 function openEditL2Dropdown()  { buildEditL2Options(document.getElementById('editL2ConfSearch').value); document.getElementById('editL2ConfDropdown').classList.add('open'); }
 function filterEditL2Options() { buildEditL2Options(document.getElementById('editL2ConfSearch').value); document.getElementById('editL2ConfDropdown').classList.add('open'); }
 function toggleEditL2Conf(v) {
-  const idx = selectedEditL2Conf.indexOf(v);
-  if (idx === -1) selectedEditL2Conf.push(v); else selectedEditL2Conf.splice(idx, 1);
+  const i=selectedEditL2Conf.indexOf(v);
+  if (i===-1) selectedEditL2Conf.push(v); else selectedEditL2Conf.splice(i,1);
   renderEditL2Chips(); buildEditL2Options(document.getElementById('editL2ConfSearch').value);
 }
-function removeEditL2Conf(v) {
-  selectedEditL2Conf = selectedEditL2Conf.filter(x => x !== v);
-  renderEditL2Chips(); buildEditL2Options(document.getElementById('editL2ConfSearch').value);
-}
+function removeEditL2Conf(v) { selectedEditL2Conf=selectedEditL2Conf.filter(x=>x!==v); renderEditL2Chips(); buildEditL2Options(document.getElementById('editL2ConfSearch').value); }
 function renderEditL2Chips() {
-  const box = document.getElementById('editL2ConfBox');
-  const inp = document.getElementById('editL2ConfSearch');
-  box.querySelectorAll('.ms-chip').forEach(c => c.remove());
-  selectedEditL2Conf.forEach(v => {
-    const chip = document.createElement('div');
-    chip.className = 'ms-chip';
-    chip.innerHTML = v + '<span onclick="removeEditL2Conf(\'' + v + '\')">×</span>';
-    box.insertBefore(chip, inp);
-  });
+  const box=document.getElementById('editL2ConfBox'), inp=document.getElementById('editL2ConfSearch');
+  box.querySelectorAll('.ms-chip').forEach(c=>c.remove());
+  selectedEditL2Conf.forEach(v=>{ const c=document.createElement('div'); c.className='ms-chip'; c.innerHTML=v+'<span onclick="removeEditL2Conf(\''+v+'\')">×</span>'; box.insertBefore(c,inp); });
 }
 
-// Close dropdowns when clicking outside
 document.addEventListener('click', function(e) {
-  if (!document.getElementById('l2ConfWrap').contains(e.target))
-    document.getElementById('l2ConfDropdown').classList.remove('open');
-  if (!document.getElementById('editL2ConfWrap').contains(e.target))
-    document.getElementById('editL2ConfDropdown').classList.remove('open');
+  if (!document.getElementById('l2ConfWrap').contains(e.target))     document.getElementById('l2ConfDropdown').classList.remove('open');
+  if (!document.getElementById('editL2ConfWrap').contains(e.target)) document.getElementById('editL2ConfDropdown').classList.remove('open');
 });
 
-// ════════════════════════════════════════════
-// LOAD DOUBTS (full, with loading spinner)
-// ════════════════════════════════════════════
+// ── LOAD DOUBTS ──────────────────────────────────────────────
 function loadDoubts() {
   document.getElementById('tableBody').innerHTML =
-    '<tr class="loading-row"><td colspan="9">Loading doubts…</td></tr>';
+    '<tr class="loading-row"><td colspan="10">Loading doubts…</td></tr>';
 
   google.script.run
     .withSuccessHandler(function(config) {
       if (!config) config = {};
       crxMembers = config.crxMembers || [];
 
-      // Populate queue filter
       var queueSel = document.getElementById('filterQueue');
       var existing = Array.from(queueSel.options).map(o => o.value);
       ['RE','NBR','HQ'].forEach(function(q) {
         if (!existing.includes(q)) {
-          var o = document.createElement('option'); o.value = q; o.textContent = q;
-          queueSel.appendChild(o);
+          var o = document.createElement('option'); o.value=q; o.textContent=q; queueSel.appendChild(o);
         }
       });
-
-      // Populate L2 LDAP dropdowns in both overlays
       populateLdapDropdowns();
 
+      // Load doubts AND team status in parallel
       google.script.run
         .withSuccessHandler(function(doubts) {
           allDoubts = Array.isArray(doubts) ? doubts : [];
@@ -781,404 +978,415 @@ function loadDoubts() {
           lastRefreshed = new Date(); updateSyncBadge();
         })
         .withFailureHandler(function(err) {
-          console.error('getDoubts error:', err);
+          console.error('getDoubts:', err);
           document.getElementById('tableBody').innerHTML =
-            '<tr class="loading-row"><td colspan="9">⚠️ Error loading doubts.</td></tr>';
+            '<tr class="loading-row"><td colspan="10">⚠️ Error loading doubts.</td></tr>';
         })
         .getDoubts();
+
+      google.script.run
+        .withSuccessHandler(function(data) {
+          if (data && data.team) {
+            teamStatus = data.team;
+            availableMembers = data.team.filter(m => m.isAvailable).map(m => m.member);
+          }
+        })
+        .withFailureHandler(function() {})
+        .getTeamStatus();
     })
     .withFailureHandler(function(err) {
-      console.error('getConfig error:', err);
+      console.error('getConfig:', err);
       document.getElementById('tableBody').innerHTML =
-        '<tr class="loading-row"><td colspan="9">⚠️ Error loading config.</td></tr>';
+        '<tr class="loading-row"><td colspan="10">⚠️ Error loading config.</td></tr>';
     })
     .getConfig();
 }
 
 function populateLdapDropdowns() {
-  ['resolvedBy', 'editResolvedBy'].forEach(function(id) {
+  ['resolvedBy','editResolvedBy','attendanceMember'].forEach(function(id) {
     var sel = document.getElementById(id);
-    sel.innerHTML = '<option value="">— Select your name —</option>';
+    if (!sel) return;
+    var cur = sel.value;
+    sel.innerHTML = id === 'attendanceMember'
+      ? '<option value="">— Select your name —</option>'
+      : '<option value="">— Select your name —</option>';
     crxMembers.forEach(function(m) {
       var name = m.split('|')[0].trim();
-      var o = document.createElement('option'); o.value = name; o.textContent = name;
-      sel.appendChild(o);
+      var o = document.createElement('option'); o.value=name; o.textContent=name; sel.appendChild(o);
     });
+    if (cur) sel.value = cur;
   });
 }
 
-// ════════════════════════════════════════════
-// STATS
-// ════════════════════════════════════════════
+// ── STATS ────────────────────────────────────────────────────
 function updateStats() {
   allDoubts = Array.isArray(allDoubts) ? allDoubts : [];
-  document.getElementById('cntOpen').textContent     = allDoubts.filter(d => d.Status === 'Open').length;
-  document.getElementById('cntAssigned').textContent = allDoubts.filter(d => d.Status === 'Assigned').length;
-  document.getElementById('cntResolved').textContent = allDoubts.filter(d => d.Status === 'Resolved').length;
+  document.getElementById('cntOpen').textContent     = allDoubts.filter(d=>d.Status==='Open').length;
+  document.getElementById('cntAssigned').textContent = allDoubts.filter(d=>d.Status==='Assigned').length;
+  document.getElementById('cntResolved').textContent = allDoubts.filter(d=>d.Status==='Resolved').length;
 }
 
-// ════════════════════════════════════════════
-// RENDER TABLE
-// ════════════════════════════════════════════
+// ── RENDER TABLE ─────────────────────────────────────────────
 function renderTable() {
   const statusF = document.getElementById('filterStatus').value;
   const queueF  = document.getElementById('filterQueue').value;
   const rows = allDoubts.filter(d => {
-    if (statusF !== 'All' && d.Status !== statusF) return false;
-    if (queueF  !== 'All' && d.Queue_Name !== queueF) return false;
+    if (statusF!=='All' && d.Status!==statusF) return false;
+    if (queueF !=='All' && d.Queue_Name!==queueF) return false;
     return true;
   });
 
   if (!rows.length) {
     document.getElementById('tableBody').innerHTML =
-      '<tr><td colspan="9" style="text-align:center;padding:48px;color:#5f6368">' +
-      '<div style="font-size:32px;margin-bottom:8px">📋</div>' +
-      'No doubts match the current filters.</td></tr>';
+      '<tr><td colspan="10" style="text-align:center;padding:48px;color:#5f6368">' +
+      '<div style="font-size:32px;margin-bottom:8px">📋</div>No doubts match the current filters.</td></tr>';
     return;
   }
 
-  const memberNames = crxMembers.map(m => m.split('|')[0].trim());
+  // Build assign dropdown member list:
+  // Available = present + free from team status; always include current assignee
+  const memberNames = availableMembers.length > 0 ? availableMembers : crxMembers.map(m=>m.split('|')[0].trim());
 
   document.getElementById('tableBody').innerHTML = rows.map(function(d) {
-
-    // Doubt ID — two lines: "D-" then the timestamp number
-    const didNum = d.Doubt_ID ? d.Doubt_ID.replace('D-', '') : '';
-    const doubtIdHtml =
-      '<div class="doubt-id-cell">' +
-        '<div class="did-prefix">D-</div>' +
-        '<div class="did-num">' + didNum + '</div>' +
-      '</div>';
-
-    // Submitted date
+    const didNum = d.Doubt_ID ? d.Doubt_ID.replace('D-','') : '';
+    const doubtIdHtml = '<div class="doubt-id-cell"><div class="did-prefix">D-</div><div class="did-num">'+didNum+'</div></div>';
     const subDate = d.Submitted_At ? new Date(d.Submitted_At).toLocaleString() : '—';
-
-    // Extension ID — single line
-    const extHtml = '<span class="nowrap" title="' + (d.Extension_ID||'') + '">' + (d.Extension_ID||'—') + '</span>';
-
-    // L0 member
+    const extHtml = '<span class="nowrap" title="'+(d.Extension_ID||'')+'">'+(d.Extension_ID||'—')+'</span>';
     const memberHtml =
-      '<div style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + (d.L0_Name||'') + '</div>' +
-      '<div style="font-size:11px;color:#5f6368;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + (d.L0_Email||'') + '</div>';
-
-    // Violations — chips, max 2 rows height
+      '<div style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(d.L0_Name||'')+'</div>'+
+      '<div style="font-size:11px;color:#5f6368;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(d.L0_Email||'')+'</div>';
     const violsHtml = d.Violations
-      ? '<div class="viols-wrap">' +
-          d.Violations.split(', ').map(function(v) {
-            return '<span class="viol-chip">' + v.trim() + '</span>';
-          }).join('') +
-        '</div>'
+      ? '<div class="viols-wrap">'+d.Violations.split(', ').map(v=>'<span class="viol-chip">'+v.trim()+'</span>').join('')+'</div>'
       : '—';
+    const queueHtml = '<span class="nowrap" title="'+(d.Queue_Name||'')+'">'+(d.Queue_Name||'—')+'</span>';
 
-    // Queue — single line with ellipsis
-    const queueHtml = '<span class="nowrap" title="' + (d.Queue_Name||'') + '">' + (d.Queue_Name||'—') + '</span>';
+    // DCR Docs Link
+    const dcrLink = d['DCR Docs Link'];
+    const dcrHtml = dcrLink && dcrLink.startsWith('http')
+      ? '<a class="dcr-link" href="'+dcrLink+'" target="_blank" rel="noopener">DOC LINK</a>'
+      : '<span style="color:#ccc;font-size:12px">—</span>';
 
-    // Status badge
     const statusClass = (d.Status||'open').toLowerCase();
-    const statusBadge = '<span class="badge ' + statusClass + '">' + (d.Status||'Open') + '</span>';
+    const statusBadge = '<span class="badge '+statusClass+'">'+(d.Status||'Open')+'</span>';
 
-    // Assign dropdown
+    // Build assign opts: available members + current assignee (always visible)
+    const dropdownMembers = [...new Set([...memberNames, ...(d.Assigned_To ? [d.Assigned_To] : [])])];
     const assignOpts = '<option value="">— Assign to —</option>' +
-      memberNames.map(function(m) {
-        return '<option ' + (d.Assigned_To === m ? 'selected' : '') + ' value="' + m + '">' + m + '</option>';
-      }).join('');
-    const assignSelect =
-      '<select class="assign-select" data-id="' + d.Doubt_ID + '" onchange="assignDoubt(this.dataset.id, this.value)">' +
-      assignOpts + '</select>';
+      dropdownMembers.map(m=>'<option '+(d.Assigned_To===m?'selected':'')+' value="'+m+'">'+m+'</option>').join('');
+    const assignSelect = '<select class="assign-select" data-id="'+d.Doubt_ID+'" onchange="assignDoubt(this.dataset.id,this.value)">'+assignOpts+'</select>';
 
-    // Action buttons
     let actionHtml;
     if (d.Status === 'Resolved') {
-      actionHtml =
-        '<div class="action-cell">' +
-          '<button class="btn-resolved">✓ Resolved</button>' +
-          '<button class="btn-edit" onclick="openEditOverlay(\'' + d.Doubt_ID + '\')">✎ Edit</button>' +
-        '</div>';
+      actionHtml = '<div class="action-cell"><button class="btn-resolved">✓ Resolved</button><button class="btn-edit" onclick="openEditOverlay(\''+d.Doubt_ID+'\')">✎ Edit</button></div>';
     } else {
-      actionHtml =
-        '<div class="action-cell">' +
-          '<button class="btn-resolve" onclick="openResolveOverlay(\'' + d.Doubt_ID + '\')">Resolve</button>' +
-        '</div>';
+      actionHtml = '<div class="action-cell"><button class="btn-resolve" onclick="openResolveOverlay(\''+d.Doubt_ID+'\')">Resolve</button></div>';
     }
 
-    return '<tr>' +
-      '<td>' + doubtIdHtml + '</td>' +
-      '<td style="white-space:nowrap;font-size:12px">' + subDate + '</td>' +
-      '<td>' + extHtml + '</td>' +
-      '<td>' + memberHtml + '</td>' +
-      '<td>' + violsHtml + '</td>' +
-      '<td>' + queueHtml + '</td>' +
-      '<td>' + statusBadge + '</td>' +
-      '<td>' + assignSelect + '</td>' +
-      '<td>' + actionHtml + '</td>' +
+    return '<tr>'+
+      '<td>'+doubtIdHtml+'</td>'+
+      '<td style="white-space:nowrap;font-size:12px">'+subDate+'</td>'+
+      '<td>'+extHtml+'</td>'+
+      '<td>'+memberHtml+'</td>'+
+      '<td>'+violsHtml+'</td>'+
+      '<td>'+queueHtml+'</td>'+
+      '<td>'+dcrHtml+'</td>'+
+      '<td>'+statusBadge+'</td>'+
+      '<td>'+assignSelect+'</td>'+
+      '<td>'+actionHtml+'</td>'+
     '</tr>';
   }).join('');
 }
 
-// ════════════════════════════════════════════
-// ASSIGN
-// ════════════════════════════════════════════
+// ── ASSIGN ───────────────────────────────────────────────────
 function assignDoubt(doubtId, memberName) {
   if (!memberName) return;
   google.script.run
     .withSuccessHandler(function(r) {
       if (r.success) {
-        const d = allDoubts.find(x => x.Doubt_ID === doubtId);
-        if (d) { d.Assigned_To = memberName; d.Status = 'Assigned'; }
+        const d = allDoubts.find(x=>x.Doubt_ID===doubtId);
+        if (d) { d.Assigned_To=memberName; d.Status='Assigned'; }
         renderTable(); updateStats();
-        showToast('✅ Assigned to ' + memberName, 'success');
+        showToast('✅ Assigned to '+memberName, 'success');
         silentRefresh();
-      } else {
-        showToast('❌ ' + (r.error || 'Assignment failed'), 'error');
-      }
+      } else showToast('❌ '+(r.error||'Assignment failed'), 'error');
     })
-    .withFailureHandler(function() { showToast('❌ Assignment failed', 'error'); })
+    .withFailureHandler(function() { showToast('❌ Assignment failed','error'); })
     .assignDoubt(doubtId, memberName);
 }
 
-// ════════════════════════════════════════════
-// CONTEXT BOX BUILDER (shared by resolve + edit)
-// ════════════════════════════════════════════
+// ── CONTEXT BOX ──────────────────────────────────────────────
 function buildContextHtml(d) {
-  const viols = d.Violations
-    ? d.Violations.split(', ').map(v => '<span class="viol-chip">' + v.trim() + '</span>').join(' ')
-    : '—';
-  return '<div class="ctx-grid">' +
-    '<div class="ctx-block"><div class="ctx-label">Doubt ID</div>' +
-      '<div class="ctx-value" style="color:#1a73e8;font-weight:500;font-family:monospace;font-size:12px">' + d.Doubt_ID + '</div></div>' +
-    '<div class="ctx-block"><div class="ctx-label">Extension ID</div>' +
-      '<div class="ctx-value"><code>' + (d.Extension_ID||'—') + '</code></div></div>' +
-    '<div class="ctx-block"><div class="ctx-label">L0 Member</div>' +
-      '<div class="ctx-value"><div style="font-weight:500">' + (d.L0_Name||'') + '</div>' +
-      '<div style="font-size:11px;color:#5f6368">' + (d.L0_Email||'') + '</div></div></div>' +
-    '<div class="ctx-block"><div class="ctx-label">L0 Approach Opinion</div>' +
-      '<div class="ctx-value"><span style="background:#fef3e0;color:#b06000;padding:2px 8px;border-radius:10px;font-size:12px">' +
-      (d['L0 Approach opinion']||'—') + '</span></div></div>' +
-    '<div class="ctx-block full"><div class="ctx-label">Violations</div>' +
-      '<div class="ctx-value">' + viols + '</div></div>' +
-    '<div class="ctx-block full">' +
-      '<div class="ctx-label">Doubt Details' +
-        '<button class="btn-copy" id="ctxCopyBtn" onclick="copyCtxDoubtDetails()">📋 Copy</button>' +
-      '</div>' +
-      '<div class="ctx-doubt-text" id="ctxDoubtText">' + (d.Doubt_Details||'—') + '</div>' +
-    '</div>' +
+  const viols = d.Violations ? d.Violations.split(', ').map(v=>'<span class="viol-chip">'+v.trim()+'</span>').join(' ') : '—';
+  return '<div class="ctx-grid">'+
+    '<div class="ctx-block"><div class="ctx-label">Doubt ID</div><div class="ctx-value" style="color:#1a73e8;font-weight:500;font-family:monospace;font-size:12px">'+d.Doubt_ID+'</div></div>'+
+    '<div class="ctx-block"><div class="ctx-label">Extension ID</div><div class="ctx-value"><code>'+(d.Extension_ID||'—')+'</code></div></div>'+
+    '<div class="ctx-block"><div class="ctx-label">L0 Member</div><div class="ctx-value"><div style="font-weight:500">'+(d.L0_Name||'')+'</div><div style="font-size:11px;color:#5f6368">'+(d.L0_Email||'')+'</div></div></div>'+
+    '<div class="ctx-block"><div class="ctx-label">L0 Approach Opinion</div><div class="ctx-value"><span style="background:#fef3e0;color:#b06000;padding:2px 8px;border-radius:10px;font-size:12px">'+(d['L0 Approach opinion']||'—')+'</span></div></div>'+
+    '<div class="ctx-block full"><div class="ctx-label">Violations</div><div class="ctx-value">'+viols+'</div></div>'+
+    '<div class="ctx-block full"><div class="ctx-label">Doubt Details<button class="btn-copy" id="ctxCopyBtn" onclick="copyCtxDoubtDetails()">📋 Copy</button></div>'+
+    '<div class="ctx-doubt-text" id="ctxDoubtText">'+(d.Doubt_Details||'—')+'</div></div>'+
   '</div>';
 }
-
 function copyCtxDoubtDetails() {
-  const text = document.getElementById('ctxDoubtText').innerText;
-  navigator.clipboard.writeText(text).then(function() {
-    const btn = document.getElementById('ctxCopyBtn');
-    btn.textContent = '✅ Copied'; btn.classList.add('copied');
-    setTimeout(() => { btn.textContent = '📋 Copy'; btn.classList.remove('copied'); }, 2000);
+  navigator.clipboard.writeText(document.getElementById('ctxDoubtText').innerText).then(function() {
+    const btn=document.getElementById('ctxCopyBtn'); btn.textContent='✅ Copied'; btn.classList.add('copied');
+    setTimeout(()=>{ btn.textContent='📋 Copy'; btn.classList.remove('copied'); },2000);
   });
 }
 
-// ════════════════════════════════════════════
-// RESOLVE OVERLAY
-// ════════════════════════════════════════════
+// ── RESOLVE OVERLAY ──────────────────────────────────────────
 function openResolveOverlay(doubtId) {
   currentDoubtId = doubtId;
-  const d = allDoubts.find(x => x.Doubt_ID === doubtId);
-  if (!d) return;
-
+  const d = allDoubts.find(x=>x.Doubt_ID===doubtId); if (!d) return;
   document.getElementById('resolveContextBox').innerHTML = buildContextHtml(d);
-
-  ['typeOfConsult','escalatedDueToTools','escalationValidity','queryClarity',
-   'newScenario','l0AreaOfImprovement','l0ApproachValidation'].forEach(id => {
-    document.getElementById(id).value = '';
-  });
-  ['providedVerdict','clarification','l2AdditionalComments'].forEach(id => {
-    document.getElementById(id).value = '';
-  });
-  selectedL2Conf = []; renderL2Chips(); buildL2Options('');
+  ['typeOfConsult','escalatedDueToTools','escalationValidity','queryClarity','newScenario','l0AreaOfImprovement','l0ApproachValidation'].forEach(id=>document.getElementById(id).value='');
+  ['providedVerdict','clarification','l2AdditionalComments'].forEach(id=>document.getElementById(id).value='');
+  selectedL2Conf=[]; renderL2Chips(); buildL2Options('');
   document.getElementById('resolveOverlay').classList.add('show');
 }
-
-function closeResolveOverlay() {
-  document.getElementById('resolveOverlay').classList.remove('show');
-  currentDoubtId = null;
-}
+function closeResolveOverlay() { document.getElementById('resolveOverlay').classList.remove('show'); currentDoubtId=null; }
 
 function submitResolve() {
-  const resolvedBy          = document.getElementById('resolvedBy').value;
-  const typeOfConsult       = document.getElementById('typeOfConsult').value;
-  const escalatedDueToTools = document.getElementById('escalatedDueToTools').value;
-  const escalationValidity  = document.getElementById('escalationValidity').value;
-  const queryClarity        = document.getElementById('queryClarity').value;
-  const newScenario         = document.getElementById('newScenario').value;
-  const l0AreaOfImprovement = document.getElementById('l0AreaOfImprovement').value;
-  const l0ApproachValidation= document.getElementById('l0ApproachValidation').value;
-  const providedVerdict     = document.getElementById('providedVerdict').value.trim();
-  const clarification       = document.getElementById('clarification').value.trim();
-  const l2AdditionalComments= document.getElementById('l2AdditionalComments').value.trim();
-  const l2Confirmation      = selectedL2Conf.slice();
-
-  if (!resolvedBy || !typeOfConsult || !escalatedDueToTools || !escalationValidity ||
-      !queryClarity || !newScenario || !l0AreaOfImprovement || !l0ApproachValidation ||
-      !providedVerdict || !clarification) {
-    showToast('⚠️ Please fill in all required fields.', 'error'); return;
+  const resolvedBy=document.getElementById('resolvedBy').value;
+  const typeOfConsult=document.getElementById('typeOfConsult').value;
+  const escalatedDueToTools=document.getElementById('escalatedDueToTools').value;
+  const escalationValidity=document.getElementById('escalationValidity').value;
+  const queryClarity=document.getElementById('queryClarity').value;
+  const newScenario=document.getElementById('newScenario').value;
+  const l0AreaOfImprovement=document.getElementById('l0AreaOfImprovement').value;
+  const l0ApproachValidation=document.getElementById('l0ApproachValidation').value;
+  const providedVerdict=document.getElementById('providedVerdict').value.trim();
+  const clarification=document.getElementById('clarification').value.trim();
+  const l2AdditionalComments=document.getElementById('l2AdditionalComments').value.trim();
+  const l2Confirmation=selectedL2Conf.slice();
+  if (!resolvedBy||!typeOfConsult||!escalatedDueToTools||!escalationValidity||!queryClarity||!newScenario||!l0AreaOfImprovement||!l0ApproachValidation||!providedVerdict||!clarification) {
+    showToast('⚠️ Please fill in all required fields.','error'); return;
   }
-
   google.script.run
     .withSuccessHandler(function(r) {
       if (r.success) {
         closeResolveOverlay();
-        const d = allDoubts.find(x => x.Doubt_ID === currentDoubtId);
-        if (d) d.Status = 'Resolved';
+        const d=allDoubts.find(x=>x.Doubt_ID===currentDoubtId); if (d) d.Status='Resolved';
         renderTable(); updateStats();
-        showToast('✅ Resolved & email sent to L0!', 'success');
+        showToast('✅ Resolved & email sent to L0!','success');
         silentRefresh();
-      } else {
-        showToast('❌ ' + r.error, 'error');
-      }
+      } else showToast('❌ '+r.error,'error');
     })
-    .withFailureHandler(function() { showToast('❌ Failed to resolve.', 'error'); })
-    .resolveDoubt({ doubtId: currentDoubtId, resolvedBy, typeOfConsult,
-      escalatedDueToTools, escalationValidity, queryClarity, newScenario,
-      l0AreaOfImprovement, l0ApproachValidation, providedVerdict,
-      l2Confirmation, clarification, l2AdditionalComments });
+    .withFailureHandler(function() { showToast('❌ Failed to resolve.','error'); })
+    .resolveDoubt({ doubtId:currentDoubtId, resolvedBy, typeOfConsult, escalatedDueToTools,
+      escalationValidity, queryClarity, newScenario, l0AreaOfImprovement,
+      l0ApproachValidation, providedVerdict, l2Confirmation, clarification, l2AdditionalComments });
 }
 
-// ════════════════════════════════════════════
-// EDIT OVERLAY
-// ════════════════════════════════════════════
+// ── EDIT OVERLAY ─────────────────────────────────────────────
 function openEditOverlay(doubtId) {
   currentEditDoubtId = doubtId;
-
-  // Show context from allDoubts (basic info)
-  const d = allDoubts.find(x => x.Doubt_ID === doubtId);
+  const d = allDoubts.find(x=>x.Doubt_ID===doubtId);
   if (d) document.getElementById('editContextBox').innerHTML = buildContextHtml(d);
-
-  // Show loading in fields
-  showToast('Loading resolved data…', 'success');
-
-  // Fetch full resolved row from server
+  document.getElementById('editResendEmail').checked = false;
+  showToast('Loading resolved data…','success');
   google.script.run
     .withSuccessHandler(function(row) {
-      if (!row) { showToast('❌ Could not load resolved data', 'error'); return; }
-
-      // Pre-populate all fields
-      document.getElementById('editResolvedBy').value          = row['L2 LDAP'] || '';
-      document.getElementById('editTypeOfConsult').value        = row['Type of consult'] || '';
-      document.getElementById('editEscalatedDueToTools').value  = row['Escalated due to lack of tools'] || '';
-      document.getElementById('editEscalationValidity').value   = row['Escalation validity'] || '';
-      document.getElementById('editQueryClarity').value         = row['Was the query clear from L0'] || '';
-      document.getElementById('editNewScenario').value          = row['Is this a new scenario for DCR'] || '';
-      document.getElementById('editL0AreaOfImprovement').value  = row['L0 Area of improvement'] || '';
-      document.getElementById('editL0ApproachValidation').value = row['L0 Approach validation'] || '';
-      document.getElementById('editProvidedVerdict').value      = row['Provided Verdict'] || '';
-      document.getElementById('editClarification').value        = row['Clarification Details'] || '';
-      document.getElementById('editL2AdditionalComments').value = row['L2 Additional Comments'] || '';
-
-      // Pre-populate L2 Confirmation chips
-      const l2ConfStr = row['L2 Confirmation'] || '';
-      selectedEditL2Conf = l2ConfStr
-        ? l2ConfStr.split(', ').map(v => v.trim()).filter(v => VIOLATIONS_LIST.includes(v))
-        : [];
-      renderEditL2Chips();
-      buildEditL2Options('');
-
+      if (!row) { showToast('❌ Could not load resolved data','error'); return; }
+      document.getElementById('editResolvedBy').value         = row['L2 LDAP']||'';
+      document.getElementById('editTypeOfConsult').value       = row['Type of consult']||'';
+      document.getElementById('editEscalatedDueToTools').value = row['Escalated due to lack of tools']||'';
+      document.getElementById('editEscalationValidity').value  = row['Escalation validity']||'';
+      document.getElementById('editQueryClarity').value        = row['Was the query clear from L0']||'';
+      document.getElementById('editNewScenario').value         = row['Is this a new scenario for DCR']||'';
+      document.getElementById('editL0AreaOfImprovement').value = row['L0 Area of improvement']||'';
+      document.getElementById('editL0ApproachValidation').value= row['L0 Approach validation']||'';
+      document.getElementById('editProvidedVerdict').value     = row['Provided Verdict']||'';
+      document.getElementById('editClarification').value       = row['Clarification Details']||'';
+      document.getElementById('editL2AdditionalComments').value= row['L2 Additional Comments']||'';
+      const l2Str = row['L2 Confirmation']||'';
+      selectedEditL2Conf = l2Str ? l2Str.split(', ').map(v=>v.trim()).filter(v=>VIOLATIONS_LIST.includes(v)) : [];
+      renderEditL2Chips(); buildEditL2Options('');
       document.getElementById('editOverlay').classList.add('show');
     })
-    .withFailureHandler(function() { showToast('❌ Failed to load resolved data', 'error'); })
+    .withFailureHandler(function() { showToast('❌ Failed to load resolved data','error'); })
     .getResolvedDoubt(doubtId);
 }
-
-function closeEditOverlay() {
-  document.getElementById('editOverlay').classList.remove('show');
-  currentEditDoubtId = null;
-}
+function closeEditOverlay() { document.getElementById('editOverlay').classList.remove('show'); currentEditDoubtId=null; }
 
 function submitEdit() {
-  const resolvedBy          = document.getElementById('editResolvedBy').value;
-  const typeOfConsult       = document.getElementById('editTypeOfConsult').value;
-  const escalatedDueToTools = document.getElementById('editEscalatedDueToTools').value;
-  const escalationValidity  = document.getElementById('editEscalationValidity').value;
-  const queryClarity        = document.getElementById('editQueryClarity').value;
-  const newScenario         = document.getElementById('editNewScenario').value;
-  const l0AreaOfImprovement = document.getElementById('editL0AreaOfImprovement').value;
-  const l0ApproachValidation= document.getElementById('editL0ApproachValidation').value;
-  const providedVerdict     = document.getElementById('editProvidedVerdict').value.trim();
-  const clarification       = document.getElementById('editClarification').value.trim();
-  const l2AdditionalComments= document.getElementById('editL2AdditionalComments').value.trim();
-  const l2Confirmation      = selectedEditL2Conf.slice();
-
-  if (!resolvedBy) { showToast('⚠️ Please select your name.', 'error'); return; }
-
-  const btn = document.querySelector('#editOverlay .btn-modal-submit');
-  btn.textContent = 'Saving…'; btn.disabled = true;
-
+  const resolvedBy         =document.getElementById('editResolvedBy').value;
+  const typeOfConsult      =document.getElementById('editTypeOfConsult').value;
+  const escalatedDueToTools=document.getElementById('editEscalatedDueToTools').value;
+  const escalationValidity =document.getElementById('editEscalationValidity').value;
+  const queryClarity       =document.getElementById('editQueryClarity').value;
+  const newScenario        =document.getElementById('editNewScenario').value;
+  const l0AreaOfImprovement=document.getElementById('editL0AreaOfImprovement').value;
+  const l0ApproachValidation=document.getElementById('editL0ApproachValidation').value;
+  const providedVerdict    =document.getElementById('editProvidedVerdict').value.trim();
+  const clarification      =document.getElementById('editClarification').value.trim();
+  const l2AdditionalComments=document.getElementById('editL2AdditionalComments').value.trim();
+  const l2Confirmation     =selectedEditL2Conf.slice();
+  const resendEmail        =document.getElementById('editResendEmail').checked;
+  if (!resolvedBy) { showToast('⚠️ Please select your name.','error'); return; }
+  const btn=document.querySelector('#editOverlay .btn-modal-submit');
+  btn.textContent='Saving…'; btn.disabled=true;
   google.script.run
     .withSuccessHandler(function(r) {
-      btn.textContent = 'Save Changes'; btn.disabled = false;
+      btn.textContent='Save Changes'; btn.disabled=false;
       if (r.success) {
         closeEditOverlay();
-        showToast('✅ Resolution updated successfully!', 'success');
+        showToast(resendEmail?'✅ Updated & email re-sent!':'✅ Resolution updated!','success');
         silentRefresh();
-      } else {
-        showToast('❌ ' + r.error, 'error');
-      }
+      } else showToast('❌ '+r.error,'error');
     })
-    .withFailureHandler(function() {
-      btn.textContent = 'Save Changes'; btn.disabled = false;
-      showToast('❌ Failed to save changes.', 'error');
-    })
-    .updateResolvedDoubt({ doubtId: currentEditDoubtId, resolvedBy, typeOfConsult,
+    .withFailureHandler(function() { btn.textContent='Save Changes'; btn.disabled=false; showToast('❌ Failed to save.','error'); })
+    .updateResolvedDoubt({ doubtId:currentEditDoubtId, resolvedBy, typeOfConsult,
       escalatedDueToTools, escalationValidity, queryClarity, newScenario,
       l0AreaOfImprovement, l0ApproachValidation, providedVerdict,
-      l2Confirmation, clarification, l2AdditionalComments });
+      l2Confirmation, clarification, l2AdditionalComments, resendEmail });
 }
 
-// ════════════════════════════════════════════
-// SILENT BACKGROUND REFRESH
-// ════════════════════════════════════════════
+// ── TEAM STATUS OVERLAY ──────────────────────────────────────
+function openTeamStatusOverlay() {
+  document.getElementById('teamStatusOverlay').classList.add('show');
+  refreshTeamStatus();
+}
+function closeTeamStatusOverlay() { document.getElementById('teamStatusOverlay').classList.remove('show'); }
+
+function refreshTeamStatus() {
+  google.script.run
+    .withSuccessHandler(function(data) {
+      if (!data || !data.team) return;
+      teamStatus = data.team;
+      availableMembers = data.team.filter(m=>m.isAvailable).map(m=>m.member);
+      renderTeamStatusTable(data.team);
+      const el = document.getElementById('teamStatusLastRefreshed');
+      if (el) el.textContent = 'Last refreshed: ' + new Date().toLocaleTimeString();
+    })
+    .withFailureHandler(function() {})
+    .getTeamStatus();
+}
+
+function renderTeamStatusTable(team) {
+  const div = document.getElementById('teamStatusTableDiv');
+  if (!team || !team.length) { div.innerHTML='<p style="color:#5f6368;padding:12px">No team data</p>'; return; }
+  let html = '<table class="status-table"><thead><tr>'+
+    '<th>CRX Member</th><th>Today</th><th>Active Doubt</th><th>Custom Status</th><th>Available?</th>'+
+    '</tr></thead><tbody>';
+  team.forEach(m => {
+    const pressBadge = m.isPresent
+      ? '<span class="badge" style="background:#e6f4ea;color:#1e8e3e">✓ Present</span>'
+      : '<span class="badge" style="background:#fce8e6;color:#c5221f">✗ Absent</span>';
+    const doubtStr = m.activeDoubts.length > 0
+      ? '<span style="color:#f09300;font-size:12px">📎 '+m.activeDoubts[0]+'</span>'
+      : '—';
+    const custom = m.customNote || '—';
+    let availBadge;
+    if (!m.isPresent) availBadge = '<span class="badge" style="background:#f1f3f4;color:#80868b">—</span>';
+    else if (m.isAvailable) availBadge = '<span class="badge" style="background:#e6f4ea;color:#1e8e3e">🟢 Free</span>';
+    else if (m.isBusyWithDoubt) availBadge = '<span class="badge" style="background:#fef3e0;color:#b06000">🟡 On Doubt</span>';
+    else availBadge = '<span class="badge" style="background:#fce8e6;color:#c5221f">🔴 Busy</span>';
+    html += '<tr>'+
+      '<td style="font-weight:500">'+m.member+'</td>'+
+      '<td>'+pressBadge+'</td>'+
+      '<td style="font-size:12px">'+doubtStr+'</td>'+
+      '<td style="font-size:12px;color:#5f6368;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+custom+'">'+custom+'</td>'+
+      '<td>'+availBadge+'</td>'+
+    '</tr>';
+  });
+  html += '</tbody></table>';
+  div.innerHTML = html;
+}
+
+function markPresent() {
+  const member = document.getElementById('attendanceMember').value;
+  if (!member) { showToast('⚠️ Select your name first','error'); return; }
+  const note = document.getElementById('customStatusNote').value.trim();
+  google.script.run
+    .withSuccessHandler(function(r) {
+      if (r.success) { showToast('✅ Marked present','success'); refreshTeamStatus(); }
+      else showToast('❌ '+r.error,'error');
+    })
+    .withFailureHandler(function() { showToast('❌ Failed','error'); })
+    .markPresence(member, 'present', note);
+}
+function markAbsent() {
+  const member = document.getElementById('attendanceMember').value;
+  if (!member) { showToast('⚠️ Select your name first','error'); return; }
+  google.script.run
+    .withSuccessHandler(function(r) {
+      if (r.success) { showToast('✅ Marked absent','success'); refreshTeamStatus(); }
+      else showToast('❌ '+r.error,'error');
+    })
+    .withFailureHandler(function() { showToast('❌ Failed','error'); })
+    .markPresence(member, 'absent', '');
+}
+function updateCustomStatus() {
+  const member = document.getElementById('attendanceMember').value;
+  if (!member) { showToast('⚠️ Select your name first','error'); return; }
+  const note = document.getElementById('customStatusNote').value.trim();
+  google.script.run
+    .withSuccessHandler(function(r) {
+      if (r.success) { showToast('✅ Status updated','success'); refreshTeamStatus(); }
+      else showToast('❌ '+r.error,'error');
+    })
+    .withFailureHandler(function() { showToast('❌ Failed','error'); })
+    .markPresence(member, 'present', note);
+}
+
+// ── SILENT REFRESH ───────────────────────────────────────────
 function silentRefresh() {
   google.script.run
     .withSuccessHandler(function(freshDoubts) {
       if (!Array.isArray(freshDoubts)) return;
-      let newCount = 0, changeCount = 0;
-      freshDoubts.forEach(function(newD) {
-        const existing = allDoubts.find(d => d.Doubt_ID === newD.Doubt_ID);
-        if (existing) {
-          if (existing.Status !== newD.Status || existing.Assigned_To !== newD.Assigned_To) {
-            Object.assign(existing, newD); changeCount++;
-          }
-        } else { allDoubts.push(newD); newCount++; }
+      let nc=0, cc=0;
+      freshDoubts.forEach(function(nd) {
+        const ex = allDoubts.find(d=>d.Doubt_ID===nd.Doubt_ID);
+        if (ex) { if (ex.Status!==nd.Status||ex.Assigned_To!==nd.Assigned_To) { Object.assign(ex,nd); cc++; } }
+        else { allDoubts.push(nd); nc++; }
       });
-      if (newCount > 0 || changeCount > 0) {
+      if (nc>0||cc>0) {
         updateStats(); renderTable();
-        showToast(newCount > 0
-          ? '🔔 ' + newCount + ' new doubt' + (newCount > 1 ? 's' : '') + ' added'
-          : '🔄 ' + changeCount + ' update' + (changeCount > 1 ? 's' : '') + ' synced',
-          'success');
+        showToast(nc>0 ? '🔔 '+nc+' new doubt'+(nc>1?'s':'')+' added' : '🔄 '+cc+' update'+(cc>1?'s':'')+' synced', 'success');
       }
-      lastRefreshed = new Date(); updateSyncBadge();
+      lastRefreshed=new Date(); updateSyncBadge();
     })
-    .withFailureHandler(function() {})
+    .withFailureHandler(function(){})
     .getDoubts();
 }
 
 function updateSyncBadge() {
-  const el = document.getElementById('syncBadge');
-  if (!el || !lastRefreshed) return;
-  const secs = Math.round((new Date() - lastRefreshed) / 1000);
-  el.textContent = secs < 2 ? '● Live' : '● ' + secs + 's ago';
+  const el=document.getElementById('syncBadge'); if (!el||!lastRefreshed) return;
+  const s=Math.round((new Date()-lastRefreshed)/1000);
+  el.textContent = s<5?'● Live':'● '+s+'s ago';
 }
 
 function checkForUpdates() {
   google.script.run
     .withSuccessHandler(function(ts) {
-      if (knownLastUpdated && ts !== knownLastUpdated) silentRefresh();
-      knownLastUpdated = ts;
-      lastRefreshed = new Date(); updateSyncBadge();
+      if (knownLastUpdated && ts!==knownLastUpdated) {
+        silentRefresh();
+        if (document.getElementById('teamStatusOverlay').classList.contains('show')) refreshTeamStatus();
+      }
+      knownLastUpdated=ts; lastRefreshed=new Date(); updateSyncBadge();
     })
-    .withFailureHandler(function() {})
+    .withFailureHandler(function(){})
     .getLastUpdated();
 }
+
+// Refresh available members every 30s in background
+setInterval(function() {
+  google.script.run
+    .withSuccessHandler(function(data) {
+      if (!data||!data.team) return;
+      teamStatus = data.team;
+      availableMembers = data.team.filter(m=>m.isAvailable).map(m=>m.member);
+      if (document.getElementById('teamStatusOverlay').classList.contains('show')) renderTeamStatusTable(data.team);
+    })
+    .withFailureHandler(function(){})
+    .getTeamStatus();
+}, 30000);
 
 setInterval(updateSyncBadge, 2000);
 setInterval(checkForUpdates, 5000);
 loadDoubts();
 </script>
+
 </body>
 </html>
