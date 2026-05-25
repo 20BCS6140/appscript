@@ -676,7 +676,11 @@ function getAnalyticsData(filters) {
     filtered.forEach(r => {
       const m  = r[31].toString().trim() || 'Unassigned';
       const ct = r[20].toString().trim().toLowerCase();
-      const esc = r[21].toString().trim().toLowerCase() === 'yes';
+      // Count escalated only when CRX explicitly selected it in L2 Confirmation (col 28)
+      const l2Conf = (r[28] || '').toString();
+      const esc = l2Conf.split(',').some(function(v) {
+        return v.trim().toLowerCase() === 'escalated';
+      });
       if (!msMap[m]) msMap[m] = { total:0, easy:0, medium:0, complex:0, escalated:0, aht:0, wait:0 };
       msMap[m].total++;
       if (ct === 'easy') msMap[m].easy++;
