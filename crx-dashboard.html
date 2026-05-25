@@ -541,6 +541,28 @@
       
       .dcr-link:hover { background:#d2e3fc; }
 
+      /* Export bar */
+    .export-bar {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      background: white; border: 1px solid #e8eaed; border-radius: 10px;
+      padding: 12px 16px; margin-bottom: 12px; flex-shrink: 0;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .export-bar label { font-size: 12px; font-weight: 600; color: #5f6368; white-space: nowrap; }
+    .export-bar input[type="date"] {
+      padding: 6px 10px; border: 1px solid #dadce0; border-radius: 6px;
+      font-size: 13px; font-family: 'Google Sans', Arial, sans-serif; outline: none;
+    }
+    .export-bar input[type="date"]:focus { border-color: #1a73e8; }
+    .btn-export {
+      background: #34a853; color: white; border: none; padding: 7px 16px;
+      border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer;
+      font-family: 'Google Sans', Arial, sans-serif; white-space: nowrap;
+      display: flex; align-items: center; gap: 6px; transition: background 0.15s;
+    }
+    .btn-export:hover { background: #2d9249; }
+    .btn-export:disabled { background: #ccc; cursor: not-allowed; }
+
 
   </style>
 </head>
@@ -583,6 +605,23 @@
       <div><div class="val" id="cntResolved">—</div><div class="lbl">Resolved</div></div>
     </div>
   </div>
+
+  <!-- ── Export Bar ── -->
+<div class="export-bar">
+  <label>Export Resolved Sheet:</label>
+  <div style="display:flex;align-items:center;gap:6px">
+    <span style="font-size:12px;color:#5f6368">From</span>
+    <input type="date" id="exportDateFrom">
+  </div>
+  <div style="display:flex;align-items:center;gap:6px">
+    <span style="font-size:12px;color:#5f6368">To</span>
+    <input type="date" id="exportDateTo">
+  </div>
+  <button class="btn-export" id="exportBtn" onclick="exportCSV()">
+    ⬇ Export CSV
+  </button>
+  <span id="exportStatus" style="font-size:12px;color:#5f6368"></span>
+</div>
 
   <!-- ── Filters (never scrolls) ── -->
   <div class="filter-bar">
@@ -887,7 +926,77 @@
 
 
 <script>
-const VIOLATIONS_LIST = ['malware', 'spam', 'misleading', 'SPP', 'RHC', 'Escalated'];;
+const VIOLATIONS_LIST = [
+  'No Abuse Found',
+  'Existing Bug',
+  'Huge file size',
+  'Malware',
+  'Circumvents API NTP',
+  'Circumvents API search',
+  'Remote Hosted Code',
+  'Impersonation/Copycat',
+  'Unwanted software distribution',
+  'Deceptive behavior',
+  'Takedown NO CR',
+  'Invalid package',
+  'Impersonation Assets',
+  'Enforcement Circumvention',
+  'Not Family Safe',
+  'Pornography',
+  'Gambling',
+  'Hate',
+  'Violence',
+  'Insufficient Metadata',
+  'Misleading - Functionality mismatch',
+  'Misleading - Additional related functionality',
+  'Misleading - Functionality not working',
+  'Misleading - Irrelevant metadata',
+  'Misleading - Security claim',
+  'Permission not used',
+  'Permission not required for properties used',
+  'Broad host permission',
+  'PP link is missing',
+  'PP Link Broken',
+  'PP link is indirect',
+  'PP missing user data handling',
+  'UDP - Prominent Disclosure',
+  'UDP - Security SSL',
+  'UDP - Other Requirements',
+  'Obfuscation-code building',
+  'Obfuscation-identifier names',
+  'Obfuscation-transfer object keys',
+  'Obfuscation-multiple',
+  'Obfuscation-string array',
+  'Obfuscation-character encoding',
+  'Obfuscation-packer',
+  'Obfuscation-long variable names',
+  'Obfuscation-code hidden in image',
+  'Obfuscation-symbols-combination',
+  'Obfuscation-others',
+  'Obfuscation-multiple',
+  'Does Not Work',
+  'Apps Redirect',
+  'Keyword Stuffing',
+  'Spam - User ratings reviews installs',
+  'Spam - Notification abuse',
+  'Spam - Message spam',
+  'Repetitive Content',
+  'Spam (Generic)',
+  'Coin Mining',
+  'Youtube Downloader',
+  'Circumvents Paywall',
+  'Circumvents Login',
+  'Violates IP guidelines',
+  'Minimum Functionality - None',
+  'Minimum Functionality - Indirect',
+  'Minimum Functionality - Click bait',
+  'Affiliate Ads - Disclosure',
+  'Affiliate Ads - User Action',
+  'SPP Ads',
+  'SPP Generic',
+  'SPP New Tab Search',
+  'Escalate'
+];
 
 let allDoubts = [], crxMembers = [], teamStatus = [], availableMembers = [];
 let currentDoubtId = null, currentEditDoubtId = null;
@@ -1045,8 +1154,8 @@ function renderTable() {
 
   // Build assign dropdown member list:
   // Available = present + free from team status; always include current assignee
-  const memberNames = availableMembers.length > 0 ? availableMembers : crxMembers.map(m=>m.split('|')[0].trim());
-
+  // const memberNames = availableMembers.length > 0 ? availableMembers : crxMembers.map(m=>m.split('|')[0].trim());
+  const memberNames = availableMembers;
   document.getElementById('tableBody').innerHTML = rows.map(function(d) {
     const didNum = d.Doubt_ID ? d.Doubt_ID.replace('D-','') : '';
     const doubtIdHtml = '<div class="doubt-id-cell"><div class="did-prefix">D-</div><div class="did-num">'+didNum+'</div></div>';
@@ -1372,9 +1481,9 @@ function checkForUpdates() {
 
 // Updates ONLY the assign dropdowns without touching any other cell
 function updateAssignDropdowns() {
-  const memberNames = availableMembers.length > 0
-    ? availableMembers
-    : crxMembers.map(m => m.split('|')[0].trim());
+  // const memberNames = availableMembers.length > 0
+  //   ? availableMembers
+  //   : crxMembers.map(m => m.split('|')[0].trim());
 
   document.querySelectorAll('.assign-select').forEach(function(sel) {
     const doubtId = sel.dataset.id;
@@ -1382,7 +1491,7 @@ function updateAssignDropdowns() {
     const currentVal = sel.value; // preserve whatever is currently selected
 
     const dropdownMembers = [...new Set([
-      ...memberNames,
+      ...availableMembers,
       ...(d && d.Assigned_To ? [d.Assigned_To] : []) // always keep current assignee
     ])];
 
@@ -1391,6 +1500,73 @@ function updateAssignDropdowns() {
         return '<option ' + (currentVal === m ? 'selected' : '') + ' value="' + m + '">' + m + '</option>';
       }).join('');
   });
+}
+
+
+
+
+// ── Initialize export date defaults (last 30 days) ───────────
+(function initExportDates() {
+  function fmt(d) {
+    return d.getFullYear() + '-' +
+      String(d.getMonth()+1).padStart(2,'0') + '-' +
+      String(d.getDate()).padStart(2,'0');
+  }
+  const today = new Date();
+  const from  = new Date(); from.setDate(from.getDate() - 30);
+  document.getElementById('exportDateTo').value   = fmt(today);
+  document.getElementById('exportDateFrom').value = fmt(from);
+})();
+
+// ── Export CSV ────────────────────────────────────────────────
+function exportCSV() {
+  const dateFrom = document.getElementById('exportDateFrom').value;
+  const dateTo   = document.getElementById('exportDateTo').value;
+
+  if (!dateFrom || !dateTo) {
+    showToast('⚠️ Please select both From and To dates', 'error'); return;
+  }
+  if (dateFrom > dateTo) {
+    showToast('⚠️ From date must be before To date', 'error'); return;
+  }
+
+  const btn    = document.getElementById('exportBtn');
+  const status = document.getElementById('exportStatus');
+  btn.disabled = true; btn.textContent = '⏳ Generating…';
+  status.textContent = '';
+
+  google.script.run
+    .withSuccessHandler(function(csvContent) {
+      btn.disabled = false; btn.textContent = '⬇ Export CSV';
+      if (!csvContent || csvContent.split('\n').length <= 1) {
+        showToast('No resolved data found for selected range', 'error');
+        status.textContent = 'No data for selected range.';
+        return;
+      }
+
+      // Count rows (minus header)
+      const rowCount = csvContent.split('\n').length - 1;
+
+      // Trigger download
+      const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url  = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href     = url;
+      link.download = 'CRX_Resolved_' + dateFrom + '_to_' + dateTo + '.csv';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      showToast('✅ Downloaded ' + rowCount + ' rows', 'success');
+      status.textContent = rowCount + ' rows exported.';
+    })
+    .withFailureHandler(function(err) {
+      btn.disabled = false; btn.textContent = '⬇ Export CSV';
+      showToast('❌ Export failed', 'error');
+      console.error('exportCSV error:', err);
+    })
+    .exportResolvedCSV(dateFrom, dateTo);
 }
 
 // Refresh available members every 5s in background
