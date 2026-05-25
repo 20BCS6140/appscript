@@ -146,7 +146,41 @@
         <label>Item's Functionality <span class="req">*</span></label>
         <select id="itemsFunctionality">
           <option value="">— Select Queue —</option>
-          <option value="game">Game</option>
+          <option value="adblocker">Adblocker</option>
+          <option value="al">Al</option>
+          <option value="autofill">Autofill</option>
+          <option value="sales-crm-lead-generation">Sales, CRM & Lead Generation</option>
+          <option value="crypto-wallet-stocks-finance">Crypto/Wallet/Stocks/Finance</option>
+          <option value="developer-tools">Developer Tools</option>
+          <option value="downloader-uploader">Downloader/Uploader</option>
+          <option value="educational-related">Educational Related</option>
+          <option value="enhancer">Enhancer</option>
+          <option value="entertainment">Entertainment</option>
+          <option value="games">Games</option>
+          <option value="newtab">NewTab</option>
+          <option value="password-manager">Password manager</option>
+          <option value="scrapping-extractor">Scrapping/Extractor</option>
+          <option value="screen-record-capture">Screen record/capture</option>
+          <option value="search">Search</option>
+          <option value="privacy-security">Privacy & Security</option>
+          <option value="seo">SEO</option>
+          <option value="shopping-coupons-tokens-discounts">Shopping/Coupons/Tokens/Discounts</option>
+          <option value="social-media">Social Media</option>
+          <option value="theme">Theme</option>
+          <option value="tools-productivity">Tools/productivity</option>
+          <option value="translator">Translator</option>
+          <option value="vpn-proxy">VPN/Proxy</option>
+          <option value="website-blocker">Website Blocker</option>
+          <option value="functionality-and-other">Functionality & 비</option>
+          <option value="accessibility">Accessibility</option>
+          <option value="productivity-workflow-and-planning">Productivity-Workflow and Planning</option>
+          <option value="lifestyle-art-design">Lifestyle - Art & Design</option>
+          <option value="lifestyle-household">Lifestyle-Household</option>
+          <option value="lifestyle-news-weather">Lifestyle - News & Weather</option>
+          <option value="lifestyle-shopping">Lifestyle-Shopping</option>
+          <option value="lifestyle-travel">Lifestyle-Travel</option>
+          <option value="lifestyle-well-being">Lifestyle-Well being</option>
+          <option value="free-text">Free Text</option>
         </select>
       </div>
       <div class="form-group">
@@ -163,7 +197,17 @@
         <label>Category <span class="req">*</span></label>
         <select id="Category">
          <option value="">— Select Queue —</option>
-         <option value="VerdictConfirmation">Verdict Confirmation</option>
+          <option value="Verdict-Confirmation">Verdict Confirmation</option>
+         <option value="Score-Logs">Score Logs</option>
+         <option value="Suspicious-code">Suspicious code</option>
+         <option value="Complex-Webpack-Code">Complex/Webpack Code</option>
+         <option value="Malware-new-malware-trend">Malware - new malware trend</option>
+         <option value="Known-malware-trend">Known malware trend</option>
+         <option value="Tool-or-Links-not-WAI">Tool or Links not WAI</option>
+         <option value="Sensitive-Developer-High-User-Base">Sensitive Developer / High User Base</option>
+         <option value="Process-guideline-change">Process guideline change</option>
+         <option value="Granular-CR">Granular CR</option>
+         <option value="Internal-Risk-Score-for-the-Extension">Internal Risk Score for the Extension</option>
         </select>
       </div>
 
@@ -171,7 +215,28 @@
         <label>Sub Category <span class="req">*</span></label>
         <select id="SubCategory">
          <option value="">— Select Queue —</option>
-         <option value="RHC">RHC</option>
+         <option value="remote-hosted-code">Remote Hosted Code</option>
+          <option value="sensitive-data-collection">Sensitive Data Collection</option>
+          <option value="cookie-theft">Cookie Theft</option>
+          <option value="permission-use-case">Permission Use Case</option>
+          <option value="seti-high-score">Seti High score</option>
+          <option value="suspicious-new-score-log-triggered">Suspicious/New Score log triggered</option>
+          <option value="deja-script">Deja Script</option>
+          <option value="nirvana-score-log">Nirvana score log</option>
+          <option value="tensorflow">Tensorflow</option>
+          <option value="google-analytics">Google Analytics</option>
+          <option value="telemetry">Telemetry</option>
+          <option value="search-hijack-search-exfiltration">Search(search Hijack, Search Exfiltration)</option>
+          <option value="minification">Minification</option>
+          <option value="crypto-phishing-wallets">Crypto Phishing/Wallets</option>
+          <option value="auto-bot">Auto Bot</option>
+          <option value="any-ongoing-bugs-open-for-the-item">Any Ongoing Bugs open for the Item</option>
+          <option value="lack-of-dynamic-proof">Lack of Dynamic proof</option>
+          <option value="tool-issue">Tool Issue</option>
+          <option value="data-scraping">Data Scraping</option>
+          <option value="webgl-unrelated-code">WebGL unrelated code</option>
+          <option value="obfuscation">Obfuscation</option>
+          <option value="login-required-for-specific-domain">Login required for specific domain</option>
         </select>
       </div>
     </div>
@@ -181,7 +246,12 @@
         <label>Stage of query<span class="req">*</span></label>
         <select id="StageOfQuery">
          <option value="">— Select Queue —</option>
-         <option value="Static">Static Analysis</option>
+         <option value="static-analysis">Static analysis</option>
+          <option value="dynamic-analysis">Dynamic analysis</option>
+          <option value="network-logs">Network logs</option>
+          <option value="sensitive-permissions">Sensitive permissions</option>
+          <option value="bug-reference">Bug reference</option>
+          <option value="free-text">Free Text</option>
         </select>
       </div>
 
@@ -233,8 +303,95 @@
 
 <script>
   // ── Static data (mirrors Code.gs arrays) ─────────────────
-  const QUEUE_NAMES     = ['RE', 'NBR', 'HQ'];
-  const VIOLATIONS_LIST = ['malware', 'spam', 'misleading', 'SPP', 'RHC', 'Escalated'];
+  const QUEUE_NAMES = [
+  'Jackalope Safetynet Review',
+  'Incentive Dcr Pending Review',
+  'Cws Navitron Pending Review',
+  'Cws Asset Review',
+  'Cws Navitron Bulk Review',
+  'Cws Highquality Pending Review',
+  'Cws Dcr Experimental',
+  'Cws Manual Lookup Queue',
+  'Cws Legal Lookup Queue',
+  'Cws Resubmitted Items',
+  'Cws Adhoc Dcr',
+  'Cws Unpublished Item Review',
+  'Metadata Reviews',
+  'Cws Safetynet Reviews',
+  'Cws Dcr Pending Review',
+  'Cws Highquality Published'
+];
+  const VIOLATIONS_LIST = [
+  'No Abuse Found',
+  'Existing Bug',
+  'Huge file size',
+  'Malware',
+  'Circumvents API NTP',
+  'Circumvents API search',
+  'Remote Hosted Code',
+  'Impersonation/Copycat',
+  'Unwanted software distribution',
+  'Deceptive behavior',
+  'Takedown NO CR',
+  'Invalid package',
+  'Impersonation Assets',
+  'Enforcement Circumvention',
+  'Not Family Safe',
+  'Pornography',
+  'Gambling',
+  'Hate',
+  'Violence',
+  'Insufficient Metadata',
+  'Misleading - Functionality mismatch',
+  'Misleading - Additional related functionality',
+  'Misleading - Functionality not working',
+  'Misleading - Irrelevant metadata',
+  'Misleading - Security claim',
+  'Permission not used',
+  'Permission not required for properties used',
+  'Broad host permission',
+  'PP link is missing',
+  'PP Link Broken',
+  'PP link is indirect',
+  'PP missing user data handling',
+  'UDP - Prominent Disclosure',
+  'UDP - Security SSL',
+  'UDP - Other Requirements',
+  'Obfuscation-code building',
+  'Obfuscation-identifier names',
+  'Obfuscation-transfer object keys',
+  'Obfuscation-multiple',
+  'Obfuscation-string array',
+  'Obfuscation-character encoding',
+  'Obfuscation-packer',
+  'Obfuscation-long variable names',
+  'Obfuscation-code hidden in image',
+  'Obfuscation-symbols-combination',
+  'Obfuscation-others',
+  'Obfuscation-multiple',
+  'Does Not Work',
+  'Apps Redirect',
+  'Keyword Stuffing',
+  'Spam - User ratings reviews installs',
+  'Spam - Notification abuse',
+  'Spam - Message spam',
+  'Repetitive Content',
+  'Spam (Generic)',
+  'Coin Mining',
+  'Youtube Downloader',
+  'Circumvents Paywall',
+  'Circumvents Login',
+  'Violates IP guidelines',
+  'Minimum Functionality - None',
+  'Minimum Functionality - Indirect',
+  'Minimum Functionality - Click bait',
+  'Affiliate Ads - Disclosure',
+  'Affiliate Ads - User Action',
+  'SPP Ads',
+  'SPP Generic',
+  'SPP New Tab Search',
+  'Escalate'
+];
 
   let selectedViolations = [];
 
