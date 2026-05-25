@@ -24,8 +24,95 @@ function updateMeta() {
 }
 
 // ── Static arrays (no longer from Config sheet) ──────────────
-const QUEUE_NAMES    = ['RE', 'NBR', 'HQ'];
-const VIOLATIONS_LIST = ['malware', 'spam', 'misleading', 'SPP', 'RHC'];
+const QUEUE_NAMES = [
+  'Jackalope Safetynet Review',
+  'Incentive Dcr Pending Review',
+  'Cws Navitron Pending Review',
+  'Cws Asset Review',
+  'Cws Navitron Bulk Review',
+  'Cws Highquality Pending Review',
+  'Cws Dcr Experimental',
+  'Cws Manual Lookup Queue',
+  'Cws Legal Lookup Queue',
+  'Cws Resubmitted Items',
+  'Cws Adhoc Dcr',
+  'Cws Unpublished Item Review',
+  'Metadata Reviews',
+  'Cws Safetynet Reviews',
+  'Cws Dcr Pending Review',
+  'Cws Highquality Published'
+];
+const VIOLATIONS_LIST = [
+  'No Abuse Found',
+  'Existing Bug',
+  'Huge file size',
+  'Malware',
+  'Circumvents API NTP',
+  'Circumvents API search',
+  'Remote Hosted Code',
+  'Impersonation/Copycat',
+  'Unwanted software distribution',
+  'Deceptive behavior',
+  'Takedown NO CR',
+  'Invalid package',
+  'Impersonation Assets',
+  'Enforcement Circumvention',
+  'Not Family Safe',
+  'Pornography',
+  'Gambling',
+  'Hate',
+  'Violence',
+  'Insufficient Metadata',
+  'Misleading - Functionality mismatch',
+  'Misleading - Additional related functionality',
+  'Misleading - Functionality not working',
+  'Misleading - Irrelevant metadata',
+  'Misleading - Security claim',
+  'Permission not used',
+  'Permission not required for properties used',
+  'Broad host permission',
+  'PP link is missing',
+  'PP Link Broken',
+  'PP link is indirect',
+  'PP missing user data handling',
+  'UDP - Prominent Disclosure',
+  'UDP - Security SSL',
+  'UDP - Other Requirements',
+  'Obfuscation-code building',
+  'Obfuscation-identifier names',
+  'Obfuscation-transfer object keys',
+  'Obfuscation-multiple',
+  'Obfuscation-string array',
+  'Obfuscation-character encoding',
+  'Obfuscation-packer',
+  'Obfuscation-long variable names',
+  'Obfuscation-code hidden in image',
+  'Obfuscation-symbols-combination',
+  'Obfuscation-others',
+  'Obfuscation-multiple',
+  'Does Not Work',
+  'Apps Redirect',
+  'Keyword Stuffing',
+  'Spam - User ratings reviews installs',
+  'Spam - Notification abuse',
+  'Spam - Message spam',
+  'Repetitive Content',
+  'Spam (Generic)',
+  'Coin Mining',
+  'Youtube Downloader',
+  'Circumvents Paywall',
+  'Circumvents Login',
+  'Violates IP guidelines',
+  'Minimum Functionality - None',
+  'Minimum Functionality - Indirect',
+  'Minimum Functionality - Click bait',
+  'Affiliate Ads - Disclosure',
+  'Affiliate Ads - User Action',
+  'SPP Ads',
+  'SPP Generic',
+  'SPP New Tab Search',
+  'Escalate'
+];
 
 // ── Entry Point ───────────────────────────────────────────────
 function doGet(e) {
@@ -496,7 +583,8 @@ function updateResolvedDoubt(updateData) {
 function getTeamStatus() {
   try {
     const ss      = SpreadsheetApp.openById(SHEET_ID);
-    const today   = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
+    const tz    = Session.getScriptTimeZone();
+    const today = Utilities.formatDate(new Date(), tz, 'yyyy-MM-dd');
 
     // All CRX members from Config
     const cfgData = ss.getSheetByName('Config').getDataRange().getValues();
@@ -512,13 +600,15 @@ function getTeamStatus() {
     const todayPres = {};
     for (let i = 1; i < presData.length; i++) {
       let rd = presData[i][0];
-      rd = rd instanceof Date
-        ? Utilities.formatDate(rd, Session.getScriptTimeZone(), 'yyyy-MM-dd')
-        : rd.toString().split('T')[0];
-      if (rd === today) {
+      // Handle both Date objects (old rows) and string dates (new rows)
+      let rdStr = rd instanceof Date
+        ? Utilities.formatDate(rd, tz, 'yyyy-MM-dd')
+        : rd.toString().substring(0, 10); // "yyyy-MM-dd" prefix
+
+      if (rdStr === today) {
         todayPres[presData[i][1].toString().trim()] = {
-          status:     presData[i][2].toString().trim().toLowerCase(),
-          customNote: presData[i][3] ? presData[i][3].toString().trim() : ''
+        status:     presData[i][2].toString().trim().toLowerCase(),
+        customNote: presData[i][3] ? presData[i][3].toString().trim() : ''
         };
       }
     }
@@ -566,25 +656,28 @@ function markPresence(memberName, status, customNote) {
   try {
     const ss    = SpreadsheetApp.openById(SHEET_ID);
     const sheet = ss.getSheetByName('Presence');
-    if (!sheet) return { success: false, error: 'Presence sheet not found. Create it first.' };
+    if (!sheet) return { success: false, error: 'Presence sheet not found.' };
 
-    const today    = new Date();
-    const todayStr = Utilities.formatDate(today, Session.getScriptTimeZone(), 'yyyy-MM-dd');
-    const data     = sheet.getDataRange().getValues();
+    const tz       = Session.getScriptTimeZone();
+    const todayStr = Utilities.formatDate(new Date(), tz, 'yyyy-MM-dd'); // store as string, not Date
 
+    const data = sheet.getDataRange().getValues();
     for (let i = 1; i < data.length; i++) {
+      // Handle both Date objects and string dates already in sheet
       let rd = data[i][0];
-      rd = rd instanceof Date
-        ? Utilities.formatDate(rd, Session.getScriptTimeZone(), 'yyyy-MM-dd')
-        : rd.toString().split('T')[0];
-      if (rd === todayStr && data[i][1].toString().trim() === memberName.trim()) {
+      let rdStr = rd instanceof Date
+        ? Utilities.formatDate(rd, tz, 'yyyy-MM-dd')
+        : rd.toString().substring(0, 10);
+
+      if (rdStr === todayStr && data[i][1].toString().trim() === memberName.trim()) {
         sheet.getRange(i + 1, 3).setValue(status);
         sheet.getRange(i + 1, 4).setValue(customNote || '');
         updateMeta();
         return { success: true };
       }
     }
-    sheet.appendRow([today, memberName, status, customNote || '']);
+    // Insert new row with string date so comparison is consistent
+    sheet.appendRow([todayStr, memberName, status, customNote || '']);
     updateMeta();
     return { success: true };
   } catch (err) {
@@ -716,6 +809,48 @@ function getAnalyticsData(filters) {
     Logger.log('getAnalyticsData ERROR: ' + err.message);
     return { summary:{total:0,totalOpen:0,totalAssigned:0,totalResolved:0},
              byViolation:{}, byCRXMember:{}, trend:[], memberStats:[], violationCounts:[] };
+  }
+}
+
+
+function exportResolvedCSV(dateFrom, dateTo) {
+  try {
+    const ss    = SpreadsheetApp.openById(SHEET_ID);
+    const sheet = ss.getSheetByName('Resolved');
+    const data  = sheet.getDataRange().getValues();
+    if (data.length <= 1) return '';
+
+    const tz   = Session.getScriptTimeZone();
+    const from = dateFrom ? new Date(dateFrom)              : null;
+    const to   = dateTo   ? new Date(dateTo + 'T23:59:59') : null;
+
+    // Filter rows by Resolved_At (index 32)
+    const rows = [data[0]]; // always include header
+    for (let i = 1; i < data.length; i++) {
+      let resolvedAt = data[i][32];
+      if (!(resolvedAt instanceof Date)) resolvedAt = new Date(resolvedAt.toString());
+      if (isNaN(resolvedAt)) continue;
+      if (from && resolvedAt < from) continue;
+      if (to   && resolvedAt > to)   continue;
+      rows.push(data[i]);
+    }
+
+    // Convert to CSV with proper escaping
+    return rows.map(function(row) {
+      return row.map(function(cell) {
+        let val = cell instanceof Date
+          ? Utilities.formatDate(cell, tz, 'yyyy-MM-dd HH:mm:ss')
+          : (cell === null || cell === undefined ? '' : cell.toString());
+        // Wrap in quotes if contains comma, quote, or newline
+        if (val.includes(',') || val.includes('"') || val.includes('\n')) {
+          val = '"' + val.replace(/"/g, '""') + '"';
+        }
+        return val;
+      }).join(',');
+    }).join('\n');
+  } catch (err) {
+    Logger.log('exportResolvedCSV ERROR: ' + err.message);
+    return '';
   }
 }
 
