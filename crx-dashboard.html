@@ -844,8 +844,8 @@
   </div>
 </div>
 
-///////////////////////////////////
-//Attendance overlay//////////////
+
+<!-- ATTENDANCE OVERLAY -->
 
 <div class="overlay" id="teamStatusOverlay">
   <div class="modal" style="width:660px">
@@ -887,7 +887,7 @@
 
 
 <script>
-const VIOLATIONS_LIST = ['malware', 'spam', 'misleading', 'SPP', 'RHC'];
+const VIOLATIONS_LIST = ['malware', 'spam', 'misleading', 'SPP', 'RHC', 'Escalated'];;
 
 let allDoubts = [], crxMembers = [], teamStatus = [], availableMembers = [];
 let currentDoubtId = null, currentEditDoubtId = null;
@@ -1370,18 +1370,45 @@ function checkForUpdates() {
     .getLastUpdated();
 }
 
-// Refresh available members every 30s in background
+// Updates ONLY the assign dropdowns without touching any other cell
+function updateAssignDropdowns() {
+  const memberNames = availableMembers.length > 0
+    ? availableMembers
+    : crxMembers.map(m => m.split('|')[0].trim());
+
+  document.querySelectorAll('.assign-select').forEach(function(sel) {
+    const doubtId = sel.dataset.id;
+    const d = allDoubts.find(x => x.Doubt_ID === doubtId);
+    const currentVal = sel.value; // preserve whatever is currently selected
+
+    const dropdownMembers = [...new Set([
+      ...memberNames,
+      ...(d && d.Assigned_To ? [d.Assigned_To] : []) // always keep current assignee
+    ])];
+
+    sel.innerHTML = '<option value="">— Assign to —</option>' +
+      dropdownMembers.map(function(m) {
+        return '<option ' + (currentVal === m ? 'selected' : '') + ' value="' + m + '">' + m + '</option>';
+      }).join('');
+  });
+}
+
+// Refresh available members every 5s in background
+// Team status refresh every 5s — updates overlay AND assign dropdowns silently
 setInterval(function() {
   google.script.run
     .withSuccessHandler(function(data) {
-      if (!data||!data.team) return;
-      teamStatus = data.team;
-      availableMembers = data.team.filter(m=>m.isAvailable).map(m=>m.member);
-      if (document.getElementById('teamStatusOverlay').classList.contains('show')) renderTeamStatusTable(data.team);
+      if (!data || !data.team) return;
+      teamStatus       = data.team;
+      availableMembers = data.team.filter(m => m.isAvailable).map(m => m.member);
+      updateAssignDropdowns(); // ← surgical DOM update, no table flicker
+      if (document.getElementById('teamStatusOverlay').classList.contains('show')) {
+        renderTeamStatusTable(data.team);
+      }
     })
-    .withFailureHandler(function(){})
+    .withFailureHandler(function() {})
     .getTeamStatus();
-}, 30000);
+}, 5000); 
 
 setInterval(updateSyncBadge, 2000);
 setInterval(checkForUpdates, 5000);
