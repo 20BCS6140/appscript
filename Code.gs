@@ -23,6 +23,85 @@ function updateMeta() {
   } catch(e) { Logger.log('Meta update failed: ' + e.message); }
 }
 
+// ── GENERATE RANDOM TOKEN ─────────────────────────────────────
+function generateToken() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let t = '';
+  for (let i = 0; i < 40; i++) t += chars.charAt(Math.floor(Math.random() * chars.length));
+  return t;
+}
+
+// ── LOGIN ─────────────────────────────────────────────────────
+function loginCRX(passkey) {
+// function loginCRX(ldap, passkey) {
+  try {
+    const ss       = SpreadsheetApp.openById(SHEET_ID);
+    const authSheet= ss.getSheetByName('CRX_Auth');
+    if (!authSheet) return { success: false, error: 'CRX_Auth sheet not found.' };
+
+    const data = authSheet.getDataRange().getValues();
+    const tz   = Session.getScriptTimeZone();
+    const today= Utilities.formatDate(new Date(), tz, 'yyyy-MM-dd');
+    var ldap = getUserLdap();
+
+    for (let i = 1; i < data.length; i++) {
+      const rowLdap = (data[i][0] || '').toString().trim().toLowerCase();
+      const rowPass = (data[i][1] || '').toString().trim();
+      if (rowLdap === ldap.trim().toLowerCase() && rowPass === passkey) {
+        // Valid — generate token and store session
+        const token        = generateToken();
+        const sessionSheet = ss.getSheetByName('CRX_Sessions');
+        if (sessionSheet) {
+          // Remove any existing today-sessions for this member
+          const rows = sessionSheet.getDataRange().getValues();
+          const toDelete = [];
+          for (let j = 1; j < rows.length; j++) {
+            let rd = rows[j][2];
+            rd = rd instanceof Date
+              ? Utilities.formatDate(rd, tz, 'yyyy-MM-dd')
+              : rd.toString().substring(0, 10);
+            if (rows[j][0].toString().trim().toLowerCase() === ldap.trim().toLowerCase() && rd === today)
+              toDelete.push(j + 1);
+          }
+          for (let k = toDelete.length - 1; k >= 0; k--) sessionSheet.deleteRow(toDelete[k]);
+          sessionSheet.appendRow([data[i][0].toString().trim(), token, today]);
+        }
+        return { success: true, token, member: data[i][0].toString().trim() };
+      }
+    }
+    return { success: false, error: 'Invalid LDAP or passkey. Please try again.' };
+  } catch (err) {
+    Logger.log('loginCRX ERROR: ' + err.message);
+    return { success: false, error: 'Login error: ' + err.message };
+  }
+}
+
+
+// ── VALIDATE SESSION TOKEN ────────────────────────────────────
+function validateSession(token) {
+  try {
+    const ss           = SpreadsheetApp.openById(SHEET_ID);
+    const sessionSheet = ss.getSheetByName('CRX_Sessions');
+    if (!sessionSheet) return false;
+    const tz    = Session.getScriptTimeZone();
+    const today = Utilities.formatDate(new Date(), tz, 'yyyy-MM-dd');
+    const data  = sessionSheet.getDataRange().getValues();
+    for (let i = 1; i < data.length; i++) {
+      if ((data[i][1] || '').toString().trim() === token.toString().trim()) {
+        let rd = data[i][2];
+        rd = rd instanceof Date
+          ? Utilities.formatDate(rd, tz, 'yyyy-MM-dd')
+          : rd.toString().substring(0, 10);
+        return rd === today;
+      }
+    }
+    return false;
+  } catch (err) {
+    Logger.log('validateSession ERROR: ' + err.message);
+    return false;
+  }
+}
+
 // ── Static arrays (no longer from Config sheet) ──────────────
 const QUEUE_NAMES = [
   'Jackalope Safetynet Review',
@@ -227,6 +306,11 @@ function getConfig() {
 
 function getUserEmail() {
   try { return Session.getActiveUser().getEmail() || ''; }
+  catch (e) { return ''; }
+}
+
+function getUserLdap() {
+  try { return Session.getActiveUser().getEmail().split('@')[0].toLowerCase() || ''; }
   catch (e) { return ''; }
 }
 
