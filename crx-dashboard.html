@@ -564,6 +564,75 @@
     .btn-export:disabled { background: #ccc; cursor: not-allowed; }
 
 
+  /* ── Login Overlay ── */
+#loginOverlay {
+  position: fixed; inset: 0; background: linear-gradient(135deg, #e8f0fe 0%, #f0f4f9 100%);
+  z-index: 9999; display: flex; align-items: center; justify-content: center;
+}
+.login-card {
+  background: white; border-radius: 20px; padding: 44px 40px;
+  width: 420px; max-width: 94vw;
+  box-shadow: 0 12px 48px rgba(26,115,232,0.15), 0 2px 8px rgba(0,0,0,0.08);
+  border: 1px solid rgba(26,115,232,0.1);
+}
+.login-brand {
+  text-align: center; margin-bottom: 32px;
+}
+.login-brand-icon {
+  width: 56px; height: 56px; border-radius: 16px;
+  background: linear-gradient(135deg, #1a73e8, #1557b0);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 14px; font-size: 26px;
+}
+.login-brand-title { font-size: 20px; font-weight: 600; color: #202124; margin-bottom: 4px; }
+.login-brand-sub   { font-size: 13px; color: #5f6368; }
+.login-field { margin-bottom: 18px; }
+.login-field label {
+  display: block; font-size: 11px; font-weight: 600; color: #5f6368;
+  text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 7px;
+}
+.login-input {
+  width: 100%; padding: 12px 14px; border: 1.5px solid #dadce0; border-radius: 10px;
+  font-size: 14px; font-family: 'Google Sans', Arial, sans-serif;
+  color: #202124; outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+  background: white;
+}
+.login-input:focus {
+  border-color: #1a73e8;
+  box-shadow: 0 0 0 3px rgba(26,115,232,0.15);
+}
+.login-btn {
+  width: 100%; padding: 13px; margin-top: 8px;
+  background: linear-gradient(135deg, #1a73e8, #1557b0);
+  color: white; border: none; border-radius: 10px;
+  font-size: 15px; font-weight: 500; cursor: pointer;
+  font-family: 'Google Sans', Arial, sans-serif;
+  transition: opacity 0.15s, transform 0.1s;
+  letter-spacing: 0.2px;
+}
+.login-btn:hover:not(:disabled) { opacity: 0.92; transform: translateY(-1px); }
+.login-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+.login-error {
+  display: none; margin-top: 14px; padding: 10px 14px;
+  background: #fce8e6; color: #c5221f; border-radius: 8px;
+  font-size: 13px; text-align: center;
+}
+.login-loading {
+  display: none; margin-top: 12px; text-align: center;
+  color: #5f6368; font-size: 13px;
+}
+.login-loading::before { content: ''; }
+
+/* Logout button in top bar */
+.btn-logout {
+  background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3);
+  padding: 5px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;
+  font-family: 'Google Sans', Arial, sans-serif; font-weight: 500;
+  transition: background 0.15s;
+}
+.btn-logout:hover { background: rgba(255,255,255,0.25); }
+
+
   </style>
 </head>
 <body>
@@ -587,6 +656,7 @@
         👥 Team Status
       </button>
       <button class="btn-refresh" onclick="loadDoubts()">↻ Refresh</button>
+      <button class="btn-refresh" onclick="doLogout()">🚨 Logout</button>
     </div>
   </div>
 
@@ -924,8 +994,150 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- ════════════════════════════════════
+     LOGIN OVERLAY
+════════════════════════════════════ -->
+<div id="loginOverlay">
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="login-brand-icon">🔐</div>
+      <div class="login-brand-title">CRX Doubt Management</div>
+      <div class="login-brand-sub">Sign in to access the dashboard</div>
+    </div>
+
+    <!-- <div class="login-field">
+      <label>LDAP</label>
+      <input class="login-input" type="text" id="loginLdap"
+             placeholder="e.g. ajaygajula" autocomplete="username"
+             onkeydown="if(event.key==='Enter')document.getElementById('loginPasskey').focus()">
+    </div> -->
+
+    <div class="login-field">
+      <label>Passkey</label>
+      <input class="login-input" type="password" id="loginPasskey"
+             placeholder="Enter your passkey" autocomplete="current-password"
+             onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+
+    <button class="login-btn" id="loginBtn" onclick="doLogin()">Sign In</button>
+
+    <div class="login-error"   id="loginError"></div>
+    <div class="login-loading" id="loginLoading">Verifying credentials…</div>
+  </div>
+</div>
+
 
 <script>
+
+
+
+// ════════════════════════════════════════════
+// AUTH — must come first
+// ════════════════════════════════════════════
+const SESSION_KEY = 'crx_mgmt_v1';
+
+function getTodayStr() {
+  var d = new Date();
+  return d.getFullYear() + '-' +
+    String(d.getMonth()+1).padStart(2,'0') + '-' +
+    String(d.getDate()).padStart(2,'0');
+}
+function getStoredSession() {
+  try { return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); }
+  catch(e) { return null; }
+}
+function storeSession(token, member) {
+  try { localStorage.setItem(SESSION_KEY, JSON.stringify({ token, member, date: getTodayStr() })); }
+  catch(e) {}
+}
+function clearSession() {
+  try { localStorage.removeItem(SESSION_KEY); } catch(e) {}
+}
+
+// Check session on load
+(function initAuth() {
+  var stored = getStoredSession();
+  if (stored && stored.token && stored.date === getTodayStr()) {
+    // Has a today-session — validate with server
+    document.getElementById('loginLoading').style.display = 'block';
+    google.script.run
+      .withSuccessHandler(function(valid) {
+        document.getElementById('loginLoading').style.display = 'none';
+        if (valid) { onAuthSuccess(stored.member); }
+        else { clearSession(); } // overlay stays visible
+      })
+      .withFailureHandler(function() {
+        document.getElementById('loginLoading').style.display = 'none';
+        // If server unreachable, fail safe — keep login overlay
+      })
+      .validateSession(stored.token);
+  }
+  // else: login overlay stays visible — user must log in
+})();
+
+function doLogin() {
+  // var ldap    = document.getElementById('loginLdap').value.trim();
+  var passkey = document.getElementById('loginPasskey').value;
+  var btn     = document.getElementById('loginBtn');
+  var errDiv  = document.getElementById('loginError');
+  var loadDiv = document.getElementById('loginLoading');
+
+  errDiv.style.display = 'none';
+  if (!passkey) { showLoginError('Please enter both LDAP and passkey.'); return; }
+
+  btn.disabled = true; btn.textContent = 'Signing in…';
+  loadDiv.style.display = 'block';
+
+  google.script.run
+    .withSuccessHandler(function(result) {
+      btn.disabled = false; btn.textContent = 'Sign In';
+      loadDiv.style.display = 'none';
+      if (result.success) {
+        storeSession(result.token, result.member);
+        // document.getElementById('loginLdap').value    = '';
+        document.getElementById('loginPasskey').value = '';
+        onAuthSuccess(result.member);
+      } else {
+        showLoginError(result.error || 'Invalid credentials.');
+      }
+    })
+    .withFailureHandler(function(err) {
+      btn.disabled = false; btn.textContent = 'Sign In';
+      loadDiv.style.display = 'none';
+      showLoginError('Connection error. Please try again.');
+      console.error('Login error:', err);
+    })
+    // .loginCRX(ldap, passkey);
+    .loginCRX(passkey);
+}
+
+function showLoginError(msg) {
+  var e = document.getElementById('loginError');
+  e.textContent = msg; e.style.display = 'block';
+}
+
+function onAuthSuccess(member) {
+  document.getElementById('loginOverlay').style.display = 'none';
+  loadDoubts(); // ← start loading NOW, after auth confirmed
+}
+
+function doLogout() {
+  clearSession();
+  // Show login overlay again and reset form
+  document.getElementById('loginOverlay').style.display = 'flex';
+  // document.getElementById('loginLdap').value    = '';
+  document.getElementById('loginPasskey').value = '';
+  document.getElementById('loginError').style.display = 'none';
+  // Clear dashboard state
+  allDoubts = []; crxMembers = []; availableMembers = [];
+  document.getElementById('tableBody').innerHTML =
+    '<tr class="loading-row"><td colspan="10">Sign in to load doubts.</td></tr>';
+  document.getElementById('cntOpen').textContent     = '—';
+  document.getElementById('cntAssigned').textContent = '—';
+  document.getElementById('cntResolved').textContent = '—';
+}
+
+
 const VIOLATIONS_LIST = [
   'No Abuse Found',
   'Existing Bug',
@@ -1588,7 +1800,7 @@ setInterval(function() {
 
 setInterval(updateSyncBadge, 2000);
 setInterval(checkForUpdates, 5000);
-loadDoubts();
+
 </script>
 
 </body>
