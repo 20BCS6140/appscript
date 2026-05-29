@@ -86,11 +86,132 @@
   .ms-option.selected::after { content: ' ✓'; }
   .ms-empty { padding: 12px 14px; font-size: 13px; color: #80868b; }
 
+  /* ── Availability Gate ── */
+#availGate {
+  position: fixed; inset: 0; z-index: 9000;
+  display: flex; align-items: center; justify-content: center;
+  background: #f0f4f9;
+}
 
+/* Checking spinner card */
+.gate-checking {
+  background: white; border-radius: 16px; padding: 40px 36px;
+  text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  max-width: 380px; width: 92vw;
+}
+.gate-spinner {
+  width: 40px; height: 40px; border: 3px solid #e8eaed;
+  border-top-color: #1a73e8; border-radius: 50%;
+  animation: spin 0.8s linear infinite; margin: 0 auto 16px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Unavailable message card */
+.gate-unavailable {
+  background: white; border-radius: 20px; padding: 48px 40px;
+  text-align: center; box-shadow: 0 8px 40px rgba(0,0,0,0.1);
+  max-width: 520px; width: 94vw; border-top: 4px solid #1a73e8;
+}
+.gate-icon {
+  font-size: 52px; margin-bottom: 18px; display: block;
+}
+.gate-title {
+  font-size: 22px; font-weight: 600; color: #202124;
+  margin-bottom: 10px; line-height: 1.3;
+}
+.gate-subtitle {
+  font-size: 14px; color: #5f6368; margin-bottom: 24px;
+  line-height: 1.6;
+}
+.gate-divider {
+  border: none; border-top: 1px solid #e8eaed; margin: 20px 0;
+}
+.gate-message {
+  font-size: 13px; color: #3c4043; line-height: 1.7;
+  background: #f8f9fa; border-radius: 10px; padding: 16px 18px;
+  text-align: left; margin-bottom: 20px;
+  border-left: 3px solid #1a73e8;
+}
+.gate-message p { margin-bottom: 10px; }
+.gate-message p:last-child { margin-bottom: 0; }
+.gate-status-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #fef3e0; color: #b06000; padding: 6px 14px;
+  border-radius: 20px; font-size: 12px; font-weight: 500; margin-bottom: 20px;
+}
+.gate-retry-btn {
+  background: white; border: 1.5px solid #1a73e8; color: #1a73e8;
+  padding: 10px 22px; border-radius: 8px; font-size: 13px; font-weight: 500;
+  cursor: pointer; font-family: 'Google Sans', Arial, sans-serif;
+  transition: all 0.15s;
+}
+.gate-retry-btn:hover { background: #e8f0fe; }
+.gate-footer {
+  margin-top: 20px; font-size: 11px; color: #9aa0a6;
+}
 
   </style>
 </head>
 <body>
+
+<!-- ════════════════════════════════════════════
+     AVAILABILITY GATE
+     Shows while checking; replaced if CRX is busy
+════════════════════════════════════════════ -->
+<div id="availGate">
+
+  <!-- Checking state (shown first) -->
+  <div class="gate-checking" id="gateChecking">
+    <div class="gate-spinner"></div>
+    <div style="font-size:15px;font-weight:500;color:#202124;margin-bottom:6px">Checking availability…</div>
+    <div style="font-size:13px;color:#5f6368">Please wait a moment</div>
+  </div>
+
+  <!-- Unavailable state (hidden; shown if no CRX member is free) -->
+  <div class="gate-unavailable" id="gateUnavailable" style="display:none">
+
+    <span class="gate-icon">🛑</span>
+
+    <div class="gate-title">CRX Team Currently Occupied</div>
+
+    <div class="gate-status-badge">
+      🟡 All team members are engaged
+    </div>
+
+    <div class="gate-message">
+      <p>
+        Thank you for reaching out to the <strong>Chrome Extensions Review (CRX) Team</strong>.
+        We sincerely appreciate your trust and patience.
+      </p>
+      <p>
+        At this moment, all of our CRX reviewers are actively engaged with
+        ongoing consultations and doubt reviews. To ensure every query
+        receives the focused attention it deserves, we are unable to accept
+        new submissions at this time.
+      </p>
+      <p>
+        Please <strong>try again in a few minutes</strong> — our team works quickly,
+        and a reviewer will be available to assist you shortly.
+      </p>
+    </div>
+
+    <hr class="gate-divider">
+
+    <p style="font-size:13px;color:#5f6368;margin-bottom:16px">
+      This page will automatically check again every minute.<br>
+      <!-- You may also click below to check right now. -->
+    </p>
+
+    <!-- <button class="gate-retry-btn" onclick="retryAvailabilityCheck()">
+      🔄 Check Again Now
+    </button> -->
+
+    <div class="gate-footer">
+      Chrome Extensions Review Team &nbsp;·&nbsp; Google Internal
+    </div>
+
+  </div>
+</div>
 
 <div class="top-bar">
   <div class="logo">
@@ -302,6 +423,62 @@
 <div class="toast" id="toast"></div>
 
 <script>
+
+// ════════════════════════════════════════════
+// AVAILABILITY CHECK — runs on every page load
+// ════════════════════════════════════════════
+var availCheckInterval = null;
+
+function checkAvailability(isRetry) {
+  if (isRetry) {
+    // Show spinner while re-checking
+    document.getElementById('gateChecking').style.display  = 'block';
+    document.getElementById('gateUnavailable').style.display = 'none';
+  }
+
+  google.script.run
+    .withSuccessHandler(function(result) {
+      if (result.hasAvailable) {
+        // ✅ At least one CRX member is free — remove gate, show form
+        document.getElementById('availGate').style.display = 'none';
+        if (availCheckInterval) { clearInterval(availCheckInterval); availCheckInterval = null; }
+      } else {
+        // ❌ No CRX member is free — show blocking message
+        document.getElementById('gateChecking').style.display   = 'none';
+        document.getElementById('gateUnavailable').style.display = 'block';
+
+        // Update the status badge with actual numbers if useful
+        var badge = document.querySelector('.gate-status-badge');
+        if (badge) {
+          var presentTxt = result.presentCount > 0
+            ? result.presentCount + ' member' + (result.presentCount > 1 ? 's' : '') + ' present, all engaged'
+            : 'No members on duty right now';
+          badge.textContent = '🟡 ' + presentTxt;
+        }
+
+        // Auto-recheck every 60 seconds while L0 is on the blocked page
+        if (!availCheckInterval) {
+          availCheckInterval = setInterval(function() {
+            checkAvailability(false);
+          }, 60000);
+        }
+      }
+    })
+    .withFailureHandler(function(err) {
+      console.warn('Availability check failed:', err);
+      // Fail open — if check errors, allow L0 access rather than permanently blocking
+      document.getElementById('availGate').style.display = 'none';
+    })
+    .checkCRXAvailability();
+}
+
+function retryAvailabilityCheck() {
+  checkAvailability(true);
+}
+
+// Run check immediately on page load
+checkAvailability(false);
+
   // ── Static data (mirrors Code.gs arrays) ─────────────────
   const QUEUE_NAMES = [
   'Jackalope Safetynet Review',
