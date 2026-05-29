@@ -17,10 +17,16 @@ function getLastUpdated() {
 
 function updateMeta() {
   try {
-    SpreadsheetApp.openById(SHEET_ID)
-      .getSheetByName('Meta').getRange('A1')
-      .setValue(new Date().toISOString());
-  } catch(e) { Logger.log('Meta update failed: ' + e.message); }
+    // Invalidate caches so next read gets fresh data
+    const cache = CacheService.getScriptCache();
+    cache.remove('team_status');
+    cache.remove('all_doubts');
+  } catch(e) {}
+
+  // ... rest of existing updateMeta() code
+  SpreadsheetApp.openById(SHEET_ID)
+    .getSheetByName('Meta').getRange('A1')
+    .setValue(new Date().toISOString());
 }
 
 // ── GENERATE RANDOM TOKEN ─────────────────────────────────────
@@ -51,6 +57,16 @@ function loginCRX(passkey) {
         // Valid — generate token and store session
         const token        = generateToken();
         const sessionSheet = ss.getSheetByName('CRX_Sessions');
+        // Add inside loginCRX(), after getting sessionSheet
+        const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 7);
+        const cutoffStr = Utilities.formatDate(cutoff, tz, 'yyyy-MM-dd');
+        const oldRows = [];
+        for (let j = 1; j < sessions.length; j++) {
+          let sd = sessions[j][2];
+          sd = sd instanceof Date ? Utilities.formatDate(sd, tz, 'yyyy-MM-dd') : sd.toString().substring(0,10);
+          if (sd < cutoffStr) oldRows.push(j + 1);
+        }
+        for (let k = oldRows.length - 1; k >= 0; k--) sessionSheet.deleteRow(oldRows[k]);
         if (sessionSheet) {
           // Remove any existing today-sessions for this member
           const rows = sessionSheet.getDataRange().getValues();
@@ -425,7 +441,42 @@ function submitDoubt(formData) {
 
 
 // ── MODIFIED getDoubts — last 30 days only ────────────────────
-function getDoubts() {
+// function getDoubts() {
+//   try {
+//     const ss    = SpreadsheetApp.openById(SHEET_ID);
+//     const sheet = ss.getSheetByName('Doubts');
+//     if (!sheet) return [];
+//     const data = sheet.getDataRange().getValues();
+//     if (data.length <= 1) return [];
+//     const headers = data[0];
+
+//     const cutoff = new Date();
+//     cutoff.setDate(cutoff.getDate() - 30); // 30-day window
+
+//     return data.slice(1)
+//       .filter(row => {
+//         const d = row[1] instanceof Date ? row[1] : new Date(row[1]);
+//         return !isNaN(d) && d >= cutoff;
+//       })
+//       .map(row => {
+//         const obj = {};
+//         headers.forEach((h, i) => {
+//           const key = h.toString().trim();
+//           let val = row[i];
+//           if (val instanceof Date) val = val.toISOString();
+//           else if (val === null || val === undefined) val = '';
+//           else val = val.toString();
+//           obj[key] = val;
+//         });
+//         return obj;
+//       });
+//   } catch (err) {
+//     Logger.log('getDoubts ERROR: ' + err.message);
+//     return [];
+//   }
+// }
+
+function _computeDoubts() {
   try {
     const ss    = SpreadsheetApp.openById(SHEET_ID);
     const sheet = ss.getSheetByName('Doubts');
@@ -458,6 +509,17 @@ function getDoubts() {
     Logger.log('getDoubts ERROR: ' + err.message);
     return [];
   }
+}
+
+function getDoubts() {
+  const cache  = CacheService.getScriptCache();
+  const cached = cache.get('all_doubts');
+  if (cached) {
+    try { return JSON.parse(cached); } catch(e) {}
+  }
+  const result = _computeDoubts(); // your existing logic
+  try { cache.put('all_doubts', JSON.stringify(result), 10); } catch(e) {}
+  return result;
 }
 
 // ── ASSIGN DOUBT ──────────────────────────────────────────────
@@ -662,9 +724,21 @@ function updateResolvedDoubt(updateData) {
   }
 }
 
-
-// ── GET TEAM STATUS ──────────────────────────────────────────
+// ---------GET TEAM STATUS -------------------------
 function getTeamStatus() {
+  const cache = CacheService.getScriptCache();
+  const cached = cache.get('team_status');
+  if (cached) {
+    try { return JSON.parse(cached); } catch(e) {}
+  }
+
+  const result = _computeTeamStatus(); // rename your existing logic to this
+
+  try { cache.put('team_status', JSON.stringify(result), 15); } catch(e) {}
+  return result;
+}
+
+function _computeTeamStatus() {
   try {
     const ss      = SpreadsheetApp.openById(SHEET_ID);
     const tz    = Session.getScriptTimeZone();
@@ -733,6 +807,78 @@ function getTeamStatus() {
     return { team: [], today: '' };
   }
 }
+
+
+// ── GET TEAM STATUS ──────────────────────────────────────────
+// function getTeamStatus() {
+//   try {
+//     const ss      = SpreadsheetApp.openById(SHEET_ID);
+//     const tz    = Session.getScriptTimeZone();
+//     const today = Utilities.formatDate(new Date(), tz, 'yyyy-MM-dd');
+
+//     // All CRX members from Config
+//     const cfgData = ss.getSheetByName('Config').getDataRange().getValues();
+//     const crxMembers = [];
+//     for (let i = 1; i < cfgData.length; i++) {
+//       if (cfgData[i][0] && cfgData[i][0].toString().trim())
+//         crxMembers.push(cfgData[i][0].toString().trim());
+//     }
+
+//     // Today's presence from Presence sheet
+//     const presSheet = ss.getSheetByName('Presence');
+//     const presData  = presSheet ? presSheet.getDataRange().getValues() : [];
+//     const todayPres = {};
+//     for (let i = 1; i < presData.length; i++) {
+//       let rd = presData[i][0];
+//       // Handle both Date objects (old rows) and string dates (new rows)
+//       let rdStr = rd instanceof Date
+//         ? Utilities.formatDate(rd, tz, 'yyyy-MM-dd')
+//         : rd.toString().substring(0, 10); // "yyyy-MM-dd" prefix
+
+//       if (rdStr === today) {
+//         todayPres[presData[i][1].toString().trim()] = {
+//         status:     presData[i][2].toString().trim().toLowerCase(),
+//         customNote: presData[i][3] ? presData[i][3].toString().trim() : ''
+//         };
+//       }
+//     }
+
+//     // Active doubt assignments (Status === 'Assigned')
+//     const dData   = ss.getSheetByName('Doubts').getDataRange().getValues();
+//     const active  = {};
+//     for (let i = 1; i < dData.length; i++) {
+//       if (dData[i][17].toString().trim() === 'Assigned') {
+//         const assignee = dData[i][18].toString().trim();
+//         if (assignee) {
+//           if (!active[assignee]) active[assignee] = [];
+//           active[assignee].push(dData[i][0].toString());
+//         }
+//       }
+//     }
+
+//     const team = crxMembers.map(member => {
+//       const p  = todayPres[member] || { status: 'absent', customNote: '' };
+//       const ad = active[member]    || [];
+//       const isPresent       = p.status === 'present';
+//       const isBusyWithDoubt = ad.length > 0;
+//       const isBusyOther     = isPresent && p.customNote !== '';
+//       return {
+//         member,
+//         isPresent,
+//         customNote:     p.customNote,
+//         activeDoubts:   ad,
+//         isBusyWithDoubt,
+//         isBusyOther,
+//         isAvailable: isPresent && !isBusyWithDoubt && !isBusyOther
+//       };
+//     });
+
+//     return { team, today };
+//   } catch (err) {
+//     Logger.log('getTeamStatus ERROR: ' + err.message);
+//     return { team: [], today: '' };
+//   }
+// }
 
 
 // ── MARK PRESENCE ─────────────────────────────────────────────
