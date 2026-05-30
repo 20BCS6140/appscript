@@ -76,6 +76,17 @@
     .stats-tbl .total-row td { font-weight:600; background:#f8f9fa; border-top:2px solid #e8eaed; }
     .two-col-tables { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px; }
     @media (max-width:900px) { .two-col-tables { grid-template-columns:1fr; } }
+
+
+  /* Copy table button */
+  .btn-copy-table {
+    background: white; border: 1px solid #dadce0; color: #5f6368;
+    padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 500;
+    cursor: pointer; font-family: 'Google Sans', Arial, sans-serif;
+    display: flex; align-items: center; gap: 5px; transition: all 0.15s; white-space: nowrap;
+  }
+  .btn-copy-table:hover  { background: #f8f9fa; border-color: #1a73e8; color: #1a73e8; }
+  .btn-copy-table.copied { background: #e6f4ea; border-color: #c3e6cb; color: #1e8e3e; }
   </style>
 </head>
 <body>
@@ -162,7 +173,12 @@
 
     <!-- Member performance table -->
     <div class="stats-table-section">
-      <div class="chart-title">Team Performance</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div class="chart-title" style="margin-bottom:0">Team Performance</div>
+        <button id="copyMemberBtn" class="btn-copy-table" onclick="copyMemberStats()">
+          📋 Copy Table
+        </button>
+      </div>
       <div id="memberStatsTable">
         <div class="loading-indicator">Loading…</div>
       </div>
@@ -170,7 +186,12 @@
 
     <!-- L2 Violations confirmed table -->
     <div class="stats-table-section">
-      <div class="chart-title">L2 Confirmed Violations</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div class="chart-title" style="margin-bottom:0">L2 Confirmed Violations</div>
+        <button id="copyViolationBtn" class="btn-copy-table" onclick="copyViolationCounts()">
+          📋 Copy Table
+        </button>
+      </div>
       <div id="violationCountTable">
         <div class="loading-indicator">Loading…</div>
       </div>
@@ -252,6 +273,10 @@
   'SPP New Tab Search',
   'Escalate'
 ];
+
+// ── Store latest table data for copy ─────────────────────────
+var memberStatsData    = [];
+var violationCountData = [];
   var chartsReady = false;
 
   // Load Google Charts first
@@ -314,53 +339,197 @@
   }
 
   // ── New render functions ─────────────────────────────────────
-  function renderMemberStatsTable(memberStats) {
-    var div = document.getElementById('memberStatsTable');
-    if (!memberStats || !memberStats.length) {
-      div.innerHTML = '<div class="no-data"><div class="icon">📊</div>No data for selected filters</div>'; return;
-    }
-    var totals = memberStats.reduce(function(a,m) {
-      return { total:a.total+m.total, easy:a.easy+m.easy, medium:a.medium+m.medium,
-             complex:a.complex+m.complex, escalated:a.escalated+m.escalated };
-    }, { total:0,easy:0,medium:0,complex:0,escalated:0 });
 
-    var html = '<table class="stats-tbl"><thead><tr>'+
-      '<th>Member</th><th>Total</th><th>Easy</th><th>Med</th><th>Complex</th>'+
-      '<th>Escalated</th><th>Avg AHT</th><th>Avg Wait</th>'+
-      '</tr></thead><tbody>';
-    memberStats.forEach(function(m) {
-      html += '<tr>'+
-        '<td style="font-weight:500">'+m.member+'</td>'+
-        '<td><strong>'+m.total+'</strong></td>'+
-        '<td>'+m.easy+'</td><td>'+m.medium+'</td><td>'+m.complex+'</td>'+
-        '<td>'+(m.escalated>0?'<span style="color:#d93025;font-weight:600">'+m.escalated+'</span>':'0')+'</td>'+
-        '<td style="font-size:12px;color:#5f6368">'+m.avgAHT+'</td>'+
-        '<td style="font-size:12px;color:#5f6368">'+m.avgWait+'</td>'+
+
+// ── Update render functions to store data ────────────────────
+// REPLACE your existing renderMemberStatsTable with this:
+function renderMemberStatsTable(memberStats) {
+  memberStatsData = memberStats || []; // store for copy
+  var div = document.getElementById('memberStatsTable');
+  if (!memberStatsData.length) {
+    div.innerHTML = '<div class="no-data"><div class="icon">📊</div>No data for selected filters</div>';
+    return;
+  }
+  var totals = memberStatsData.reduce(function(a, m) {
+    return { total:a.total+m.total, easy:a.easy+m.easy,
+             medium:a.medium+m.medium, complex:a.complex+m.complex, escalated:a.escalated+m.escalated };
+  }, { total:0, easy:0, medium:0, complex:0, escalated:0 });
+
+  var html = '<table class="stats-tbl"><thead><tr>'+
+    '<th>Member</th><th>Total</th><th>Easy</th><th>Med</th><th>Complex</th>'+
+    '<th>Escalated</th><th>Avg AHT</th><th>Avg Wait</th>'+
+    '</tr></thead><tbody>';
+  memberStatsData.forEach(function(m) {
+    html += '<tr>'+
+      '<td style="font-weight:500">'+m.member+'</td>'+
+      '<td><strong>'+m.total+'</strong></td>'+
+      '<td>'+m.easy+'</td><td>'+m.medium+'</td><td>'+m.complex+'</td>'+
+      '<td>'+(m.escalated>0?'<span style="color:#d93025;font-weight:600">'+m.escalated+'</span>':'0')+'</td>'+
+      '<td style="font-size:12px;color:#5f6368">'+m.avgAHT+'</td>'+
+      '<td style="font-size:12px;color:#5f6368">'+m.avgWait+'</td>'+
+    '</tr>';
+  });
+  html += '<tr class="total-row"><td>Total</td><td>'+totals.total+'</td>'+
+    '<td>'+totals.easy+'</td><td>'+totals.medium+'</td><td>'+totals.complex+'</td>'+
+    '<td>'+totals.escalated+'</td><td>—</td><td>—</td></tr>';
+  html += '</tbody></table>';
+  div.innerHTML = html;
+}
+
+// REPLACE your existing renderViolationCountTable with this:
+function renderViolationCountTable(violationCounts) {
+  violationCountData = violationCounts || []; // store for copy
+  var div = document.getElementById('violationCountTable');
+  if (!violationCountData.length) {
+    div.innerHTML = '<div class="no-data"><div class="icon">📊</div>No data for selected filters</div>';
+    return;
+  }
+  var total = violationCountData.reduce(function(s, v) { return s + v.count; }, 0);
+  var html = '<table class="stats-tbl"><thead><tr>'+
+    '<th>Violations Marked</th><th>Count</th>'+
+    '</tr></thead><tbody>';
+  violationCountData.forEach(function(v) {
+    html += '<tr><td>'+v.violation+'</td><td><strong>'+v.count+'</strong></td></tr>';
+  });
+  html += '<tr class="total-row"><td>Total</td><td>'+total+'</td></tr>';
+  html += '</tbody></table>';
+  div.innerHTML = html;
+}
+
+// ── COPY FUNCTIONS ────────────────────────────────────────────
+
+function copyMemberStats() {
+  if (!memberStatsData.length) {
+    showAllEmpty && showToast('No data to copy', 'error'); return;
+  }
+
+  // Build HTML table with ONLY Member | Total | Easy | Med | Complex
+  var totals = memberStatsData.reduce(function(a, m) {
+    return { total:a.total+m.total, easy:a.easy+m.easy,
+             medium:a.medium+m.medium, complex:a.complex+m.complex };
+  }, { total:0, easy:0, medium:0, complex:0 });
+
+  var html =
+    '<table border="1" cellpadding="8" cellspacing="0" ' +
+    'style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:13px;border-color:#e0e0e0">' +
+    '<thead>' +
+      '<tr style="background:#f5f5f5;font-weight:bold">' +
+        '<td style="padding:8px 14px;border:1px solid #ccc">Member</td>' +
+        '<td style="padding:8px 14px;border:1px solid #ccc;text-align:center">Total</td>' +
+        '<td style="padding:8px 14px;border:1px solid #ccc;text-align:center">Easy</td>' +
+        '<td style="padding:8px 14px;border:1px solid #ccc;text-align:center">Med</td>' +
+        '<td style="padding:8px 14px;border:1px solid #ccc;text-align:center">Complex</td>' +
+      '</tr>' +
+    '</thead><tbody>';
+
+  memberStatsData.forEach(function(m) {
+    html +=
+      '<tr>' +
+        '<td style="padding:8px 14px;border:1px solid #e0e0e0">' + m.member + '</td>' +
+        '<td style="padding:8px 14px;border:1px solid #e0e0e0;text-align:center"><strong>' + m.total + '</strong></td>' +
+        '<td style="padding:8px 14px;border:1px solid #e0e0e0;text-align:center">' + m.easy + '</td>' +
+        '<td style="padding:8px 14px;border:1px solid #e0e0e0;text-align:center">' + m.medium + '</td>' +
+        '<td style="padding:8px 14px;border:1px solid #e0e0e0;text-align:center">' + m.complex + '</td>' +
       '</tr>';
-    });
-    html += '<tr class="total-row"><td>Total</td><td>'+totals.total+'</td>'+
-      '<td>'+totals.easy+'</td><td>'+totals.medium+'</td><td>'+totals.complex+'</td>'+
-      '<td>'+totals.escalated+'</td><td>—</td><td>—</td></tr>';
-    html += '</tbody></table>';
-    div.innerHTML = html;
+  });
+
+  // Total row
+  html +=
+    '<tr style="background:#f5f5f5;font-weight:bold">' +
+      '<td style="padding:8px 14px;border:1px solid #ccc">Total</td>' +
+      '<td style="padding:8px 14px;border:1px solid #ccc;text-align:center">' + totals.total + '</td>' +
+      '<td style="padding:8px 14px;border:1px solid #ccc;text-align:center">' + totals.easy + '</td>' +
+      '<td style="padding:8px 14px;border:1px solid #ccc;text-align:center">' + totals.medium + '</td>' +
+      '<td style="padding:8px 14px;border:1px solid #ccc;text-align:center">' + totals.complex + '</td>' +
+    '</tr>';
+
+  html += '</tbody></table>';
+
+  copyRichHTML(html, 'copyMemberBtn');
+}
+
+function copyViolationCounts() {
+  if (!violationCountData.length) {
+    showToast && showToast('No data to copy', 'error'); return;
   }
 
-  function renderViolationCountTable(violationCounts) {
-    var div = document.getElementById('violationCountTable');
-    if (!violationCounts || !violationCounts.length) {
-      div.innerHTML = '<div class="no-data"><div class="icon">📊</div>No data for selected filters</div>'; return;
-    }
-    var total = violationCounts.reduce(function(s,v) { return s+v.count; }, 0);
-    var html = '<table class="stats-tbl"><thead><tr>'+
-      '<th>Violations Marked</th><th>Count</th>'+
-      '</tr></thead><tbody>';
-    violationCounts.forEach(function(v) {
-      html += '<tr><td>'+v.violation+'</td><td><strong>'+v.count+'</strong></td></tr>';
-    });
-    html += '<tr class="total-row"><td>Total</td><td>'+total+'</td></tr>';
-    html += '</tbody></table>';
-    div.innerHTML = html;
+  var total = violationCountData.reduce(function(s, v) { return s + v.count; }, 0);
+
+  var html =
+    '<table border="1" cellpadding="8" cellspacing="0" ' +
+    'style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:13px;border-color:#e0e0e0">' +
+    '<thead>' +
+      '<tr style="background:#f5f5f5;font-weight:bold">' +
+        '<td style="padding:8px 14px;border:1px solid #ccc">Violations Marked</td>' +
+        '<td style="padding:8px 14px;border:1px solid #ccc;text-align:center">Count</td>' +
+      '</tr>' +
+    '</thead><tbody>';
+
+  violationCountData.forEach(function(v) {
+    html +=
+      '<tr>' +
+        '<td style="padding:8px 14px;border:1px solid #e0e0e0">' + v.violation + '</td>' +
+        '<td style="padding:8px 14px;border:1px solid #e0e0e0;text-align:center"><strong>' + v.count + '</strong></td>' +
+      '</tr>';
+  });
+
+  html +=
+    '<tr style="background:#f5f5f5;font-weight:bold">' +
+      '<td style="padding:8px 14px;border:1px solid #ccc">Total</td>' +
+      '<td style="padding:8px 14px;border:1px solid #ccc;text-align:center">' + total + '</td>' +
+    '</tr>';
+
+  html += '</tbody></table>';
+
+  copyRichHTML(html, 'copyViolationBtn');
+}
+
+// ── Core copy engine — copies rich HTML so it pastes as table ─
+function copyRichHTML(html, btnId) {
+  var btn = document.getElementById(btnId);
+
+  function showFeedback() {
+    var orig = btn.innerHTML;
+    btn.innerHTML = '✅ Copied!';
+    btn.classList.add('copied');
+    setTimeout(function() {
+      btn.innerHTML = orig;
+      btn.classList.remove('copied');
+    }, 2000);
   }
+
+  // Modern API — ClipboardItem with text/html (pastes as table in Docs & Gmail)
+  if (window.ClipboardItem && navigator.clipboard && navigator.clipboard.write) {
+    var blob = new Blob([html], { type: 'text/html' });
+    navigator.clipboard.write([new ClipboardItem({ 'text/html': blob })])
+      .then(showFeedback)
+      .catch(function() { fallbackCopy(html, showFeedback); });
+  } else {
+    fallbackCopy(html, showFeedback);
+  }
+}
+
+// Fallback: render HTML in a hidden div, select it, execCommand copy
+// Works in older browsers and still pastes as a table
+function fallbackCopy(html, callback) {
+  var temp = document.createElement('div');
+  temp.style.cssText = 'position:fixed;left:-9999px;top:-9999px;pointer-events:none;opacity:0';
+  temp.innerHTML = html;
+  document.body.appendChild(temp);
+  try {
+    var range = document.createRange();
+    range.selectNodeContents(temp);
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+    document.execCommand('copy');
+    sel.removeAllRanges();
+    if (callback) callback();
+  } catch(e) {
+    console.warn('Copy failed:', e);
+  }
+  document.body.removeChild(temp);
+}
 
   function loadAnalytics() {
     // Show loading state
