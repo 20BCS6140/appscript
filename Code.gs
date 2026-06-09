@@ -2,7 +2,7 @@
 // Code.GS — Google Chat Webhook Notifications
 // ============================================================
 
-const SHEET_ID = '1MxVhInv31dg10ZaQRidOv6gUStExG3wf-r8SpsysZ0c';
+const SHEET_ID = '1yS7as3VGQaee7Y4YAW8gbppMn2rl2DvdypDqzKpcu3c';
 const CHAT_WEBHOOK_URL = 'YOUR_WEBHOOK_URL_HERE';
 
 function onSheetChange(e) {
@@ -38,8 +38,8 @@ function generateToken() {
 }
 
 // ── LOGIN ─────────────────────────────────────────────────────
-function loginCRX(passkey) {
-// function loginCRX(ldap, passkey) {
+
+function loginCRX(ldap, passkey) {
   try {
     const ss       = SpreadsheetApp.openById(SHEET_ID);
     const authSheet= ss.getSheetByName('CRX_Auth');
@@ -58,6 +58,7 @@ function loginCRX(passkey) {
         const token        = generateToken();
         const sessionSheet = ss.getSheetByName('CRX_Sessions');
         // Add inside loginCRX(), after getting sessionSheet
+        const sessions = sessionSheet.getDataRange().getValues();
         const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 7);
         const cutoffStr = Utilities.formatDate(cutoff, tz, 'yyyy-MM-dd');
         const oldRows = [];
@@ -285,7 +286,7 @@ function checkCRXAccess() {
     const userLdap  = userEmail.split('@')[0].toLowerCase();
 
     const ss     = SpreadsheetApp.openById(SHEET_ID);
-    const config = ss.getSheetByName('Config');
+    const config = ss.getSheetByName('Access');
     const data   = config.getDataRange().getValues();
 
     for (let i = 1; i < data.length; i++) {
@@ -344,11 +345,18 @@ function getUserLdap() {
 function getPodInfo(email) {
   try {
     const ss = SpreadsheetApp.openById(SHEET_ID);
-    const podSheet = ss.getSheetByName('POD'); // ← update tab name if different
+    const podSheet = ss.getSheetByName('POD');
     if (!podSheet) return { pod: '', supervisor: '' };
+
+    // Extract LDAP from the email — POD sheet stores LDAPs, not full emails
+    const emailLdap = email.toString().trim().toLowerCase().split('@')[0];
+
     const data = podSheet.getDataRange().getValues();
     for (let i = 1; i < data.length; i++) {
-      if (data[i][0].toString().trim().toLowerCase() === email.trim().toLowerCase()) {
+      const rowVal = data[i][0].toString().trim().toLowerCase();
+      // Match against LDAP directly (e.g. "yishin")
+      // Also falls back to matching full email in case you ever mix formats
+      if (rowVal === emailLdap || rowVal === email.trim().toLowerCase()) {
         return {
           pod:        data[i][1].toString().trim(),
           supervisor: data[i][2].toString().trim()
@@ -357,6 +365,7 @@ function getPodInfo(email) {
     }
     return { pod: '', supervisor: '' };
   } catch (e) {
+    Logger.log('getPodInfo ERROR: ' + e.message);
     return { pod: '', supervisor: '' };
   }
 }
@@ -636,7 +645,13 @@ function resolveDoubt(resolveData) {
       clarification: resolveData.clarification,
       finalVerdict:  resolveData.providedVerdict,
       resolvedBy:    resolveData.resolvedBy,
-      doubtId:       doubtRow[0]
+      doubtId:       doubtRow[0],
+      pod:           doubtRow[20],
+      supervisor:    doubtRow[21],
+      l0Improvement: resolveData.l0AreaOfImprovement,  
+      additionalComments: resolveData.l2AdditionalComments,
+      typeOfConsult: resolveData.typeOfConsult,
+      approachValidation: resolveData.l0ApproachValidation
     });
 
     updateMeta();
@@ -711,7 +726,13 @@ function updateResolvedDoubt(updateData) {
             clarification: updateData.clarification,
             finalVerdict:  updateData.providedVerdict,
             resolvedBy:    updateData.resolvedBy,
-            doubtId:       data[i][0]
+            doubtId:       data[i][0],
+            pod:           data[i][33],
+            supervisor:    data[i][34],
+            l0Improvement: updateData.l0AreaOfImprovement,  
+            additionalComments: updateData.l2AdditionalComments,
+            typeOfConsult: updateData.typeOfConsult,
+            approachValidation: updateData.l0ApproachValidation
           });
         }
         updateMeta();
@@ -1086,20 +1107,91 @@ function exportResolvedCSV(dateFrom, dateTo) {
 
 // ── CHECK IF ANY CRX MEMBER IS AVAILABLE ─────────────────────
 // Called by L0 form on page load — lightweight availability check
+// function checkCRXAvailability() {
+//   try {
+//     const result    = getTeamStatus();
+//     const available = result.team.filter(function(m) { return m.isAvailable; });
+//     const present   = result.team.filter(function(m) { return m.isPresent; });
+//     return {
+//       hasAvailable:   available.length > 0,
+//       availableCount: available.length,
+//       presentCount:   present.length,
+//       totalCount:     result.team.length
+//     };
+//   } catch (err) {
+//     Logger.log('checkCRXAvailability ERROR: ' + err.message);
+//     // Fail open — if something breaks, don't block L0s
+//     return { hasAvailable: true, availableCount: 1, presentCount: 1, totalCount: 1 };
+//   }
+// }
+
 function checkCRXAvailability() {
   try {
-    const result    = getTeamStatus();
-    const available = result.team.filter(function(m) { return m.isAvailable; });
-    const present   = result.team.filter(function(m) { return m.isPresent; });
+    const ss    = SpreadsheetApp.openById(SHEET_ID);
+    const tz    = Session.getScriptTimeZone();
+    const today = Utilities.formatDate(new Date(), tz, 'yyyy-MM-dd');
+
+    // ── 1. Count CRX members marked present today ──
+    const presSheet  = ss.getSheetByName('Presence');
+    let presentCount = 0;
+    if (presSheet) {
+      const pData = presSheet.getDataRange().getValues();
+      for (let i = 1; i < pData.length; i++) {
+        let rd = pData[i][0];
+        rd = rd instanceof Date
+          ? Utilities.formatDate(rd, tz, 'yyyy-MM-dd')
+          : rd.toString().substring(0, 10);
+        if (rd === today && pData[i][2].toString().trim().toLowerCase() === 'present') {
+          presentCount++;
+        }
+      }
+    }
+
+    // Nobody present today → block regardless
+    if (presentCount === 0) {
+      return { hasAvailable: false, presentCount: 0, openCount: 0,
+               freeCount: 0, reason: 'no_present' };
+    }
+
+    // ── 2. Count doubts currently in Open status ──
+    const dSheet = ss.getSheetByName('Doubts');
+    let openCount = 0;
+    if (dSheet) {
+      const dData = dSheet.getDataRange().getValues();
+      for (let i = 1; i < dData.length; i++) {
+        if (dData[i][17].toString().trim() === 'Open') openCount++;
+      }
+    }
+
+    // ── 3. Count free members (present + no active doubt + no custom note) ──
+    let freeCount = 0;
+    try {
+      const ts = getTeamStatus();
+      freeCount = ts.team.filter(function(m) { return m.isAvailable; }).length;
+    } catch(e) {}
+
+    // ── Decision logic ────────────────────────────────────────────────────
+    // ALLOW  when: any member is free  OR  open doubts < present count
+    // BLOCK  when: no free member  AND  open doubts >= present count
+    //
+    // This means L0s can queue up to (presentCount) open doubts in total.
+    // CRX members pick from the queue as they finish existing ones.
+    const hasAvailable = freeCount > 0 || openCount < presentCount;
+
     return {
-      hasAvailable:   available.length > 0,
-      availableCount: available.length,
-      presentCount:   present.length,
-      totalCount:     result.team.length
+      hasAvailable,
+      presentCount,
+      openCount,
+      freeCount,
+      capacity: presentCount,           // max open doubts allowed at once
+      slotsLeft: Math.max(0, presentCount - openCount),
+      reason: hasAvailable ? 'available' : 'full_capacity'
     };
+
   } catch (err) {
     Logger.log('checkCRXAvailability ERROR: ' + err.message);
-    // Fail open — if something breaks, don't block L0s
-    return { hasAvailable: true, availableCount: 1, presentCount: 1, totalCount: 1 };
+    // Fail open — don't block L0s due to a code error
+    return { hasAvailable: true, presentCount: 1, openCount: 0,
+             freeCount: 1, capacity: 1, slotsLeft: 1, reason: 'error_open' };
   }
 }
