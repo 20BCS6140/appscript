@@ -170,47 +170,45 @@
   <!-- Unavailable state (hidden; shown if no CRX member is free) -->
   <div class="gate-unavailable" id="gateUnavailable" style="display:none">
 
-    <span class="gate-icon">🛑</span>
+  <span class="gate-icon" id="gateIcon">🕐</span>
 
-    <div class="gate-title">CRX Team Currently Occupied</div>
+  <div class="gate-title" id="gateTitle">CRX Team at Full Capacity</div>
 
-    <div class="gate-status-badge">
-      🟡 All team members are engaged
-    </div>
-
-    <div class="gate-message">
-      <p>
-        Thank you for reaching out to the <strong>Chrome Extensions Review (CRX) Team</strong>.
-        We sincerely appreciate your trust and patience.
-      </p>
-      <p>
-        At this moment, all of our CRX reviewers are actively engaged with
-        ongoing consultations and doubt reviews. To ensure every query
-        receives the focused attention it deserves, we are unable to accept
-        new submissions at this time.
-      </p>
-      <p>
-        Please <strong>try again in a few minutes</strong> — our team works quickly,
-        and a reviewer will be available to assist you shortly.
-      </p>
-    </div>
-
-    <hr class="gate-divider">
-
-    <p style="font-size:13px;color:#5f6368;margin-bottom:16px">
-      This page will automatically check again every minute.<br>
-      <!-- You may also click below to check right now. -->
-    </p>
-
-    <!-- <button class="gate-retry-btn" onclick="retryAvailabilityCheck()">
-      🔄 Check Again Now
-    </button> -->
-
-    <div class="gate-footer">
-      Chrome Extensions Review Team &nbsp;·&nbsp; Google Internal
-    </div>
-
+  <div class="gate-status-badge" id="gateBadge">
+    🟡 Checking…
   </div>
+
+  <div class="gate-message" id="gateMessage">
+    <p id="gateMainMsg">
+      All present CRX reviewers currently have a pending consultation in queue.
+    </p>
+    <p>
+      Your doubt will be accepted as soon as a reviewer completes an existing
+      one and capacity opens up. <strong>Please try again in a few minutes.</strong>
+    </p>
+    <p style="color:#5f6368;font-size:12px;margin-top:4px">
+      This page automatically checks for an open slot every 30 seconds.
+    </p>
+  </div>
+
+  <div style="margin-bottom:20px">
+    <div id="gateCapacityBar" style="background:#f1f3f4;border-radius:20px;height:10px;overflow:hidden;margin-bottom:8px">
+      <div id="gateCapacityFill" style="height:100%;border-radius:20px;background:#ea4335;transition:width 0.4s"></div>
+    </div>
+    <div id="gateCapacityLabel" style="font-size:12px;color:#5f6368;text-align:center"></div>
+  </div>
+
+  <hr class="gate-divider">
+
+  <button class="gate-retry-btn" onclick="retryAvailabilityCheck()">
+    🔄 Check for Open Slot
+  </button>
+
+  <div class="gate-footer">
+    Chrome Extensions Review Team &nbsp;·&nbsp; Google Internal
+  </div>
+
+</div>
 </div>
 
 <div class="top-bar">
@@ -218,10 +216,10 @@
     <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
     CRX Doubt Management
   </div>
-  <!-- <div class="nav-links">
-    <a href="https://script.google.com/macros/s/AKfycbw-F49hkvSpUvBAduT8qFtravWvQSnQ7FDAphM9UWBoF63tf0leJ8idXpdGQvHCAZWC/exec?page=crx">CRX Dashboard</a>
-    <a href="https://script.google.com/macros/s/AKfycbw-F49hkvSpUvBAduT8qFtravWvQSnQ7FDAphM9UWBoF63tf0leJ8idXpdGQvHCAZWC/exec?page=analytics">Analytics</a>
-  </div> -->
+  <div class="nav-links">
+    <a href="https://script.google.com/macros/s/AKfycbw-F49hkvSpUvBAduT8qFtravWvQSnQ7FDAphM9UWBoF63tf0leJ8idXpdGQvHCAZWC/exec?page=crx" target="_blank" rel="noopener noreferrer">CRX Dashboard</a>
+    <a href="https://script.google.com/macros/s/AKfycbw-F49hkvSpUvBAduT8qFtravWvQSnQ7FDAphM9UWBoF63tf0leJ8idXpdGQvHCAZWC/exec?page=analytics" target="_blank" rel="noopener noreferrer">Analytics</a>
+  </div>
 </div>
 
 <div class="page">
@@ -427,50 +425,150 @@
 // ════════════════════════════════════════════
 // AVAILABILITY CHECK — runs on every page load
 // ════════════════════════════════════════════
+// var availCheckInterval = null;
+
+// function checkAvailability(isRetry) {
+//   if (isRetry) {
+//     // Show spinner while re-checking
+//     document.getElementById('gateChecking').style.display  = 'block';
+//     document.getElementById('gateUnavailable').style.display = 'none';
+//   }
+
+//   google.script.run
+//     .withSuccessHandler(function(result) {
+//       if (result.hasAvailable) {
+//         // ✅ At least one CRX member is free — remove gate, show form
+//         document.getElementById('availGate').style.display = 'none';
+//         if (availCheckInterval) { clearInterval(availCheckInterval); availCheckInterval = null; }
+//       } else {
+//         // ❌ No CRX member is free — show blocking message
+//         document.getElementById('gateChecking').style.display   = 'none';
+//         document.getElementById('gateUnavailable').style.display = 'block';
+
+//         // Update the status badge with actual numbers if useful
+//         var badge = document.querySelector('.gate-status-badge');
+//         if (badge) {
+//           var presentTxt = result.presentCount > 0
+//             ? result.presentCount + ' member' + (result.presentCount > 1 ? 's' : '') + ' present, all engaged'
+//             : 'No members on duty right now';
+//           badge.textContent = '🟡 ' + presentTxt;
+//         }
+
+//         // Auto-recheck every 60 seconds while L0 is on the blocked page
+//         if (!availCheckInterval) {
+//           availCheckInterval = setInterval(function() {
+//             checkAvailability(false);
+//           }, 60000);
+//         }
+//       }
+//     })
+//     .withFailureHandler(function(err) {
+//       console.warn('Availability check failed:', err);
+//       // Fail open — if check errors, allow L0 access rather than permanently blocking
+//       document.getElementById('availGate').style.display = 'none';
+//     })
+//     .checkCRXAvailability();
+// }
+
+// ════════════════════════════════════════════
+// AVAILABILITY GATE
+// ════════════════════════════════════════════
 var availCheckInterval = null;
 
 function checkAvailability(isRetry) {
   if (isRetry) {
-    // Show spinner while re-checking
-    document.getElementById('gateChecking').style.display  = 'block';
+    document.getElementById('gateChecking').style.display    = 'block';
     document.getElementById('gateUnavailable').style.display = 'none';
   }
 
   google.script.run
     .withSuccessHandler(function(result) {
+
       if (result.hasAvailable) {
-        // ✅ At least one CRX member is free — remove gate, show form
+        // ✅ Slot available — open the form
         document.getElementById('availGate').style.display = 'none';
         if (availCheckInterval) { clearInterval(availCheckInterval); availCheckInterval = null; }
+
       } else {
-        // ❌ No CRX member is free — show blocking message
-        document.getElementById('gateChecking').style.display   = 'none';
+        // ❌ No capacity — show blocking message
+        document.getElementById('gateChecking').style.display    = 'none';
         document.getElementById('gateUnavailable').style.display = 'block';
 
-        // Update the status badge with actual numbers if useful
-        var badge = document.querySelector('.gate-status-badge');
-        if (badge) {
-          var presentTxt = result.presentCount > 0
-            ? result.presentCount + ' member' + (result.presentCount > 1 ? 's' : '') + ' present, all engaged'
-            : 'No members on duty right now';
-          badge.textContent = '🟡 ' + presentTxt;
-        }
+        // Update message content based on reason
+        updateGateMessage(result);
 
-        // Auto-recheck every 60 seconds while L0 is on the blocked page
+        // Auto-recheck every 30 seconds
         if (!availCheckInterval) {
           availCheckInterval = setInterval(function() {
             checkAvailability(false);
-          }, 60000);
+          }, 30000);
         }
       }
     })
     .withFailureHandler(function(err) {
       console.warn('Availability check failed:', err);
-      // Fail open — if check errors, allow L0 access rather than permanently blocking
+      // Fail open — don't permanently block on error
       document.getElementById('availGate').style.display = 'none';
     })
     .checkCRXAvailability();
 }
+
+function updateGateMessage(result) {
+  var icon      = document.getElementById('gateIcon');
+  var title     = document.getElementById('gateTitle');
+  var badge     = document.getElementById('gateBadge');
+  var mainMsg   = document.getElementById('gateMainMsg');
+  var capBar    = document.getElementById('gateCapacityFill');
+  var capLabel  = document.getElementById('gateCapacityLabel');
+
+  if (result.reason === 'no_present') {
+    // No one is on duty today
+    icon.textContent  = '🔴';
+    title.textContent = 'CRX Team Not on Duty';
+    badge.textContent = '🔴 No team members are on duty today';
+    badge.style.background = '#fce8e6'; badge.style.color = '#c5221f';
+    mainMsg.textContent =
+      'No CRX team members have checked in for today. ' +
+      'The doubt submission form will open once reviewers are on duty.';
+
+    // Bar: 0% used
+    capBar.style.width      = '0%';
+    capBar.style.background = '#ea4335';
+    capLabel.textContent    = '0 of 0 slots used — team offline';
+
+  } else {
+    // Full capacity: openCount >= presentCount
+    var open     = result.openCount    || 0;
+    var present  = result.presentCount || 0;
+    var pct      = present > 0 ? Math.min(100, Math.round((open / present) * 100)) : 100;
+
+    icon.textContent  = '🕐';
+    title.textContent = 'CRX Team at Full Capacity';
+    badge.textContent = '🟡 ' + open + ' open doubt' + (open > 1 ? 's' : '') +
+                        ' · ' + present + ' reviewer' + (present > 1 ? 's' : '') + ' on duty';
+    badge.style.background = '#fef3e0'; badge.style.color = '#b06000';
+
+    mainMsg.textContent =
+      'All ' + present + ' present CRX reviewer' + (present > 1 ? 's' : '') +
+      ' currently have a pending consultation in queue (' + open +
+      ' open doubt' + (open > 1 ? 's' : '') + ' waiting). ' +
+      'New doubts will be accepted as soon as a reviewer resolves an existing one.';
+
+    // Capacity bar
+    capBar.style.width      = pct + '%';
+    capBar.style.background = pct >= 100 ? '#ea4335' : '#fbbc04';
+    capLabel.textContent    = open + ' of ' + present + ' slot' +
+                              (present > 1 ? 's' : '') + ' filled' +
+                              (pct >= 100 ? ' — queue full' : '');
+  }
+}
+
+function retryAvailabilityCheck() {
+  checkAvailability(true);
+}
+
+// Run check immediately when page loads
+checkAvailability(false);
 
 function retryAvailabilityCheck() {
   checkAvailability(true);
