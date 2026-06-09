@@ -640,8 +640,8 @@
 <div class="top-bar">
   <div class="logo">CRX Doubt Management</div>
   <div class="nav-links">
-    <a href="?page=l0">L0 Form</a>
-    <a href="?page=analytics">Analytics</a>
+    <a href="?page=l0" target="_blank" rel="noopener noreferrer">L0 Form</a>
+    <a href="?page=analytics" target="_blank" rel="noopener noreferrer">Analytics</a>
   </div>
 </div>
 
@@ -765,14 +765,14 @@
         <select id="typeOfConsult">
           <option value="">— Select —</option>
           <option value="easy">Easy</option>
-          <option value="medium">Medium</option>
+          <option value="medium" >Medium</option>
           <option value="complex">Complex</option>
         </select>
       </div>
       <div class="fg"><label>L0 Approach Validation <span style="color:red">*</span></label>
         <select id="l0ApproachValidation">
           <option value="">— Select —</option>
-          <option value="valid doubt">Valid Doubt</option>
+          <option value="valid doubt" >Valid Doubt</option>
           <option value="invalid doubt">Invalid Doubt</option>
         </select>
       </div>
@@ -782,13 +782,13 @@
       <div class="fg"><label>Escalated (lack of tools)? <span style="color:red">*</span></label>
         <select id="escalatedDueToTools">
           <option value="">— Select —</option>
-          <option value="yes">Yes</option><option value="no">No</option>
+          <option value="yes">Yes</option><option value="no" >No</option>
         </select>
       </div>
       <div class="fg"><label>Escalation Validity <span style="color:red">*</span></label>
         <select id="escalationValidity">
           <option value="">— Select —</option>
-          <option value="yes">Yes</option><option value="no">No</option>
+          <option value="yes" >Yes</option><option value="no">No</option>
         </select>
       </div>
     </div>
@@ -797,13 +797,13 @@
       <div class="fg"><label>Query Clear from L0? <span style="color:red">*</span></label>
         <select id="queryClarity">
           <option value="">— Select —</option>
-          <option value="yes">Yes</option><option value="no">No</option>
+          <option value="yes" >Yes</option><option value="no">No</option>
         </select>
       </div>
       <div class="fg"><label>New Scenario for DCR? <span style="color:red">*</span></label>
         <select id="newScenario">
           <option value="">— Select —</option>
-          <option value="yes">Yes</option><option value="no">No</option>
+          <option value="yes">Yes</option><option value="no" >No</option>
         </select>
       </div>
     </div>
@@ -969,6 +969,9 @@
       <select id="attendanceMember" style="flex:1;padding:8px 12px;border:1px solid #dadce0;border-radius:6px;font-size:13px;font-family:'Google Sans',Arial,sans-serif;outline:none">
         <option value="">— Select your name —</option>
       </select>
+      <!-- <input id="attendanceMember" style="flex:1;padding:8px 12px;border:1px solid #dadce0;border-radius:6px;font-size:13px;font-family:'Google Sans',Arial,sans-serif;outline:none">
+        
+      </input>  -->
       <button class="btn-present" onclick="markPresent()">✓ Present</button>
       <button class="btn-absent"  onclick="markAbsent()">✗ Absent</button>
     </div>
@@ -1005,12 +1008,12 @@
       <div class="login-brand-sub">Sign in to access the dashboard</div>
     </div>
 
-    <!-- <div class="login-field">
+    <div class="login-field">
       <label>LDAP</label>
       <input class="login-input" type="text" id="loginLdap"
              placeholder="e.g. ajaygajula" autocomplete="username"
              onkeydown="if(event.key==='Enter')document.getElementById('loginPasskey').focus()">
-    </div> -->
+    </div>
 
     <div class="login-field">
       <label>Passkey</label>
@@ -1075,8 +1078,22 @@ function clearSession() {
   // else: login overlay stays visible — user must log in
 })();
 
+google.script.run
+    .withSuccessHandler(function(ldap) {
+      if (ldap) {
+        const el1 = document.getElementById('loginLdap');
+        // const ldap = email.split('@')[0].toLowerCase();
+        el1.value = ldap;
+        el1.readOnly = true;
+        el1.style.backgroundColor = '#f1f3f4';
+      }
+    })
+    .withFailureHandler(err => console.warn('Email fetch failed:', err))
+    .getUserLdap();
+
+
 function doLogin() {
-  // var ldap    = document.getElementById('loginLdap').value.trim();
+  var ldap    = document.getElementById('loginLdap').value.trim();
   var passkey = document.getElementById('loginPasskey').value;
   var btn     = document.getElementById('loginBtn');
   var errDiv  = document.getElementById('loginError');
@@ -1094,7 +1111,7 @@ function doLogin() {
       loadDiv.style.display = 'none';
       if (result.success) {
         storeSession(result.token, result.member);
-        // document.getElementById('loginLdap').value    = '';
+        document.getElementById('loginLdap').value    = '';
         document.getElementById('loginPasskey').value = '';
         onAuthSuccess(result.member);
       } else {
@@ -1107,8 +1124,8 @@ function doLogin() {
       showLoginError('Connection error. Please try again.');
       console.error('Login error:', err);
     })
-    // .loginCRX(ldap, passkey);
-    .loginCRX(passkey);
+    .loginCRX(ldap, passkey);
+    
 }
 
 function showLoginError(msg) {
@@ -1125,7 +1142,7 @@ function doLogout() {
   clearSession();
   // Show login overlay again and reset form
   document.getElementById('loginOverlay').style.display = 'flex';
-  // document.getElementById('loginLdap').value    = '';
+  document.getElementById('loginLdap').value    = '';
   document.getElementById('loginPasskey').value = '';
   document.getElementById('loginError').style.display = 'none';
   // Clear dashboard state
@@ -1563,7 +1580,24 @@ function submitEdit() {
       l2Confirmation, clarification, l2AdditionalComments, resendEmail });
 }
 
+// google.script.run
+//     .withSuccessHandler(function(ldap) {
+//       if (ldap) {
+//         const el1 = document.getElementById('attendanceMember');
+//         // const ldap = email.split('@')[0].toLowerCase();
+//         el1.value = ldap;
+//         el1.readOnly = true;
+//         el1.style.backgroundColor = '#f1f3f4';
+//       }
+//     })
+//     .withFailureHandler(err => console.warn('Email fetch failed:', err))
+//     .getUserLdap();
+
+
+
 // ── TEAM STATUS OVERLAY ──────────────────────────────────────
+
+
 function openTeamStatusOverlay() {
   document.getElementById('teamStatusOverlay').classList.add('show');
   refreshTeamStatus();
