@@ -2,7 +2,7 @@
 // Code.GS — Google Chat Webhook Notifications
 // ============================================================
 
-const SHEET_ID = '1yS7as3VGQaee7Y4YAW8gbppMn2rl2DvdypDqzKpcu3c';
+const SHEET_ID = '1MxVhInv31dg10ZaQRidOv6gUStExG3wf-r8SpsysZ0c';
 const CHAT_WEBHOOK_URL = 'YOUR_WEBHOOK_URL_HERE';
 
 function onSheetChange(e) {
@@ -533,13 +533,58 @@ function getDoubts() {
 
 // ── ASSIGN DOUBT ──────────────────────────────────────────────
 // Status=col18, Assigned_To=col19, Assigned_At=col20 (1-indexed)
+// function assignDoubt(doubtId, memberName) {
+//   try {
+//     const ss    = SpreadsheetApp.openById(SHEET_ID);
+//     const sheet = ss.getSheetByName('Doubts');
+//     const data  = sheet.getDataRange().getValues();
+//     for (let i = 1; i < data.length; i++) {
+//       if (data[i][0].toString() === doubtId.toString()) {
+//         sheet.getRange(i + 1, 19).setValue(memberName);
+//         sheet.getRange(i + 1, 20).setValue(new Date().toISOString());
+//         sheet.getRange(i + 1, 18).setValue('Assigned');
+//         updateMeta();
+//         return { success: true };
+//       }
+//     }
+//     return { success: false, error: 'Doubt not found' };
+//   } catch (err) {
+//     return { success: false, error: err.message };
+//   }
+// }
+
 function assignDoubt(doubtId, memberName) {
+  // LockService prevents two CRX members assigning the same doubt simultaneously.
+  // The second request waits for the first to finish, then sees it's already Assigned.
+  const lock = LockService.getScriptLock();
   try {
+    lock.waitLock(6000); // wait up to 6s to acquire lock before giving up
+
     const ss    = SpreadsheetApp.openById(SHEET_ID);
     const sheet = ss.getSheetByName('Doubts');
     const data  = sheet.getDataRange().getValues();
+
     for (let i = 1; i < data.length; i++) {
       if (data[i][0].toString() === doubtId.toString()) {
+
+        // Re-read current status AFTER acquiring lock (fresh from sheet)
+        const currentStatus   = data[i][17].toString().trim();
+        const currentAssignee = data[i][18].toString().trim();
+
+        if (currentStatus === 'Assigned' || currentStatus === 'Resolved') {
+          // Someone else already got here first
+          return {
+            success:    false,
+            alreadyTaken: true,
+            assignedTo: currentAssignee,
+            status:     currentStatus,
+            error:      currentStatus === 'Resolved'
+              ? 'This doubt has already been resolved.'
+              : 'Just assigned to ' + currentAssignee + '. Please pick another doubt.'
+          };
+        }
+
+        // Safe to assign — nobody else has it
         sheet.getRange(i + 1, 19).setValue(memberName);
         sheet.getRange(i + 1, 20).setValue(new Date().toISOString());
         sheet.getRange(i + 1, 18).setValue('Assigned');
@@ -548,8 +593,45 @@ function assignDoubt(doubtId, memberName) {
       }
     }
     return { success: false, error: 'Doubt not found' };
+
+  } catch (err) {
+    // LockService throws if it couldn't acquire lock within 6s
+    // (extremely unlikely — only if 10+ assign clicks happen in same second)
+    return { success: false, error: 'Could not process assignment. Please try again.' };
+  } finally {
+    lock.releaseLock(); // always release, even on error
+  }
+}
+
+function unassignDoubt(doubtId) {
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(6000);
+    const ss    = SpreadsheetApp.openById(SHEET_ID);
+    const sheet = ss.getSheetByName('Doubts');
+    const data  = sheet.getDataRange().getValues();
+
+    for (let i = 1; i < data.length; i++) {
+      if (data[i][0].toString() === doubtId.toString()) {
+        const prevAssignee = data[i][18].toString().trim();
+
+        // Only unassign if currently Assigned (not if already Resolved)
+        if (data[i][17].toString().trim() === 'Resolved') {
+          return { success: false, error: 'Cannot unassign a resolved doubt.' };
+        }
+
+        sheet.getRange(i + 1, 18).setValue('Open');  // Status → Open
+        sheet.getRange(i + 1, 19).setValue('');       // Assigned_To → empty
+        sheet.getRange(i + 1, 20).setValue('');       // Assigned_At → empty
+        updateMeta();
+        return { success: true, doubtId, prevAssignee };
+      }
+    }
+    return { success: false, error: 'Doubt not found' };
   } catch (err) {
     return { success: false, error: err.message };
+  } finally {
+    lock.releaseLock();
   }
 }
 
