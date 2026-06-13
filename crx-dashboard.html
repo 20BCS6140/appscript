@@ -640,8 +640,8 @@
 <div class="top-bar">
   <div class="logo">CRX Doubt Management</div>
   <div class="nav-links">
-    <a href="https://script.google.com/a/macros/google.com/s/AKfycbyEqQTlEWrVtAqtDjIYH27ZtYoCklzAHwt0yQ_Vk4Dr2jO0LIsp5_QZOMHrZl69kN3tAw/exec?page=l0" target="_blank" rel="noopener noreferrer">L0 Form</a>
-    <a href="https://script.google.com/a/macros/google.com/s/AKfycbyEqQTlEWrVtAqtDjIYH27ZtYoCklzAHwt0yQ_Vk4Dr2jO0LIsp5_QZOMHrZl69kN3tAw/exec?page=analytics" target="_blank" rel="noopener noreferrer">Analytics</a>
+    <a href="https://script.google.com/macros/s/AKfycbw-F49hkvSpUvBAduT8qFtravWvQSnQ7FDAphM9UWBoF63tf0leJ8idXpdGQvHCAZWC/exec?page=l0" target="_blank" rel="noopener noreferrer">L0 Form</a>
+    <a href="https://script.google.com/macros/s/AKfycbw-F49hkvSpUvBAduT8qFtravWvQSnQ7FDAphM9UWBoF63tf0leJ8idXpdGQvHCAZWC/exec?page=analytics" target="_blank" rel="noopener noreferrer">Analytics</a>
   </div>
 </div>
 
@@ -1436,20 +1436,93 @@ function renderTable() {
 }
 
 // ── ASSIGN ───────────────────────────────────────────────────
+// function assignDoubt(doubtId, memberName) {
+//  if (!memberName) {
+    // "— Assign to —" selected → unassign this doubt
+    // doUnassign(doubtId);
+    // return;
+  // }
+//   google.script.run
+//     .withSuccessHandler(function(r) {
+//       if (r.success) {
+//         const d = allDoubts.find(x=>x.Doubt_ID===doubtId);
+//         if (d) { d.Assigned_To=memberName; d.Status='Assigned'; }
+//         renderTable(); updateStats();
+//         showToast('✅ Assigned to '+memberName, 'success');
+//         silentRefresh();
+//       } else showToast('❌ '+(r.error||'Assignment failed'), 'error');
+//     })
+//     .withFailureHandler(function() { showToast('❌ Assignment failed','error'); })
+//     .assignDoubt(doubtId, memberName);
+// }
+
+
 function assignDoubt(doubtId, memberName) {
-  if (!memberName) return;
+   if (!memberName) {
+    // "— Assign to —" selected → unassign this doubt
+    doUnassign(doubtId);
+    return;
+  }
+  // Optimistically show the selection is being processed
+  showToast('⏳ Assigning to ' + memberName + '…', 'success');
+
   google.script.run
     .withSuccessHandler(function(r) {
       if (r.success) {
-        const d = allDoubts.find(x=>x.Doubt_ID===doubtId);
-        if (d) { d.Assigned_To=memberName; d.Status='Assigned'; }
+        const d = allDoubts.find(x => x.Doubt_ID === doubtId);
+        if (d) { d.Assigned_To = memberName; d.Status = 'Assigned'; }
         renderTable(); updateStats();
-        showToast('✅ Assigned to '+memberName, 'success');
-        silentRefresh();
-      } else showToast('❌ '+(r.error||'Assignment failed'), 'error');
+        showToast('✅ Assigned to ' + memberName, 'success');
+        silentRefresh(); // push update to other users immediately
+
+      } else if (r.alreadyTaken) {
+        // Another CRX member got there first — reset this dropdown and refresh
+        showToast('⚠️ ' + r.error, 'error');
+        silentRefresh(); // immediately pull the latest assignment for everyone to see
+
+      } else {
+        showToast('❌ ' + (r.error || 'Assignment failed'), 'error');
+      }
     })
-    .withFailureHandler(function() { showToast('❌ Assignment failed','error'); })
+    .withFailureHandler(function(err) {
+      showToast('❌ Assignment failed. Try again.', 'error');
+      console.error('assignDoubt error:', err);
+    })
     .assignDoubt(doubtId, memberName);
+}
+
+function doUnassign(doubtId) {
+  const d = allDoubts.find(x => x.Doubt_ID === doubtId);
+
+  // Don't allow unassigning a resolved doubt
+  if (d && d.Status === 'Resolved') {
+    showToast('❌ Cannot unassign a resolved doubt.', 'error');
+    renderTable(); // reset dropdown back to showing the assignee
+    return;
+  }
+
+  const prevName = d ? (d.Assigned_To || 'unknown') : 'unknown';
+  showToast('⏳ Removing assignee…', 'success');
+
+  google.script.run
+    .withSuccessHandler(function(r) {
+      if (r.success) {
+        const d = allDoubts.find(x => x.Doubt_ID === doubtId);
+        if (d) { d.Assigned_To = ''; d.Status = 'Open'; }
+        renderTable(); updateStats();
+        // Notify all CRX members via silentRefresh toast
+        showToast('🔁 ' + prevName + ' removed from ' + doubtId + ' — back to Open', 'success');
+        silentRefresh();
+      } else {
+        showToast('❌ ' + (r.error || 'Failed to unassign'), 'error');
+        renderTable(); // reset dropdown
+      }
+    })
+    .withFailureHandler(function() {
+      showToast('❌ Failed to remove assignee. Try again.', 'error');
+      renderTable();
+    })
+    .unassignDoubt(doubtId);
 }
 
 // ── CONTEXT BOX ──────────────────────────────────────────────
