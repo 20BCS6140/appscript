@@ -754,25 +754,25 @@
       <button class="btn-close" onclick="closeResolveOverlay()">×</button>
     </div>
 
-    <div id="resolveContextBox"></div>
 
+    <!-- Replace the full resolve overlay modal content: -->
+    <div id="resolveContextBox"></div>
     <div class="section-divider">CRX Response</div>
 
-    <select id="resolvedBy" style="width:100%;padding:9px 12px;border:1px solid #dadce0;border-radius:8px;font-size:14px;font-family:'Google Sans',Arial,sans-serif;outline:none;margin-bottom:14px"></select>
+      <label>Your Name (L2 LDAP) <span style="color:red">*</span></label>
+        <select id="resolvedBy" style="width:100%;padding:9px 12px;border:1px solid #dadce0;border-radius:8px;font-size:14px;font-family:'Google Sans',Arial,sans-serif;outline:none;margin-bottom:14px"></select>
 
     <div class="form-row" style="margin-bottom:14px">
       <div class="fg"><label>Type of Consult <span style="color:red">*</span></label>
         <select id="typeOfConsult">
-          <option value="">— Select —</option>
           <option value="easy">Easy</option>
-          <option value="medium" >Medium</option>
+          <option value="medium" selected>Medium</option>
           <option value="complex">Complex</option>
         </select>
       </div>
       <div class="fg"><label>L0 Approach Validation <span style="color:red">*</span></label>
         <select id="l0ApproachValidation">
-          <option value="">— Select —</option>
-          <option value="valid doubt" >Valid Doubt</option>
+          <option value="valid doubt" selected>Valid Doubt</option>
           <option value="invalid doubt">Invalid Doubt</option>
         </select>
       </div>
@@ -781,14 +781,12 @@
     <div class="form-row" style="margin-bottom:14px">
       <div class="fg"><label>Escalated (lack of tools)? <span style="color:red">*</span></label>
         <select id="escalatedDueToTools">
-          <option value="">— Select —</option>
-          <option value="yes">Yes</option><option value="no" >No</option>
+          <option value="yes">Yes</option><option value="no" selected>No</option>
         </select>
       </div>
       <div class="fg"><label>Escalation Validity <span style="color:red">*</span></label>
         <select id="escalationValidity">
-          <option value="">— Select —</option>
-          <option value="yes" >Yes</option><option value="no">No</option>
+          <option value="yes" selected>Yes</option><option value="no">No</option>
         </select>
       </div>
     </div>
@@ -796,14 +794,12 @@
     <div class="form-row" style="margin-bottom:14px">
       <div class="fg"><label>Query Clear from L0? <span style="color:red">*</span></label>
         <select id="queryClarity">
-          <option value="">— Select —</option>
-          <option value="yes" >Yes</option><option value="no">No</option>
+          <option value="yes" selected>Yes</option><option value="no">No</option>
         </select>
       </div>
       <div class="fg"><label>New Scenario for DCR? <span style="color:red">*</span></label>
         <select id="newScenario">
-          <option value="">— Select —</option>
-          <option value="yes">Yes</option><option value="no" >No</option>
+          <option value="yes">Yes</option><option value="no" selected>No</option>
         </select>
       </div>
     </div>
@@ -811,31 +807,39 @@
     <div class="form-row" style="margin-bottom:14px">
       <div class="fg"><label>L0 Area of Improvement <span style="color:red">*</span></label>
         <select id="l0AreaOfImprovement">
-          <option value="">— Select —</option>
-          <option value="static analysis">Static Analysis</option>
+          <option value="static analysis" selected>Static Analysis</option>
           <option value="dynamic analysis">Dynamic Analysis</option>
         </select>
       </div>
-      <div class="fg"></div>
+      <div class="fg">
+        <label>L2 Confirmation <span style="color:red">*</span></label>
+        <select id="l2Confirmation">
+          <option value="">— Select —</option>
+          <!-- Add your dropdown values here when ready -->
+          <option value="confirmed">Confirmed</option>
+          <option value="not-confirmed">Not Confirmed</option>
+          <option value="partial">Partial</option>
+        </select>
+      </div>
     </div>
 
-    <label>Provided Verdict <span style="color:red">*</span> <span style="color:#5f6368;font-size:11px">(sent to L0 via email)</span></label>
-    <textarea id="providedVerdict" placeholder="Enter the final verdict…"></textarea>
-
-    <label>L2 Confirmation (Violations) <span style="color:red">*</span></label>
+    <!-- L2 Reason for the verdict — multi-select (was L2 Confirmation violations) -->
+    <label>L2 Reason for the Verdict <span style="color:red">*</span></label>
     <div class="multi-select-wrap" id="l2ConfWrap">
       <div class="ms-box" id="l2ConfBox" onclick="document.getElementById('l2ConfSearch').focus()">
         <input class="ms-input" id="l2ConfSearch" placeholder="Search violations…"
-               oninput="filterL2Options()" onfocus="openL2Dropdown()" autocomplete="off">
+           oninput="filterL2Options()" onfocus="openL2Dropdown()" autocomplete="off">
       </div>
       <div class="ms-dropdown" id="l2ConfDropdown"></div>
     </div>
 
-    <label>Clarification Details <span style="color:red">*</span></label>
-    <textarea id="clarification" placeholder="Provide a clear explanation…"></textarea>
+    <label>L2 Additional Comments <span style="color:red">*</span>
+      <span style="color:#5f6368;font-size:11px">(sent to L0 via email)</span>
+    </label>
+    <textarea id="l2AdditionalComments" placeholder="Provide your assessment and comments to the L0…"></textarea>
 
-    <label>L2 Additional Comments</label>
-    <input type="text" id="l2AdditionalComments" placeholder="Optional remarks…">
+    <label>Recommendations</label>
+      <input type="text" id="recommendations" placeholder="Optional recommendations…">
 
     <div class="modal-footer">
       <button class="btn-cancel" onclick="closeResolveOverlay()">Cancel</button>
@@ -918,13 +922,21 @@
           <option value="dynamic analysis">Dynamic Analysis</option>
         </select>
       </div>
-      <div class="fg"></div>
+      <div class="fg">
+        <label>L2 Confirmation <span style="color:red">*</span></label>
+        <select id="editL2Confirmation">
+          <option value="">— Select —</option>
+          <!-- Add your dropdown values here when ready -->
+          <option value="confirmed">Confirmed</option>
+          <option value="not-confirmed">Not Confirmed</option>
+          <option value="partial">Partial</option>
+        </select>
+      </div>
     </div>
 
-    <label>Provided Verdict <span style="color:#5f6368;font-size:11px">(updates L0 record)</span></label>
-    <textarea id="editProvidedVerdict" placeholder="Enter the final verdict…"></textarea>
+    
 
-    <label>L2 Confirmation (Violations)</label>
+    <label>L2 Reason for the Verdict</label>
     <div class="multi-select-wrap" id="editL2ConfWrap">
       <div class="ms-box" id="editL2ConfBox" onclick="document.getElementById('editL2ConfSearch').focus()">
         <input class="ms-input" id="editL2ConfSearch" placeholder="Search violations…"
@@ -933,11 +945,17 @@
       <div class="ms-dropdown" id="editL2ConfDropdown"></div>
     </div>
 
-    <label>Clarification Details</label>
-    <textarea id="editClarification" placeholder="Provide a clear explanation…"></textarea>
+    <label>L2 Additional Comments <span style="color:red">*</span>
+      <span style="color:#5f6368;font-size:11px">(sent to L0 via email)</span>
+    </label>
+    <textarea id="editL2AdditionalComments" placeholder="Provide your assessment and comments to the L0…"></textarea>
 
-    <label>L2 Additional Comments</label>
-    <input type="text" id="editL2AdditionalComments" placeholder="Optional remarks…">
+    <label>Recommendations</label>
+      <input type="text" id="editRecommendations" placeholder="Optional recommendations…">
+
+    
+
+    
 
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;padding:10px;background:#e8f0fe;border-radius:8px">
       <input type="checkbox" id="editResendEmail" style="width:16px;height:16px;accent-color:#1a73e8">
@@ -1289,6 +1307,16 @@ document.addEventListener('click', function(e) {
   if (!document.getElementById('editL2ConfWrap').contains(e.target)) document.getElementById('editL2ConfDropdown').classList.remove('open');
 });
 
+
+const QUEUE_NAMES_LIST = [
+  'Jackalope Safetynet Review','Incentive Dcr Pending Review',
+  'Cws Navitron Pending Review','Cws Asset Review','Cws Navitron Bulk Review',
+  'Cws Highquality Pending Review','Cws Dcr Experimental','Cws Manual Lookup Queue',
+  'Cws Legal Lookup Queue','Cws Resubmitted Items','Cws Adhoc Dcr',
+  'Cws Unpublished Item Review','Metadata Reviews','Cws Safetynet Reviews',
+  'Cws Dcr Pending Review','Cws Highquality Published'
+];
+
 // ── LOAD DOUBTS ──────────────────────────────────────────────
 function loadDoubts() {
   document.getElementById('tableBody').innerHTML =
@@ -1301,8 +1329,8 @@ function loadDoubts() {
 
       var queueSel = document.getElementById('filterQueue');
       var existing = Array.from(queueSel.options).map(o => o.value);
-      ['RE','NBR','HQ'].forEach(function(q) {
-        if (!existing.includes(q)) {
+      QUEUE_NAMES_LIST.forEach(function(q) {
+          if (!existing.includes(q)) {
           var o = document.createElement('option'); o.value=q; o.textContent=q; queueSel.appendChild(o);
         }
       });
@@ -1388,29 +1416,44 @@ function renderTable() {
   document.getElementById('tableBody').innerHTML = rows.map(function(d) {
     const didNum = d.Doubt_ID ? d.Doubt_ID.replace('D-','') : '';
     const doubtIdHtml = '<div class="doubt-id-cell"><div class="did-prefix">D-</div><div class="did-num">'+didNum+'</div></div>';
-    const subDate = d.Submitted_At ? new Date(d.Submitted_At).toLocaleString() : '—';
-    const extHtml = '<span class="nowrap" title="'+(d.Extension_ID||'')+'">'+(d.Extension_ID||'—')+'</span>';
+    
+    const extHtml = '<span class="nowrap" title="'+(d['Extension ID']||'')+'">'+
+                  (d['Extension ID']||'—')+'</span>';
     const memberHtml =
-      '<div style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(d.L0_Name||'')+'</div>'+
-      '<div style="font-size:11px;color:#5f6368;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(d.L0_Email||'')+'</div>';
-    const violsHtml = d.Violations
-      ? '<div class="viols-wrap">'+d.Violations.split(', ').map(v=>'<span class="viol-chip">'+v.trim()+'</span>').join('')+'</div>'
-      : '—';
-    const queueHtml = '<span class="nowrap" title="'+(d.Queue_Name||'')+'">'+(d.Queue_Name||'—')+'</span>';
+      '<div style="font-size:12px;color:#5f6368;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+
+      (d['Email Address']||'')+'</div>';
 
+    // Submitted At → Timestamp
+    const subDate = d['Timestamp'] ? new Date(d['Timestamp']).toLocaleString() : '—';
+
+    // Queue Name → 'Queue Name' (spaced key)
+    const queueHtml = '<span class="nowrap" title="'+(d['Queue Name']||'')+'">'+
+                  (d['Queue Name']||'—')+'</span>';
+
+
+    // Violations → L0 Reason for the verdict
+    const violsHtml = d['L0 Reason for the verdict']
+      ? '<div class="viols-wrap">'+
+      d['L0 Reason for the verdict'].split(', ')
+      .map(v=>'<span class="viol-chip">'+v.trim()+'</span>').join('')+'</div>'
+      : '—';
+    
+
+    // DCR Docs Link
     // DCR Docs Link
     const dcrLink = d['DCR Docs Link'];
     const dcrHtml = dcrLink && dcrLink.startsWith('http')
       ? '<a class="dcr-link" href="'+dcrLink+'" target="_blank" rel="noopener">DOC LINK</a>'
       : '<span style="color:#ccc;font-size:12px">—</span>';
 
+    // Status (same key)
     const statusClass = (d.Status||'open').toLowerCase();
     const statusBadge = '<span class="badge '+statusClass+'">'+(d.Status||'Open')+'</span>';
 
     // Build assign opts: available members + current assignee (always visible)
-    const dropdownMembers = [...new Set([...memberNames, ...(d.Assigned_To ? [d.Assigned_To] : [])])];
+    const dropdownMembers = [...new Set([...memberNames, ...(d['L2 LDAP'] ? [d['L2 LDAP']] : [])])];
     const assignOpts = '<option value="">— Assign to —</option>' +
-      dropdownMembers.map(m=>'<option '+(d.Assigned_To===m?'selected':'')+' value="'+m+'">'+m+'</option>').join('');
+      dropdownMembers.map(m => '<option '+(d['L2 LDAP']===m?'selected':'')+' value="'+m+'">'+m+'</option>').join('');
     const assignSelect = '<select class="assign-select" data-id="'+d.Doubt_ID+'" onchange="assignDoubt(this.dataset.id,this.value)">'+assignOpts+'</select>';
 
     let actionHtml;
@@ -1501,7 +1544,7 @@ function doUnassign(doubtId) {
     return;
   }
 
-  const prevName = d ? (d.Assigned_To || 'unknown') : 'unknown';
+  const prevName = d ? (d['L2 LDAP'] || 'unknown') : 'unknown';
   showToast('⏳ Removing assignee…', 'success');
 
   google.script.run
@@ -1526,18 +1569,44 @@ function doUnassign(doubtId) {
 }
 
 // ── CONTEXT BOX ──────────────────────────────────────────────
+
 function buildContextHtml(d) {
-  const viols = d.Violations ? d.Violations.split(', ').map(v=>'<span class="viol-chip">'+v.trim()+'</span>').join(' ') : '—';
+  const viols = d['L0 Reason for the verdict']
+    ? d['L0 Reason for the verdict'].split(', ')
+        .map(v => '<span class="viol-chip">'+v.trim()+'</span>').join(' ')
+    : '—';
   return '<div class="ctx-grid">'+
-    '<div class="ctx-block"><div class="ctx-label">Doubt ID</div><div class="ctx-value" style="color:#1a73e8;font-weight:500;font-family:monospace;font-size:12px">'+d.Doubt_ID+'</div></div>'+
-    '<div class="ctx-block"><div class="ctx-label">Extension ID</div><div class="ctx-value"><code>'+(d.Extension_ID||'—')+'</code></div></div>'+
-    '<div class="ctx-block"><div class="ctx-label">L0 Member</div><div class="ctx-value"><div style="font-weight:500">'+(d.L0_Name||'')+'</div><div style="font-size:11px;color:#5f6368">'+(d.L0_Email||'')+'</div></div></div>'+
-    '<div class="ctx-block"><div class="ctx-label">L0 Approach Opinion</div><div class="ctx-value"><span style="background:#fef3e0;color:#b06000;padding:2px 8px;border-radius:10px;font-size:12px">'+(d['L0 Approach opinion']||'—')+'</span></div></div>'+
-    '<div class="ctx-block full"><div class="ctx-label">Violations</div><div class="ctx-value">'+viols+'</div></div>'+
-    '<div class="ctx-block full"><div class="ctx-label">Doubt Details<button class="btn-copy" id="ctxCopyBtn" onclick="copyCtxDoubtDetails()">📋 Copy</button></div>'+
-    '<div class="ctx-doubt-text" id="ctxDoubtText">'+(d.Doubt_Details||'—')+'</div></div>'+
+    '<div class="ctx-block"><div class="ctx-label">Doubt ID</div>'+
+      '<div class="ctx-value" style="color:#1a73e8;font-weight:500;font-family:monospace;font-size:12px">'+d.Doubt_ID+'</div></div>'+
+    '<div class="ctx-block"><div class="ctx-label">Extension ID</div>'+
+      '<div class="ctx-value"><code>'+(d['Extension ID']||'—')+'</code></div></div>'+
+    '<div class="ctx-block"><div class="ctx-label">Email Address</div>'+
+      '<div class="ctx-value">'+(d['Email Address']||'—')+'</div></div>'+
+    '<div class="ctx-block"><div class="ctx-label">L0 Approach Opinion</div>'+
+      '<div class="ctx-value"><span style="background:#fef3e0;color:#b06000;padding:2px 8px;border-radius:10px;font-size:12px">'+
+      (d['L0 Approach opinion']||'—')+'</span></div></div>'+
+    '<div class="ctx-block full"><div class="ctx-label">L0 Reason for the Verdict</div>'+
+      '<div class="ctx-value">'+viols+'</div></div>'+
+    '<div class="ctx-block full">'+
+      '<div class="ctx-label">Doubt Details'+
+        '<button class="btn-copy" id="ctxCopyBtn" onclick="copyCtxDoubtDetails()">📋 Copy</button>'+
+      '</div>'+
+      '<div class="ctx-doubt-text" id="ctxDoubtText">'+(d['Doubt Details']||'—')+'</div>'+
+    '</div>'+
   '</div>';
 }
+// function buildContextHtml(d) {
+//   const viols = d.Violations ? d.Violations.split(', ').map(v=>'<span class="viol-chip">'+v.trim()+'</span>').join(' ') : '—';
+//   return '<div class="ctx-grid">'+
+//     '<div class="ctx-block"><div class="ctx-label">Doubt ID</div><div class="ctx-value" style="color:#1a73e8;font-weight:500;font-family:monospace;font-size:12px">'+d.Doubt_ID+'</div></div>'+
+//     '<div class="ctx-block"><div class="ctx-label">Extension ID</div><div class="ctx-value"><code>'+(d.Extension_ID||'—')+'</code></div></div>'+
+//     '<div class="ctx-block"><div class="ctx-label">L0 Member</div><div class="ctx-value"><div style="font-weight:500">'+(d.L0_Name||'')+'</div><div style="font-size:11px;color:#5f6368">'+(d.L0_Email||'')+'</div></div></div>'+
+//     '<div class="ctx-block"><div class="ctx-label">L0 Approach Opinion</div><div class="ctx-value"><span style="background:#fef3e0;color:#b06000;padding:2px 8px;border-radius:10px;font-size:12px">'+(d['L0 Approach opinion']||'—')+'</span></div></div>'+
+//     '<div class="ctx-block full"><div class="ctx-label">Violations</div><div class="ctx-value">'+viols+'</div></div>'+
+//     '<div class="ctx-block full"><div class="ctx-label">Doubt Details<button class="btn-copy" id="ctxCopyBtn" onclick="copyCtxDoubtDetails()">📋 Copy</button></div>'+
+//     '<div class="ctx-doubt-text" id="ctxDoubtText">'+(d.Doubt_Details||'—')+'</div></div>'+
+//   '</div>';
+// }
 function copyCtxDoubtDetails() {
   navigator.clipboard.writeText(document.getElementById('ctxDoubtText').innerText).then(function() {
     const btn=document.getElementById('ctxCopyBtn'); btn.textContent='✅ Copied'; btn.classList.add('copied');
@@ -1550,44 +1619,95 @@ function openResolveOverlay(doubtId) {
   currentDoubtId = doubtId;
   const d = allDoubts.find(x=>x.Doubt_ID===doubtId); if (!d) return;
   document.getElementById('resolveContextBox').innerHTML = buildContextHtml(d);
-  ['typeOfConsult','escalatedDueToTools','escalationValidity','queryClarity','newScenario','l0AreaOfImprovement','l0ApproachValidation'].forEach(id=>document.getElementById(id).value='');
-  ['providedVerdict','clarification','l2AdditionalComments'].forEach(id=>document.getElementById(id).value='');
-  selectedL2Conf=[]; renderL2Chips(); buildL2Options('');
+  // ['typeOfConsult','escalatedDueToTools','escalationValidity','queryClarity','newScenario','l0AreaOfImprovement','l0ApproachValidation'].forEach(id=>document.getElementById(id).value='');
+  // ['providedVerdict','clarification','l2AdditionalComments'].forEach(id=>document.getElementById(id).value='');
+  // selectedL2Conf=[]; renderL2Chips(); buildL2Options('');
+  // Replace the reset section:
+  ['typeOfConsult','escalatedDueToTools','escalationValidity','queryClarity',
+   'newScenario','l0AreaOfImprovement','l0ApproachValidation','l2Confirmation'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  ['l2AdditionalComments','recommendations'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  selectedL2Conf = []; renderL2Chips(); buildL2Options('');
   document.getElementById('resolveOverlay').classList.add('show');
 }
 function closeResolveOverlay() { document.getElementById('resolveOverlay').classList.remove('show'); currentDoubtId=null; }
 
+
+
 function submitResolve() {
-  const resolvedBy=document.getElementById('resolvedBy').value;
-  const typeOfConsult=document.getElementById('typeOfConsult').value;
-  const escalatedDueToTools=document.getElementById('escalatedDueToTools').value;
-  const escalationValidity=document.getElementById('escalationValidity').value;
-  const queryClarity=document.getElementById('queryClarity').value;
-  const newScenario=document.getElementById('newScenario').value;
-  const l0AreaOfImprovement=document.getElementById('l0AreaOfImprovement').value;
-  const l0ApproachValidation=document.getElementById('l0ApproachValidation').value;
-  const providedVerdict=document.getElementById('providedVerdict').value.trim();
-  const clarification=document.getElementById('clarification').value.trim();
-  const l2AdditionalComments=document.getElementById('l2AdditionalComments').value.trim();
-  const l2Confirmation=selectedL2Conf.slice();
-  if (!resolvedBy||!typeOfConsult||!escalatedDueToTools||!escalationValidity||!queryClarity||!newScenario||!l0AreaOfImprovement||!l0ApproachValidation||!providedVerdict||!clarification) {
-    showToast('⚠️ Please fill in all required fields.','error'); return;
+  const resolvedBy          = document.getElementById('resolvedBy').value;
+  const typeOfConsult       = document.getElementById('typeOfConsult').value;
+  const escalatedDueToTools = document.getElementById('escalatedDueToTools').value;
+  const escalationValidity  = document.getElementById('escalationValidity').value;
+  const queryClarity        = document.getElementById('queryClarity').value;
+  const newScenario         = document.getElementById('newScenario').value;
+  const l0AreaOfImprovement = document.getElementById('l0AreaOfImprovement').value;
+  const l0ApproachValidation= document.getElementById('l0ApproachValidation').value;
+  const l2Confirmation      = document.getElementById('l2Confirmation').value; // dropdown
+  const l2Reason            = selectedL2Conf.slice();      // multi-select violations
+  const l2AdditionalComments= document.getElementById('l2AdditionalComments').value.trim();
+  const recommendations     = document.getElementById('recommendations').value.trim();
+
+  if (!resolvedBy || !l2AdditionalComments) {
+    showToast('⚠️ Please fill in all required fields.', 'error'); return;
   }
+
   google.script.run
     .withSuccessHandler(function(r) {
       if (r.success) {
         closeResolveOverlay();
-        const d=allDoubts.find(x=>x.Doubt_ID===currentDoubtId); if (d) d.Status='Resolved';
+        const d = allDoubts.find(x => x.Doubt_ID === currentDoubtId);
+        if (d) d.Status = 'Resolved';
         renderTable(); updateStats();
-        showToast('✅ Resolved & email sent to L0!','success');
+        showToast('✅ Resolved & email sent to L0!', 'success');
         silentRefresh();
-      } else showToast('❌ '+r.error,'error');
+      } else showToast('❌ ' + r.error, 'error');
     })
-    .withFailureHandler(function() { showToast('❌ Failed to resolve.','error'); })
-    .resolveDoubt({ doubtId:currentDoubtId, resolvedBy, typeOfConsult, escalatedDueToTools,
+    .withFailureHandler(function() { showToast('❌ Failed to resolve.', 'error'); })
+    .resolveDoubt({
+      doubtId: currentDoubtId, resolvedBy, typeOfConsult, escalatedDueToTools,
       escalationValidity, queryClarity, newScenario, l0AreaOfImprovement,
-      l0ApproachValidation, providedVerdict, l2Confirmation, clarification, l2AdditionalComments });
+      l0ApproachValidation, l2Confirmation,
+      l2Reason,              // multi-select → L2 Reason for the verdict
+      l2AdditionalComments,  // → L2 Additional Comments
+      recommendations        // → Recommendations
+    });
 }
+
+// function submitResolve() {
+//   const resolvedBy=document.getElementById('resolvedBy').value;
+//   const typeOfConsult=document.getElementById('typeOfConsult').value;
+//   const escalatedDueToTools=document.getElementById('escalatedDueToTools').value;
+//   const escalationValidity=document.getElementById('escalationValidity').value;
+//   const queryClarity=document.getElementById('queryClarity').value;
+//   const newScenario=document.getElementById('newScenario').value;
+//   const l0AreaOfImprovement=document.getElementById('l0AreaOfImprovement').value;
+//   const l0ApproachValidation=document.getElementById('l0ApproachValidation').value;
+//   const providedVerdict=document.getElementById('providedVerdict').value.trim();
+//   const clarification=document.getElementById('clarification').value.trim();
+//   const l2AdditionalComments=document.getElementById('l2AdditionalComments').value.trim();
+//   const l2Confirmation=selectedL2Conf.slice();
+//   if (!resolvedBy||!typeOfConsult||!escalatedDueToTools||!escalationValidity||!queryClarity||!newScenario||!l0AreaOfImprovement||!l0ApproachValidation||!providedVerdict||!clarification) {
+//     showToast('⚠️ Please fill in all required fields.','error'); return;
+//   }
+//   google.script.run
+//     .withSuccessHandler(function(r) {
+//       if (r.success) {
+//         closeResolveOverlay();
+//         const d=allDoubts.find(x=>x.Doubt_ID===currentDoubtId); if (d) d.Status='Resolved';
+//         renderTable(); updateStats();
+//         showToast('✅ Resolved & email sent to L0!','success');
+//         silentRefresh();
+//       } else showToast('❌ '+r.error,'error');
+//     })
+//     .withFailureHandler(function() { showToast('❌ Failed to resolve.','error'); })
+//     .resolveDoubt({ doubtId:currentDoubtId, resolvedBy, typeOfConsult, escalatedDueToTools,
+//       escalationValidity, queryClarity, newScenario, l0AreaOfImprovement,
+//       l0ApproachValidation, providedVerdict, l2Confirmation, clarification, l2AdditionalComments });
+// }
 
 // ── EDIT OVERLAY ─────────────────────────────────────────────
 function openEditOverlay(doubtId) {
@@ -1599,20 +1719,38 @@ function openEditOverlay(doubtId) {
   google.script.run
     .withSuccessHandler(function(row) {
       if (!row) { showToast('❌ Could not load resolved data','error'); return; }
-      document.getElementById('editResolvedBy').value         = row['L2 LDAP']||'';
-      document.getElementById('editTypeOfConsult').value       = row['Type of consult']||'';
-      document.getElementById('editEscalatedDueToTools').value = row['Escalated due to lack of tools']||'';
-      document.getElementById('editEscalationValidity').value  = row['Escalation validity']||'';
-      document.getElementById('editQueryClarity').value        = row['Was the query clear from L0']||'';
-      document.getElementById('editNewScenario').value         = row['Is this a new scenario for DCR']||'';
-      document.getElementById('editL0AreaOfImprovement').value = row['L0 Area of improvement']||'';
-      document.getElementById('editL0ApproachValidation').value= row['L0 Approach validation']||'';
-      document.getElementById('editProvidedVerdict').value     = row['Provided Verdict']||'';
-      document.getElementById('editClarification').value       = row['Clarification Details']||'';
-      document.getElementById('editL2AdditionalComments').value= row['L2 Additional Comments']||'';
-      const l2Str = row['L2 Confirmation']||'';
-      selectedEditL2Conf = l2Str ? l2Str.split(', ').map(v=>v.trim()).filter(v=>VIOLATIONS_LIST.includes(v)) : [];
+      // document.getElementById('editResolvedBy').value         = row['L2 LDAP']||'';
+      // document.getElementById('editTypeOfConsult').value       = row['Type of consult']||'';
+      // document.getElementById('editEscalatedDueToTools').value = row['Escalated due to lack of tools']||'';
+      // document.getElementById('editEscalationValidity').value  = row['Escalation validity']||'';
+      // document.getElementById('editQueryClarity').value        = row['Was the query clear from L0']||'';
+      // document.getElementById('editNewScenario').value         = row['Is this a new scenario for DCR']||'';
+      // document.getElementById('editL0AreaOfImprovement').value = row['L0 Area of improvement']||'';
+      // document.getElementById('editL0ApproachValidation').value= row['L0 Approach validation']||'';
+      // document.getElementById('editProvidedVerdict').value     = row['Provided Verdict']||'';
+      // document.getElementById('editClarification').value       = row['Clarification Details']||'';
+      // document.getElementById('editL2AdditionalComments').value= row['L2 Additional Comments']||'';
+      // const l2Str = row['L2 Confirmation']||'';
+      // selectedEditL2Conf = l2Str ? l2Str.split(', ').map(v=>v.trim()).filter(v=>VIOLATIONS_LIST.includes(v)) : [];
+      // renderEditL2Chips(); buildEditL2Options('');
+
+      // In openEditOverlay() withSuccessHandler, update field mappings:
+      document.getElementById('editResolvedBy').value          = row['L2 LDAP']||'';
+      document.getElementById('editTypeOfConsult').value        = row['Type of consult']||'';
+      document.getElementById('editEscalatedDueToTools').value  = row['Escalated due to lack of tools']||'';
+      document.getElementById('editEscalationValidity').value   = row['Escalation validity']||'';
+      document.getElementById('editQueryClarity').value         = row['Was the query clear from L0']||'';
+      document.getElementById('editNewScenario').value          = row['Is this a new scenario for DCR']||'';
+      document.getElementById('editL0AreaOfImprovement').value  = row['L0 Area of improvement']||'';
+      document.getElementById('editL0ApproachValidation').value = row['L0 Approach validation']||'';
+      document.getElementById('editL2Confirmation').value       = row['L2 Confirmation']||'';
+      // L2 Reason for the verdict (was L2 Confirmation multi-select)
+      const l2ReasonStr = row['L2 Reason for the verdict']||'';
+      selectedEditL2Conf = l2ReasonStr
+      ? l2ReasonStr.split(', ').map(v=>v.trim()).filter(v=>VIOLATIONS_LIST.includes(v)) : [];
       renderEditL2Chips(); buildEditL2Options('');
+      document.getElementById('editL2AdditionalComments').value = row['L2 Additional Comments']||'';
+      document.getElementById('editRecommendations').value      = row['Recommendations']||'';
       document.getElementById('editOverlay').classList.add('show');
     })
     .withFailureHandler(function() { showToast('❌ Failed to load resolved data','error'); })
@@ -1621,18 +1759,18 @@ function openEditOverlay(doubtId) {
 function closeEditOverlay() { document.getElementById('editOverlay').classList.remove('show'); currentEditDoubtId=null; }
 
 function submitEdit() {
-  const resolvedBy         =document.getElementById('editResolvedBy').value;
-  const typeOfConsult      =document.getElementById('editTypeOfConsult').value;
-  const escalatedDueToTools=document.getElementById('editEscalatedDueToTools').value;
-  const escalationValidity =document.getElementById('editEscalationValidity').value;
-  const queryClarity       =document.getElementById('editQueryClarity').value;
-  const newScenario        =document.getElementById('editNewScenario').value;
-  const l0AreaOfImprovement=document.getElementById('editL0AreaOfImprovement').value;
-  const l0ApproachValidation=document.getElementById('editL0ApproachValidation').value;
-  const providedVerdict    =document.getElementById('editProvidedVerdict').value.trim();
-  const clarification      =document.getElementById('editClarification').value.trim();
-  const l2AdditionalComments=document.getElementById('editL2AdditionalComments').value.trim();
-  const l2Confirmation     =selectedEditL2Conf.slice();
+  const resolvedBy          = document.getElementById('resolvedBy').value;
+  const typeOfConsult       = document.getElementById('typeOfConsult').value;
+  const escalatedDueToTools = document.getElementById('escalatedDueToTools').value;
+  const escalationValidity  = document.getElementById('escalationValidity').value;
+  const queryClarity        = document.getElementById('queryClarity').value;
+  const newScenario         = document.getElementById('newScenario').value;
+  const l0AreaOfImprovement = document.getElementById('l0AreaOfImprovement').value;
+  const l0ApproachValidation= document.getElementById('l0ApproachValidation').value;
+  const l2Confirmation      = document.getElementById('l2Confirmation').value; // dropdown
+  const l2Reason            = selectedL2Conf.slice();      // multi-select violations
+  const l2AdditionalComments= document.getElementById('l2AdditionalComments').value.trim();
+  const recommendations     = document.getElementById('recommendations').value.trim();
   const resendEmail        =document.getElementById('editResendEmail').checked;
   if (!resolvedBy) { showToast('⚠️ Please select your name.','error'); return; }
   const btn=document.querySelector('#editOverlay .btn-modal-submit');
@@ -1647,10 +1785,13 @@ function submitEdit() {
       } else showToast('❌ '+r.error,'error');
     })
     .withFailureHandler(function() { btn.textContent='Save Changes'; btn.disabled=false; showToast('❌ Failed to save.','error'); })
-    .updateResolvedDoubt({ doubtId:currentEditDoubtId, resolvedBy, typeOfConsult,
-      escalatedDueToTools, escalationValidity, queryClarity, newScenario,
-      l0AreaOfImprovement, l0ApproachValidation, providedVerdict,
-      l2Confirmation, clarification, l2AdditionalComments, resendEmail });
+    .updateResolvedDoubt({ doubtId: currentDoubtId, resolvedBy, typeOfConsult, escalatedDueToTools,
+      escalationValidity, queryClarity, newScenario, l0AreaOfImprovement,
+      l0ApproachValidation, l2Confirmation,
+      l2Reason,              // multi-select → L2 Reason for the verdict
+      l2AdditionalComments,  // → L2 Additional Comments
+      recommendations,        // → Recommendations
+      resendEmail });
 }
 
 // google.script.run
@@ -1799,27 +1940,43 @@ function checkForUpdates() {
 }
 
 // Updates ONLY the assign dropdowns without touching any other cell
+
 function updateAssignDropdowns() {
-  // const memberNames = availableMembers.length > 0
-  //   ? availableMembers
-  //   : crxMembers.map(m => m.split('|')[0].trim());
-
   document.querySelectorAll('.assign-select').forEach(function(sel) {
-    const doubtId = sel.dataset.id;
-    const d = allDoubts.find(x => x.Doubt_ID === doubtId);
-    const currentVal = sel.value; // preserve whatever is currently selected
-
+    const doubtId   = sel.dataset.id;
+    const d         = allDoubts.find(x => x.Doubt_ID === doubtId);
+    const currentVal= sel.value;
     const dropdownMembers = [...new Set([
       ...availableMembers,
-      ...(d && d.Assigned_To ? [d.Assigned_To] : []) // always keep current assignee
+      ...(d && d['L2 LDAP'] ? [d['L2 LDAP']] : [])
     ])];
-
     sel.innerHTML = '<option value="">— Assign to —</option>' +
       dropdownMembers.map(function(m) {
-        return '<option ' + (currentVal === m ? 'selected' : '') + ' value="' + m + '">' + m + '</option>';
+        return '<option '+(currentVal===m?'selected':'')+' value="'+m+'">'+m+'</option>';
       }).join('');
   });
 }
+// function updateAssignDropdowns() {
+//   // const memberNames = availableMembers.length > 0
+//   //   ? availableMembers
+//   //   : crxMembers.map(m => m.split('|')[0].trim());
+
+//   document.querySelectorAll('.assign-select').forEach(function(sel) {
+//     const doubtId = sel.dataset.id;
+//     const d = allDoubts.find(x => x.Doubt_ID === doubtId);
+//     const currentVal = sel.value; // preserve whatever is currently selected
+
+//     const dropdownMembers = [...new Set([
+//       ...availableMembers,
+//       ...(d && d.Assigned_To ? [d.Assigned_To] : []) // always keep current assignee
+//     ])];
+
+//     sel.innerHTML = '<option value="">— Assign to —</option>' +
+//       dropdownMembers.map(function(m) {
+//         return '<option ' + (currentVal === m ? 'selected' : '') + ' value="' + m + '">' + m + '</option>';
+//       }).join('');
+//   });
+// }
 
 
 
