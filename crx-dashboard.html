@@ -1759,18 +1759,18 @@ function openEditOverlay(doubtId) {
 function closeEditOverlay() { document.getElementById('editOverlay').classList.remove('show'); currentEditDoubtId=null; }
 
 function submitEdit() {
-  const resolvedBy          = document.getElementById('resolvedBy').value;
-  const typeOfConsult       = document.getElementById('typeOfConsult').value;
-  const escalatedDueToTools = document.getElementById('escalatedDueToTools').value;
-  const escalationValidity  = document.getElementById('escalationValidity').value;
-  const queryClarity        = document.getElementById('queryClarity').value;
-  const newScenario         = document.getElementById('newScenario').value;
-  const l0AreaOfImprovement = document.getElementById('l0AreaOfImprovement').value;
-  const l0ApproachValidation= document.getElementById('l0ApproachValidation').value;
-  const l2Confirmation      = document.getElementById('l2Confirmation').value; // dropdown
-  const l2Reason            = selectedL2Conf.slice();      // multi-select violations
-  const l2AdditionalComments= document.getElementById('l2AdditionalComments').value.trim();
-  const recommendations     = document.getElementById('recommendations').value.trim();
+  const resolvedBy          = document.getElementById('editResolvedBy').value;
+  const typeOfConsult       = document.getElementById('editTypeOfConsult').value;
+  const escalatedDueToTools = document.getElementById('editEscalatedDueToTools').value;
+  const escalationValidity  = document.getElementById('editEscalationValidity').value;
+  const queryClarity        = document.getElementById('editQueryClarity').value;
+  const newScenario         = document.getElementById('editNewScenario').value;
+  const l0AreaOfImprovement = document.getElementById('editL0AreaOfImprovement').value;
+  const l0ApproachValidation= document.getElementById('editL0ApproachValidation').value;
+  const l2Confirmation      = document.getElementById('editL2Confirmation').value; // dropdown
+  const l2Reason            = selectedEditL2Conf.slice();      // multi-select violations
+  const l2AdditionalComments= document.getElementById('editL2AdditionalComments').value.trim();
+  const recommendations     = document.getElementById('editRecommendations').value.trim();
   const resendEmail        =document.getElementById('editResendEmail').checked;
   if (!resolvedBy) { showToast('⚠️ Please select your name.','error'); return; }
   const btn=document.querySelector('#editOverlay .btn-modal-submit');
@@ -1785,7 +1785,7 @@ function submitEdit() {
       } else showToast('❌ '+r.error,'error');
     })
     .withFailureHandler(function() { btn.textContent='Save Changes'; btn.disabled=false; showToast('❌ Failed to save.','error'); })
-    .updateResolvedDoubt({ doubtId: currentDoubtId, resolvedBy, typeOfConsult, escalatedDueToTools,
+    .updateResolvedDoubt({ doubtId: currentEditDoubtId, resolvedBy, typeOfConsult, escalatedDueToTools,
       escalationValidity, queryClarity, newScenario, l0AreaOfImprovement,
       l0ApproachValidation, l2Confirmation,
       l2Reason,              // multi-select → L2 Reason for the verdict
