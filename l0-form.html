@@ -25,7 +25,7 @@
     label { display: block; font-size: 13px; font-weight: 500; color: #3c4043; margin-bottom: 8px; }
     label .req { color: #d93025; margin-left: 2px; }
 
-    input[type="text"], input[type="email"], input[type="datetime-local"], select, textarea {
+    input[type="text"], input[type="email"],input[type="date"],input[type="time"], input[type="datetime-local"], select, textarea {
       width: 100%; padding: 10px 14px; border: 1px solid #dadce0; border-radius: 8px;
       font-size: 14px; font-family: 'Google Sans', Arial, sans-serif; color: #202124;
       transition: border-color 0.2s, box-shadow 0.2s; outline: none; background: white;
@@ -226,162 +226,166 @@
   <div class="page-title">Submit a Doubt</div>
   <div class="page-subtitle">Fill in the details below to raise a doubt with the CRX review team.</div>
 
+
   <div class="card">
+
+    <!-- Email only — no separate name field -->
+    <div class="form-group">
+      <label>Your Email (LDAP) <span class="req">*</span></label>
+      <input type="email" id="l0Email" placeholder="yourname@google.com" readonly>
+    </div>
+
+    <!-- Extension Pickup: Date + Time as two separate fields -->
     <div class="inline-group">
       <div class="form-group">
-        <label>Your Name <span class="req">*</span></label>
-        <input type="text" id="l0Name" placeholder="LDAP" readonly>
+        <label>Extension Pickup Date <span class="req">*</span></label>
+        <input type="date" id="extensionPickupDate">
       </div>
       <div class="form-group">
-        <label>Your Email <span class="req">*</span></label>
-        <input type="email" id="l0Email" placeholder="yourname@google.com" readonly>
+        <label>Extension Pickup Time <span class="req">*</span></label>
+        <input type="time" id="extensionPickupTime">
       </div>
     </div>
 
     <div class="inline-group">
-      <div class="form-group">
-        <label>Extension Pickup Time <span class="req">*</span></label>
-        <input type="datetime-local" id="extensionPickupTime">
-      </div>
       <div class="form-group">
         <label>Extension ID <span class="req">*</span></label>
         <input type="text" id="extensionId" placeholder="e.g. abcdefghijklmnop">
       </div>
-    </div>
-
-    <div class="inline-group">
       <div class="form-group">
         <label>Revision ID <span class="req">*</span></label>
         <input type="text" id="revisionID" placeholder="e.g. 00001">
       </div>
-      <div class="form-group">
-        <label>Task ID <span class="req">*</span></label>
-        <input type="text" id="taskID" placeholder="e.g. abcdefghijklmnop">
-      </div>
     </div>
 
-    <div class="inline-group">
-      <div class="form-group">
-        <label>Item's Functionality <span class="req">*</span></label>
-        <select id="itemsFunctionality">
-          <option value="">— Select Queue —</option>
-          <option value="adblocker">Adblocker</option>
-          <option value="al">Al</option>
-          <option value="autofill">Autofill</option>
-          <option value="sales-crm-lead-generation">Sales, CRM & Lead Generation</option>
-          <option value="crypto-wallet-stocks-finance">Crypto/Wallet/Stocks/Finance</option>
-          <option value="developer-tools">Developer Tools</option>
-          <option value="downloader-uploader">Downloader/Uploader</option>
-          <option value="educational-related">Educational Related</option>
-          <option value="enhancer">Enhancer</option>
-          <option value="entertainment">Entertainment</option>
-          <option value="games">Games</option>
-          <option value="newtab">NewTab</option>
-          <option value="password-manager">Password manager</option>
-          <option value="scrapping-extractor">Scrapping/Extractor</option>
-          <option value="screen-record-capture">Screen record/capture</option>
-          <option value="search">Search</option>
-          <option value="privacy-security">Privacy & Security</option>
-          <option value="seo">SEO</option>
-          <option value="shopping-coupons-tokens-discounts">Shopping/Coupons/Tokens/Discounts</option>
-          <option value="social-media">Social Media</option>
-          <option value="theme">Theme</option>
-          <option value="tools-productivity">Tools/productivity</option>
-          <option value="translator">Translator</option>
-          <option value="vpn-proxy">VPN/Proxy</option>
-          <option value="website-blocker">Website Blocker</option>
-          <option value="functionality-and-other">Functionality & 비</option>
-          <option value="accessibility">Accessibility</option>
-          <option value="productivity-workflow-and-planning">Productivity-Workflow and Planning</option>
-          <option value="lifestyle-art-design">Lifestyle - Art & Design</option>
-          <option value="lifestyle-household">Lifestyle-Household</option>
-          <option value="lifestyle-news-weather">Lifestyle - News & Weather</option>
-          <option value="lifestyle-shopping">Lifestyle-Shopping</option>
-          <option value="lifestyle-travel">Lifestyle-Travel</option>
-          <option value="lifestyle-well-being">Lifestyle-Well being</option>
-          <option value="free-text">Free Text</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Queue Name <span class="req">*</span></label>
-        <select id="queueName">
-          <option value="">— Select Queue —</option>
-          <!-- populated by JS from QUEUE_NAMES array -->
-        </select>
-      </div>
+    <div class="form-group">
+      <label>Task ID <span class="req">*</span></label>
+      <input type="text" id="taskID" placeholder="e.g. abcdefghijklmnop">
     </div>
 
-    <div class="inline-group">
-      <div class="form-group">
-        <label>Category <span class="req">*</span></label>
-        <select id="Category">
-         <option value="">— Select Queue —</option>
-          <option value="Verdict-Confirmation">Verdict Confirmation</option>
-         <option value="Score-Logs">Score Logs</option>
-         <option value="Suspicious-code">Suspicious code</option>
-         <option value="Complex-Webpack-Code">Complex/Webpack Code</option>
-         <option value="Malware-new-malware-trend">Malware - new malware trend</option>
-         <option value="Known-malware-trend">Known malware trend</option>
-         <option value="Tool-or-Links-not-WAI">Tool or Links not WAI</option>
-         <option value="Sensitive-Developer-High-User-Base">Sensitive Developer / High User Base</option>
-         <option value="Process-guideline-change">Process guideline change</option>
-         <option value="Granular-CR">Granular CR</option>
-         <option value="Internal-Risk-Score-for-the-Extension">Internal Risk Score for the Extension</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>Sub Category <span class="req">*</span></label>
-        <select id="SubCategory">
-         <option value="">— Select Queue —</option>
-         <option value="remote-hosted-code">Remote Hosted Code</option>
-          <option value="sensitive-data-collection">Sensitive Data Collection</option>
-          <option value="cookie-theft">Cookie Theft</option>
-          <option value="permission-use-case">Permission Use Case</option>
-          <option value="seti-high-score">Seti High score</option>
-          <option value="suspicious-new-score-log-triggered">Suspicious/New Score log triggered</option>
-          <option value="deja-script">Deja Script</option>
-          <option value="nirvana-score-log">Nirvana score log</option>
-          <option value="tensorflow">Tensorflow</option>
-          <option value="google-analytics">Google Analytics</option>
-          <option value="telemetry">Telemetry</option>
-          <option value="search-hijack-search-exfiltration">Search(search Hijack, Search Exfiltration)</option>
-          <option value="minification">Minification</option>
-          <option value="crypto-phishing-wallets">Crypto Phishing/Wallets</option>
-          <option value="auto-bot">Auto Bot</option>
-          <option value="any-ongoing-bugs-open-for-the-item">Any Ongoing Bugs open for the Item</option>
-          <option value="lack-of-dynamic-proof">Lack of Dynamic proof</option>
-          <option value="tool-issue">Tool Issue</option>
-          <option value="data-scraping">Data Scraping</option>
-          <option value="webgl-unrelated-code">WebGL unrelated code</option>
-          <option value="obfuscation">Obfuscation</option>
-          <option value="login-required-for-specific-domain">Login required for specific domain</option>
-        </select>
-      </div>
+    <!-- Item's Functionality + conditional free text -->
+    <div class="form-group">
+      <label>Item's Functionality <span class="req">*</span></label>
+      <select id="itemsFunctionality" onchange="toggleFreeText('itemsFunctionality','itemsFunctionalityFreeText')">
+        <option value="">— Select —</option>
+        <option value="adblocker">Adblocker</option>
+        <option value="ai">AI</option>
+        <option value="autofill">Autofill</option>
+        <option value="developer-tools">Developer Tools</option>
+        <option value="downloader-uploader">Downloader/Uploader</option>
+        <option value="educational">Educational</option>
+        <option value="enhancer">Enhancer</option>
+        <option value="entertainment">Entertainment</option>
+        <option value="games">Games</option>
+        <option value="newtab">NewTab</option>
+        <option value="password-manager">Password Manager</option>
+        <option value="privacy-security">Privacy & Security</option>
+        <option value="productivity">Tools/Productivity</option>
+        <option value="shopping">Shopping/Coupons</option>
+        <option value="social-media">Social Media</option>
+        <option value="theme">Theme</option>
+        <option value="translator">Translator</option>
+        <option value="vpn-proxy">VPN/Proxy</option>
+        <option value="website-blocker">Website Blocker</option>
+        <option value="Free Text">Free Text</option>
+      </select>
+    </div>
+    <div class="form-group" id="itemsFunctionalityFreeText" style="display:none">
+      <label>Item's Functionality — Free Text <span class="req">*</span></label>
+      <input type="text" id="itemsFunctionalityFreeTextInput"
+           placeholder="Please describe the item's functionality">
     </div>
 
-    <div class="inline-group">
-      <div class="form-group">
-        <label>Stage of query<span class="req">*</span></label>
-        <select id="StageOfQuery">
-         <option value="">— Select Queue —</option>
-         <option value="static-analysis">Static analysis</option>
-          <option value="dynamic-analysis">Dynamic analysis</option>
-          <option value="network-logs">Network logs</option>
-          <option value="sensitive-permissions">Sensitive permissions</option>
-          <option value="bug-reference">Bug reference</option>
-          <option value="free-text">Free Text</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label> DCR Docs Link <span class="req">*</span></label>
-         <input type="text" id="DocLink" placeholder="e.g. abcdefghijklmnop">
-        
-      </div>
+    <!-- Queue Name -->
+    <div class="form-group">
+      <label>Queue Name <span class="req">*</span></label>
+      <select id="queueName">
+        <option value="">— Select Queue —</option>
+      </select>
     </div>
 
-    <!-- L0 Approach opinion — NEW -->
+    <!-- Category + conditional free text -->
+    <div class="form-group">
+      <label>Category <span class="req">*</span></label>
+      <select id="Category" onchange="toggleFreeText('Category','categoryFreeText')">
+        <option value="">— Select —</option>
+        <option value="Verdict-Confirmation">Verdict Confirmation</option>
+        <option value="Score-Logs">Score Logs</option>
+        <option value="Suspicious-code">Suspicious code</option>
+        <option value="Complex-Webpack-Code">Complex/Webpack Code</option>
+        <option value="Malware-new-malware-trend">Malware - new malware trend</option>
+        <option value="Known-malware-trend">Known malware trend</option>
+        <option value="Tool-or-Links-not-WAI">Tool or Links not WAI</option>
+        <option value="Sensitive-Developer-High-User-Base">Sensitive Developer / High User Base</option>
+        <option value="Process-guideline-change">Process guideline change</option>
+        <option value="Granular-CR">Granular CR</option>
+        <option value="Internal-Risk-Score">Internal Risk Score for the Extension</option>
+        <option value="Free Text">Free Text</option>
+      </select>
+    </div>
+    <div class="form-group" id="categoryFreeText" style="display:none">
+      <label>Category — Free Text <span class="req">*</span></label>
+      <input type="text" id="categoryFreeTextInput"
+           placeholder="Please describe the category">
+    </div>
+
+    <!-- Sub Category + conditional free text -->
+    <div class="form-group">
+      <label>Sub Category <span class="req">*</span></label>
+      <select id="SubCategory" onchange="toggleFreeText('SubCategory','subCategoryFreeText')">
+        <option value="">— Select —</option>
+        <option value="remote-hosted-code">Remote Hosted Code</option>
+        <option value="sensitive-data-collection">Sensitive Data Collection</option>
+        <option value="cookie-theft">Cookie Theft</option>
+        <option value="permission-use-case">Permission Use Case</option>
+        <option value="seti-high-score">Seti High Score</option>
+        <option value="obfuscation">Obfuscation</option>
+        <option value="data-scraping">Data Scraping</option>
+        <option value="search-hijack">Search Hijack/Exfiltration</option>
+        <option value="minification">Minification</option>
+        <option value="telemetry">Telemetry</option>
+        <option value="lack-of-dynamic-proof">Lack of Dynamic Proof</option>
+        <option value="tool-issue">Tool Issue</option>
+        <option value="auto-bot">Auto Bot</option>
+        <option value="Free Text">Free Text</option>
+      </select>
+    </div>
+    <div class="form-group" id="subCategoryFreeText" style="display:none">
+      <label>Sub Category — Free Text <span class="req">*</span></label>
+      <input type="text" id="subCategoryFreeTextInput"
+           placeholder="Please describe the sub category">
+    </div>
+
+    <!-- Stage of Query + conditional free text -->
+    <div class="form-group">
+      <label>Stage of Query <span class="req">*</span></label>
+      <select id="StageOfQuery" onchange="toggleFreeText('StageOfQuery','stageOfQueryFreeText')">
+        <option value="">— Select —</option>
+        <option value="static-analysis">Static Analysis</option>
+        <option value="dynamic-analysis">Dynamic Analysis</option>
+        <option value="network-logs">Network Logs</option>
+        <option value="sensitive-permissions">Sensitive Permissions</option>
+        <option value="bug-reference">Bug Reference</option>
+        <option value="Free Text">Free Text</option>
+      </select>
+    </div>
+    <div class="form-group" id="stageOfQueryFreeText" style="display:none">
+      <label>Stage of Query — Free Text <span class="req">*</span></label>
+      <input type="text" id="stageOfQueryFreeTextInput"
+           placeholder="Please describe the stage of query">
+    </div>
+
+    <div class="form-group">
+      <label>Doubt Details <span class="req">*</span></label>
+      <textarea id="doubtDetails"
+        placeholder="Describe your doubt in detail. Include any specific behavior, screenshot references, or policy sections  you're unsure about..."></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>DCR Docs Link <span class="req">*</span></label>
+      <input type="text" id="DocLink" placeholder="e.g. https://docs.google.com/...">
+    </div>
+
     <div class="form-group">
       <label>L0 Approach Opinion <span class="req">*</span></label>
       <select id="l0ApproachOpinion">
@@ -392,30 +396,31 @@
       </select>
     </div>
 
+    <!-- Violations = L0 Reason for the verdict -->
     <div class="form-group">
-      <label>Violations Observed <span class="req">*</span>
+      <label>L0 Reason for the Verdict <span class="req">*</span>
         <span style="color:#5f6368;font-weight:400">(search & select all that apply)</span>
       </label>
       <div class="multi-select-wrap" id="violationsWrap">
         <div class="ms-box" id="msBox" onclick="focusSearch()">
-          <!-- chips injected here -->
           <input class="ms-input" id="msSearch" placeholder="Search violations…"
-             oninput="filterOptions()" onfocus="openDropdown()" autocomplete="off">
+                 oninput="filterOptions()" onfocus="openDropdown()" autocomplete="off">
         </div>
         <div class="ms-dropdown" id="msDropdown"></div>
       </div>
     </div>
 
-    <div class="form-group">
-      <label>Doubt Details <span class="req">*</span></label>
-      <textarea id="doubtDetails" placeholder="Describe your doubt in detail. Include any specific behavior, screenshot references, or policy sections you're unsure about..."></textarea>
-    </div>
+    
 
     <button class="btn-submit" id="submitBtn" onclick="submitForm()">
       <span class="btn-text">Submit Doubt to CRX Team</span>
       <div class="spinner"></div>
     </button>
   </div>
+
+  
+    
+  </div> 
 </div>
 
 <div class="toast" id="toast"></div>
@@ -473,6 +478,9 @@
 // ════════════════════════════════════════════
 // AVAILABILITY GATE
 // ════════════════════════════════════════════
+
+
+
 var availCheckInterval = null;
 
 function checkAvailability(isRetry) {
@@ -742,23 +750,17 @@ checkAvailability(false);
   });
 
   // ── Auto-fill email ───────────────────────────────────────
-  google.script.run
-    .withSuccessHandler(function(email) {
-      if (email) {
-        const el = document.getElementById('l0Email');
-        el.value = email;
-        el.readOnly = true;
-        el.style.backgroundColor = '#f1f3f4';
-
-        const el1 = document.getElementById('l0Name');
-        const ldap = email.split('@')[0].toLowerCase();
-        el1.value = ldap;
-        el1.readOnly = true;
-        el1.style.backgroundColor = '#f1f3f4';
-      }
-    })
-    .withFailureHandler(err => console.warn('Email fetch failed:', err))
-    .getUserEmail();
+ google.script.run
+  .withSuccessHandler(function(email) {
+    if (email) {
+      const el = document.getElementById('l0Email');
+      el.value = email;
+      el.readOnly = true;
+      el.style.backgroundColor = '#f1f3f4';
+    }
+  })
+  .withFailureHandler(err => console.warn('Email fetch failed:', err))
+  .getUserEmail();
 
   // ── Load config (only crxMembers now; queues/violations are static) ──
   // No getConfig() call needed for this page anymore
@@ -771,62 +773,170 @@ checkAvailability(false);
     setTimeout(() => t.className = 'toast', 4000);
   }
 
-  // ── Submit ────────────────────────────────────────────────
-  function submitForm() {
-    const l0Name              = document.getElementById('l0Name').value.trim();
-    const l0Email             = document.getElementById('l0Email').value.trim();
-    const extensionPickupTime = document.getElementById('extensionPickupTime').value;
-    const extensionId         = document.getElementById('extensionId').value.trim();
-    const revisionId          = document.getElementById('revisionID').value.trim();
-    const taskId              = document.getElementById('taskID').value.trim();
-    const itemsFunctionality  = document.getElementById('itemsFunctionality').value;
-    const queueName           = document.getElementById('queueName').value;
-    const category            = document.getElementById('Category').value;
-    const subCategory         = document.getElementById('SubCategory').value;
-    const stageOfQuery        = document.getElementById('StageOfQuery').value;
-    const docLink             = document.getElementById('DocLink').value.trim();
-    const l0ApproachOpinion   = document.getElementById('l0ApproachOpinion').value;
-    const doubtDetails        = document.getElementById('doubtDetails').value.trim();
-    const violations          = selectedViolations.slice(); // copy
-
-    if (!l0Name || !l0Email || !extensionPickupTime || !extensionId || !revisionId ||
-        !taskId || !itemsFunctionality || !queueName || !category || !subCategory ||
-        !stageOfQuery || !docLink || !l0ApproachOpinion || !doubtDetails || violations.length === 0) {
-      showToast('⚠️ Please fill in all required fields and select at least one violation.', 'error');
-      return;
-    }
-
-    const btn = document.getElementById('submitBtn');
-    btn.disabled = true;
-    btn.classList.add('loading');
-
-    google.script.run
-      .withSuccessHandler(function(result) {
-        btn.disabled = false;
-        btn.classList.remove('loading');
-        if (result.success) {
-          showToast('✅ Doubt submitted! ID: ' + result.doubtId, 'success');
-          // Reset
-          ['l0Name','extensionPickupTime','extensionId','revisionID','taskID','DocLink','doubtDetails']
-            .forEach(id => document.getElementById(id).value = '');
-          ['itemsFunctionality','queueName','Category','SubCategory','StageOfQuery','l0ApproachOpinion']
-            .forEach(id => document.getElementById(id).value = '');
-          selectedViolations = [];
-          renderChips();
-          buildOptions('');
-        } else {
-          showToast('❌ Error: ' + result.error, 'error');
-        }
-      })
-      .withFailureHandler(function() {
-        btn.disabled = false;
-        btn.classList.remove('loading');
-        showToast('❌ Submission failed. Please try again.', 'error');
-      })
-      .submitDoubt({ l0Name, l0Email, extensionPickupTime, extensionId, revisionId,
-                     taskId, itemsFunctionality, queueName, category, subCategory,
-                     stageOfQuery, docLink, l0ApproachOpinion, doubtDetails, violations });
+  // Add this function for showing/hiding free text fields
+function toggleFreeText(selectId, freeTextDivId) {
+  const sel = document.getElementById(selectId);
+  const div = document.getElementById(freeTextDivId);
+  const input = div.querySelector('input');
+  if (sel.value === 'Free Text') {
+    div.style.display = 'block';
+    input.required = true;
+  } else {
+    div.style.display = 'none';
+    input.value = '';
+    input.required = false;
   }
+}
+
+  // ── Submit ────────────────────────────────────────────────
+
+
+// Update submitForm() to collect new fields
+function submitForm() {
+  const l0Email             = document.getElementById('l0Email').value.trim();
+  const pickupDate          = document.getElementById('extensionPickupDate').value;
+  const pickupTime          = document.getElementById('extensionPickupTime').value;
+  const extensionId         = document.getElementById('extensionId').value.trim();
+  const revisionId          = document.getElementById('revisionID').value.trim();
+  const taskId              = document.getElementById('taskID').value.trim();
+  const itemsFunctionality  = document.getElementById('itemsFunctionality').value;
+  const itemsFuncFreeText   = document.getElementById('itemsFunctionalityFreeTextInput').value.trim();
+  const queueName           = document.getElementById('queueName').value;
+  const category            = document.getElementById('Category').value;
+  const categoryFreeText    = document.getElementById('categoryFreeTextInput').value.trim();
+  const subCategory         = document.getElementById('SubCategory').value;
+  const subCategoryFreeText = document.getElementById('subCategoryFreeTextInput').value.trim();
+  const stageOfQuery        = document.getElementById('StageOfQuery').value;
+  const stageFreeText       = document.getElementById('stageOfQueryFreeTextInput').value.trim();
+  const doubtDetails        = document.getElementById('doubtDetails').value.trim();
+  const docLink             = document.getElementById('DocLink').value.trim();
+  const l0ApproachOpinion   = document.getElementById('l0ApproachOpinion').value;
+  const violations          = selectedViolations.slice();
+
+  // Validate required fields
+  if (!l0Email || !pickupDate || !pickupTime || !extensionId || !revisionId ||
+      !taskId || !itemsFunctionality || !queueName || !category ||
+      !subCategory || !stageOfQuery || !doubtDetails || !docLink ||
+      !l0ApproachOpinion || violations.length === 0) {
+    showToast('⚠️ Please fill in all required fields.', 'error'); return;
+  }
+  // Validate free text fields when "Free Text" selected
+  if (itemsFunctionality === 'Free Text' && !itemsFuncFreeText) {
+    showToast('⚠️ Please provide details for Item\'s Functionality Free Text.', 'error'); return;
+  }
+  if (category === 'Free Text' && !categoryFreeText) {
+    showToast('⚠️ Please provide details for Category Free Text.', 'error'); return;
+  }
+  if (subCategory === 'Free Text' && !subCategoryFreeText) {
+    showToast('⚠️ Please provide details for Sub Category Free Text.', 'error'); return;
+  }
+  if (stageOfQuery === 'Free Text' && !stageFreeText) {
+    showToast('⚠️ Please provide details for Stage of Query Free Text.', 'error'); return;
+  }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true; btn.classList.add('loading');
+
+  google.script.run
+    .withSuccessHandler(function(result) {
+      btn.disabled = false; btn.classList.remove('loading');
+      if (result.success) {
+        showToast('✅ Doubt submitted! ID: ' + result.doubtId, 'success');
+        // Reset form
+        ['extensionPickupDate','extensionPickupTime','extensionId','revisionID',
+         'taskID','DocLink','doubtDetails','itemsFunctionalityFreeTextInput',
+         'categoryFreeTextInput','subCategoryFreeTextInput','stageOfQueryFreeTextInput']
+          .forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+        ['itemsFunctionality','queueName','Category','SubCategory',
+         'StageOfQuery','l0ApproachOpinion']
+          .forEach(id => document.getElementById(id).value = '');
+        // Hide free text divs
+        ['itemsFunctionalityFreeText','categoryFreeText',
+         'subCategoryFreeText','stageOfQueryFreeText']
+          .forEach(id => { document.getElementById(id).style.display='none'; });
+        selectedViolations = []; renderChips(); buildOptions('');
+      } else {
+        showToast('❌ Error: ' + result.error, 'error');
+      }
+    })
+    .withFailureHandler(function() {
+      btn.disabled = false; btn.classList.remove('loading');
+      showToast('❌ Submission failed. Please try again.', 'error');
+    })
+    .submitDoubt({
+      l0Email,
+      extensionPickupDateTime: pickupDate + 'T' + pickupTime, // combined for splitting server-side
+      extensionId, revisionId, taskId,
+      itemsFunctionality,
+      itemsFunctionalityFreeText: itemsFunctionality === 'Free Text' ? itemsFuncFreeText : 'NA',
+      queueName, category,
+      categoryFreeText: category === 'Free Text' ? categoryFreeText : 'NA',
+      subCategory,
+      subCategoryFreeText: subCategory === 'Free Text' ? subCategoryFreeText : 'NA',
+      stageOfQuery,
+      stageOfQueryFreeText: stageOfQuery === 'Free Text' ? stageFreeText : 'NA',
+      doubtDetails, docLink, l0ApproachOpinion,
+      violations
+    });
+}
+
+
+
+  // function submitForm() {
+  //   const l0Name              = document.getElementById('l0Name').value.trim();
+  //   const l0Email             = document.getElementById('l0Email').value.trim();
+  //   const extensionPickupTime = document.getElementById('extensionPickupTime').value;
+  //   const extensionId         = document.getElementById('extensionId').value.trim();
+  //   const revisionId          = document.getElementById('revisionID').value.trim();
+  //   const taskId              = document.getElementById('taskID').value.trim();
+  //   const itemsFunctionality  = document.getElementById('itemsFunctionality').value;
+  //   const queueName           = document.getElementById('queueName').value;
+  //   const category            = document.getElementById('Category').value;
+  //   const subCategory         = document.getElementById('SubCategory').value;
+  //   const stageOfQuery        = document.getElementById('StageOfQuery').value;
+  //   const docLink             = document.getElementById('DocLink').value.trim();
+  //   const l0ApproachOpinion   = document.getElementById('l0ApproachOpinion').value;
+  //   const doubtDetails        = document.getElementById('doubtDetails').value.trim();
+  //   const violations          = selectedViolations.slice(); // copy
+
+  //   if (!l0Name || !l0Email || !extensionPickupTime || !extensionId || !revisionId ||
+  //       !taskId || !itemsFunctionality || !queueName || !category || !subCategory ||
+  //       !stageOfQuery || !docLink || !l0ApproachOpinion || !doubtDetails || violations.length === 0) {
+  //     showToast('⚠️ Please fill in all required fields and select at least one violation.', 'error');
+  //     return;
+  //   }
+
+  //   const btn = document.getElementById('submitBtn');
+  //   btn.disabled = true;
+  //   btn.classList.add('loading');
+
+  //   google.script.run
+  //     .withSuccessHandler(function(result) {
+  //       btn.disabled = false;
+  //       btn.classList.remove('loading');
+  //       if (result.success) {
+  //         showToast('✅ Doubt submitted! ID: ' + result.doubtId, 'success');
+  //         // Reset
+  //         ['l0Name','extensionPickupTime','extensionId','revisionID','taskID','DocLink','doubtDetails']
+  //           .forEach(id => document.getElementById(id).value = '');
+  //         ['itemsFunctionality','queueName','Category','SubCategory','StageOfQuery','l0ApproachOpinion']
+  //           .forEach(id => document.getElementById(id).value = '');
+  //         selectedViolations = [];
+  //         renderChips();
+  //         buildOptions('');
+  //       } else {
+  //         showToast('❌ Error: ' + result.error, 'error');
+  //       }
+  //     })
+  //     .withFailureHandler(function() {
+  //       btn.disabled = false;
+  //       btn.classList.remove('loading');
+  //       showToast('❌ Submission failed. Please try again.', 'error');
+  //     })
+  //     .submitDoubt({ l0Name, l0Email, extensionPickupTime, extensionId, revisionId,
+  //                    taskId, itemsFunctionality, queueName, category, subCategory,
+  //                    stageOfQuery, docLink, l0ApproachOpinion, doubtDetails, violations });
+  // }
 </script>
 </body>
 </html>
