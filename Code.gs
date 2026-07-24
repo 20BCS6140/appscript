@@ -23,6 +23,7 @@ function updateMeta() {
     const cache = CacheService.getScriptCache();
     cache.remove('team_status');
     cache.remove('all_doubts');
+    cache.remove('l0_crx_status');
   } catch(e) {}
 
   // ... rest of existing updateMeta() code
@@ -1793,6 +1794,62 @@ function checkCRXAvailability() {
     Logger.log('checkCRXAvailability ERROR: ' + err.message);
     return { hasAvailable: true, presentCount: 1, openCount: 0,
              freeCount: 1, capacity: 1, slotsLeft: 1, reason: 'error_open' };
+  }
+}
+
+// ── CRX STATUS FOR L0 FORM ────────────────────────────────────
+// Cached for 5 minutes — safe for 150 L0s, very low load
+function getCRXStatusForL0() {
+  const cache  = CacheService.getScriptCache();
+  const cached = cache.get('l0_crx_status');
+  if (cached) {
+    try { return JSON.parse(cached); } catch(e) {}
+  }
+
+  try {
+    const ss  = SpreadsheetApp.openById(SHEET_ID);
+    const tz  = Session.getScriptTimeZone();
+    const today = Utilities.formatDate(new Date(), tz, 'yyyy-MM-dd');
+
+    // Present count from Presence sheet
+    let presentCount = 0;
+    const presSheet  = ss.getSheetByName('Presence');
+    if (presSheet) {
+      const pData = presSheet.getDataRange().getValues();
+      for (let i = 1; i < pData.length; i++) {
+        let rd = pData[i][0];
+        rd = rd instanceof Date
+          ? Utilities.formatDate(rd, tz, 'yyyy-MM-dd')
+          : rd.toString().substring(0, 10);
+        if (rd === today && pData[i][2].toString().trim().toLowerCase() === 'present')
+          presentCount++;
+      }
+    }
+
+    // Open + Assigned counts from Doubts sheet (Status at index 21)
+    let openCount = 0, assignedCount = 0;
+    const dSheet = ss.getSheetByName('Doubts');
+    if (dSheet) {
+      const dData = dSheet.getDataRange().getValues();
+      for (let i = 1; i < dData.length; i++) {
+        const status = dData[i][21].toString().trim();
+        if (status === 'Open')     openCount++;
+        if (status === 'Assigned') assignedCount++;
+      }
+    }
+
+    const result = { presentCount, openCount, assignedCount,
+                     cachedAt: new Date().toISOString() };
+
+    // Cache for 5 minutes (300 seconds)
+    // All 150 L0s share this single cached result — zero extra sheet reads
+    try { cache.put('l0_crx_status', JSON.stringify(result), 300); } catch(e) {}
+
+    return result;
+  } catch (err) {
+    Logger.log('getCRXStatusForL0 ERROR: ' + err.message);
+    return { presentCount: 0, openCount: 0, assignedCount: 0,
+             cachedAt: new Date().toISOString() };
   }
 }
 
