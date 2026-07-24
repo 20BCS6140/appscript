@@ -87,87 +87,147 @@
   .ms-empty { padding: 12px 14px; font-size: 13px; color: #80868b; }
 
   /* ── Availability Gate ── */
-#availGate {
+/* #availGate {
   position: fixed; inset: 0; z-index: 9000;
   display: flex; align-items: center; justify-content: center;
   background: #f0f4f9;
-}
+} */
 
 /* Checking spinner card */
-.gate-checking {
+/* .gate-checking {
   background: white; border-radius: 16px; padding: 40px 36px;
   text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.1);
   max-width: 380px; width: 92vw;
-}
-.gate-spinner {
+} */
+/* .gate-spinner {
   width: 40px; height: 40px; border: 3px solid #e8eaed;
   border-top-color: #1a73e8; border-radius: 50%;
   animation: spin 0.8s linear infinite; margin: 0 auto 16px;
-}
+} */
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* Unavailable message card */
-.gate-unavailable {
+/* .gate-unavailable {
   background: white; border-radius: 20px; padding: 48px 40px;
   text-align: center; box-shadow: 0 8px 40px rgba(0,0,0,0.1);
   max-width: 520px; width: 94vw; border-top: 4px solid #1a73e8;
-}
-.gate-icon {
+} */
+/* .gate-icon {
   font-size: 52px; margin-bottom: 18px; display: block;
-}
-.gate-title {
+} */
+/* .gate-title {
   font-size: 22px; font-weight: 600; color: #202124;
   margin-bottom: 10px; line-height: 1.3;
-}
-.gate-subtitle {
+} */
+/* .gate-subtitle {
   font-size: 14px; color: #5f6368; margin-bottom: 24px;
   line-height: 1.6;
-}
-.gate-divider {
+} */
+/* .gate-divider {
   border: none; border-top: 1px solid #e8eaed; margin: 20px 0;
-}
-.gate-message {
+} */
+/* .gate-message {
   font-size: 13px; color: #3c4043; line-height: 1.7;
   background: #f8f9fa; border-radius: 10px; padding: 16px 18px;
   text-align: left; margin-bottom: 20px;
   border-left: 3px solid #1a73e8;
-}
-.gate-message p { margin-bottom: 10px; }
-.gate-message p:last-child { margin-bottom: 0; }
-.gate-status-badge {
+} */
+/* .gate-message p { margin-bottom: 10px; } */
+/* .gate-message p:last-child { margin-bottom: 0; } */
+/* .gate-status-badge {
   display: inline-flex; align-items: center; gap: 6px;
   background: #fef3e0; color: #b06000; padding: 6px 14px;
   border-radius: 20px; font-size: 12px; font-weight: 500; margin-bottom: 20px;
-}
-.gate-retry-btn {
+} */
+/* .gate-retry-btn {
   background: white; border: 1.5px solid #1a73e8; color: #1a73e8;
   padding: 10px 22px; border-radius: 8px; font-size: 13px; font-weight: 500;
   cursor: pointer; font-family: 'Google Sans', Arial, sans-serif;
   transition: all 0.15s;
-}
-.gate-retry-btn:hover { background: #e8f0fe; }
-.gate-footer {
+} */
+/* .gate-retry-btn:hover { background: #e8f0fe; } */
+/* .gate-footer {
   margin-top: 20px; font-size: 11px; color: #9aa0a6;
+} */
+
+/* ── CRX Status Widget ── */
+.crx-status-widget {
+  position: fixed;
+  top: 54px;          /* sits just below the nav bar */
+  right: 16px;
+  z-index: 500;
+  background: white;
+  border: 1px solid #e8eaed;
+  border-radius: 10px;
+  padding: 10px 14px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  min-width: 190px;
+  font-family: 'Google Sans', Arial, sans-serif;
+  transition: opacity 0.3s;
+}
+.crx-status-widget.loading { opacity: 0.5; }
+.crx-status-title {
+  font-size: 10px; font-weight: 600; color: #5f6368;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  margin-bottom: 8px; display: flex; justify-content: space-between;
+  align-items: center;
+}
+.crx-status-refresh {
+  font-size: 10px; color: #9aa0a6; cursor: default;
+}
+.crx-status-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 4px 0; border-bottom: 1px solid #f1f3f4; font-size: 12px;
+}
+.crx-status-row:last-child { border-bottom: none; padding-bottom: 0; }
+.crx-status-label { color: #5f6368; }
+.crx-status-val {
+  font-weight: 600; font-size: 13px; padding: 1px 8px;
+  border-radius: 10px;
+}
+.crx-status-val.present  { background: #e6f4ea; color: #1e8e3e; }
+.crx-status-val.assigned { background: #fef3e0; color: #b06000; }
+.crx-status-val.open     { background: #e8f0fe; color: #1a73e8; }
+.crx-status-footer {
+  font-size: 10px; color: #b0b8c1; margin-top: 7px; text-align: right;
 }
 
   </style>
 </head>
 <body>
 
-<!-- ════════════════════════════════════════════
-     AVAILABILITY GATE
-     Shows while checking; replaced if CRX is busy
-════════════════════════════════════════════ -->
-<div id="availGate">
+  <!-- ── CRX Status Widget ── -->
+  <div class="crx-status-widget loading" id="crxStatusWidget">
+    <div class="crx-status-title">
+      CRX Team Status
+      <span class="crx-status-refresh" id="crxStatusRefreshLabel">●</span>
+    </div>
+    <div class="crx-status-row">
+      <span class="crx-status-label">👥 Present today</span>
+      <span class="crx-status-val present" id="crxPresent">—</span>
+    </div>
+    <div class="crx-status-row">
+      <span class="crx-status-label">📎 Assigned</span>
+      <span class="crx-status-val assigned" id="crxAssigned">—</span>
+    </div>
+    <div class="crx-status-row">
+      <span class="crx-status-label">📋 Open doubts</span>
+      <span class="crx-status-val open" id="crxOpen">—</span>
+    </div>
+    <div class="crx-status-footer" id="crxStatusAge"></div>
+</div>
 
-  <!-- Checking state (shown first) -->
+
+<!-- <div id="availGate">
+
+ 
   <div class="gate-checking" id="gateChecking">
     <div class="gate-spinner"></div>
     <div style="font-size:15px;font-weight:500;color:#202124;margin-bottom:6px">Checking availability…</div>
     <div style="font-size:13px;color:#5f6368">Please wait a moment</div>
   </div>
 
-  <!-- Unavailable state (hidden; shown if no CRX member is free) -->
+  
   <div class="gate-unavailable" id="gateUnavailable" style="display:none">
 
   <span class="gate-icon" id="gateIcon">🕐</span>
@@ -208,8 +268,7 @@
     Chrome Extensions Review Team &nbsp;·&nbsp; Google Internal
   </div>
 
-</div>
-</div>
+</div> -->
 
 <div class="top-bar">
   <div class="logo">
@@ -427,6 +486,22 @@
 
 <script>
 
+
+
+// Auto-fill today's date
+window.addEventListener("load", function () {
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, "0");
+  const dd = String(today.getDate()).padStart(2, "0");
+
+  document.getElementById("extensionPickupDate").value = `${yyyy}-${mm}-${dd}`;
+});
+
+// ════════════════════════════════════════════
+// AVAILABILITY CHECK — runs on every page load
+// ════════════════════════════════════════════
+
 // ════════════════════════════════════════════
 // AVAILABILITY CHECK — runs on every page load
 // ════════════════════════════════════════════
@@ -481,109 +556,155 @@
 
 
 
-var availCheckInterval = null;
+// var availCheckInterval = null;
 
-function checkAvailability(isRetry) {
-  if (isRetry) {
-    document.getElementById('gateChecking').style.display    = 'block';
-    document.getElementById('gateUnavailable').style.display = 'none';
-  }
+// function checkAvailability(isRetry) {
+//   if (isRetry) {
+//     document.getElementById('gateChecking').style.display    = 'block';
+//     document.getElementById('gateUnavailable').style.display = 'none';
+//   }
 
-  google.script.run
-    .withSuccessHandler(function(result) {
+//   google.script.run
+//     .withSuccessHandler(function(result) {
 
-      if (result.hasAvailable) {
-        // ✅ Slot available — open the form
-        document.getElementById('availGate').style.display = 'none';
-        if (availCheckInterval) { clearInterval(availCheckInterval); availCheckInterval = null; }
+//       if (result.hasAvailable) {
+//         // ✅ Slot available — open the form
+//         document.getElementById('availGate').style.display = 'none';
+//         if (availCheckInterval) { clearInterval(availCheckInterval); availCheckInterval = null; }
 
-      } else {
-        // ❌ No capacity — show blocking message
-        document.getElementById('gateChecking').style.display    = 'none';
-        document.getElementById('gateUnavailable').style.display = 'block';
+//       } else {
+//         // ❌ No capacity — show blocking message
+//         document.getElementById('gateChecking').style.display    = 'none';
+//         document.getElementById('gateUnavailable').style.display = 'block';
 
-        // Update message content based on reason
-        updateGateMessage(result);
+//         // Update message content based on reason
+//         updateGateMessage(result);
 
-        // Auto-recheck every 30 seconds
-        if (!availCheckInterval) {
-          availCheckInterval = setInterval(function() {
-            checkAvailability(false);
-          }, 30000);
-        }
-      }
-    })
-    .withFailureHandler(function(err) {
-      console.warn('Availability check failed:', err);
-      // Fail open — don't permanently block on error
-      document.getElementById('availGate').style.display = 'none';
-    })
-    .checkCRXAvailability();
-}
+//         // Auto-recheck every 30 seconds
+//         if (!availCheckInterval) {
+//           availCheckInterval = setInterval(function() {
+//             checkAvailability(false);
+//           }, 30000);
+//         }
+//       }
+//     })
+//     .withFailureHandler(function(err) {
+//       console.warn('Availability check failed:', err);
+//       // Fail open — don't permanently block on error
+//       document.getElementById('availGate').style.display = 'none';
+//     })
+//     .checkCRXAvailability();
+// }
 
-function updateGateMessage(result) {
-  var icon      = document.getElementById('gateIcon');
-  var title     = document.getElementById('gateTitle');
-  var badge     = document.getElementById('gateBadge');
-  var mainMsg   = document.getElementById('gateMainMsg');
-  var capBar    = document.getElementById('gateCapacityFill');
-  var capLabel  = document.getElementById('gateCapacityLabel');
+// function updateGateMessage(result) {
+//   var icon      = document.getElementById('gateIcon');
+//   var title     = document.getElementById('gateTitle');
+//   var badge     = document.getElementById('gateBadge');
+//   var mainMsg   = document.getElementById('gateMainMsg');
+//   var capBar    = document.getElementById('gateCapacityFill');
+//   var capLabel  = document.getElementById('gateCapacityLabel');
 
-  if (result.reason === 'no_present') {
-    // No one is on duty today
-    icon.textContent  = '🔴';
-    title.textContent = 'CRX Team Not on Duty';
-    badge.textContent = '🔴 No team members are on duty today';
-    badge.style.background = '#fce8e6'; badge.style.color = '#c5221f';
-    mainMsg.textContent =
-      'No CRX team members have checked in for today. ' +
-      'The doubt submission form will open once reviewers are on duty.';
+//   if (result.reason === 'no_present') {
+//     // No one is on duty today
+//     icon.textContent  = '🔴';
+//     title.textContent = 'CRX Team Not on Duty';
+//     badge.textContent = '🔴 No team members are on duty today';
+//     badge.style.background = '#fce8e6'; badge.style.color = '#c5221f';
+//     mainMsg.textContent =
+//       'No CRX team members have checked in for today. ' +
+//       'The doubt submission form will open once reviewers are on duty.';
 
-    // Bar: 0% used
-    capBar.style.width      = '0%';
-    capBar.style.background = '#ea4335';
-    capLabel.textContent    = '0 of 0 slots used — team offline';
+//     // Bar: 0% used
+//     capBar.style.width      = '0%';
+//     capBar.style.background = '#ea4335';
+//     capLabel.textContent    = '0 of 0 slots used — team offline';
 
-  } else {
-    // Full capacity: openCount >= presentCount
-    var open     = result.openCount    || 0;
-    var present  = result.presentCount || 0;
-    var pct      = present > 0 ? Math.min(100, Math.round((open / present) * 100)) : 100;
+//   } else {
+//     // Full capacity: openCount >= presentCount
+//     var open     = result.openCount    || 0;
+//     var present  = result.presentCount || 0;
+//     var pct      = present > 0 ? Math.min(100, Math.round((open / present) * 100)) : 100;
 
-    icon.textContent  = '🕐';
-    title.textContent = 'CRX Team at Full Capacity';
-    badge.textContent = '🟡 ' + open + ' open doubt' + (open > 1 ? 's' : '') +
-                        ' · ' + present + ' reviewer' + (present > 1 ? 's' : '') + ' on duty';
-    badge.style.background = '#fef3e0'; badge.style.color = '#b06000';
+//     icon.textContent  = '🕐';
+//     title.textContent = 'CRX Team at Full Capacity';
+//     badge.textContent = '🟡 ' + open + ' open doubt' + (open > 1 ? 's' : '') +
+//                         ' · ' + present + ' reviewer' + (present > 1 ? 's' : '') + ' on duty';
+//     badge.style.background = '#fef3e0'; badge.style.color = '#b06000';
 
-    mainMsg.textContent =
-      'All ' + present + ' present CRX reviewer' + (present > 1 ? 's' : '') +
-      ' currently have a pending consultation in queue (' + open +
-      ' open doubt' + (open > 1 ? 's' : '') + ' waiting). ' +
-      'New doubts will be accepted as soon as a reviewer resolves an existing one.';
+//     mainMsg.textContent =
+//       'All ' + present + ' present CRX reviewer' + (present > 1 ? 's' : '') +
+//       ' currently have a pending consultation in queue (' + open +
+//       ' open doubt' + (open > 1 ? 's' : '') + ' waiting). ' +
+//       'New doubts will be accepted as soon as a reviewer resolves an existing one.';
 
-    // Capacity bar
-    capBar.style.width      = pct + '%';
-    capBar.style.background = pct >= 100 ? '#ea4335' : '#fbbc04';
-    capLabel.textContent    = open + ' of ' + present + ' slot' +
-                              (present > 1 ? 's' : '') + ' filled' +
-                              (pct >= 100 ? ' — queue full' : '');
-  }
-}
+//     // Capacity bar
+//     capBar.style.width      = pct + '%';
+//     capBar.style.background = pct >= 100 ? '#ea4335' : '#fbbc04';
+//     capLabel.textContent    = open + ' of ' + present + ' slot' +
+//                               (present > 1 ? 's' : '') + ' filled' +
+//                               (pct >= 100 ? ' — queue full' : '');
+//   }
+// }
 
-function retryAvailabilityCheck() {
-  checkAvailability(true);
-}
+// function retryAvailabilityCheck() {
+//   checkAvailability(true);
+// }
 
 // Run check immediately when page loads
-checkAvailability(false);
+// checkAvailability(false);
 
-function retryAvailabilityCheck() {
-  checkAvailability(true);
-}
+// function retryAvailabilityCheck() {
+//   checkAvailability(true);
+// }
 
 // Run check immediately on page load
-checkAvailability(false);
+// checkAvailability(false);
+
+// ── CRX STATUS WIDGET ────────────────────────────────────────
+// Fetches from server-side cache (refreshed every 5 min server-side)
+// Client polls every 5 min — negligible load for 150 L0s
+
+var crxStatusInterval = null;
+
+function loadCRXStatus() {
+  google.script.run
+    .withSuccessHandler(function(data) {
+      if (!data) return;
+
+      document.getElementById('crxPresent').textContent  = data.presentCount;
+      document.getElementById('crxAssigned').textContent = data.assignedCount;
+      document.getElementById('crxOpen').textContent     = data.openCount;
+
+      // Show how old the cache is
+      var age = '';
+      if (data.cachedAt) {
+        var secs = Math.round((new Date() - new Date(data.cachedAt)) / 1000);
+        if (secs < 60)       age = 'Updated just now';
+        else if (secs < 300) age = 'Updated ' + Math.floor(secs / 60) + 'm ago';
+        else                 age = 'Updated ~5m ago';
+      }
+      document.getElementById('crxStatusAge').textContent = age;
+
+      // Green dot = at least one present, grey = nobody on duty
+      var dot = document.getElementById('crxStatusRefreshLabel');
+      dot.textContent = data.presentCount > 0 ? '● Live' : '○ Offline';
+      dot.style.color = data.presentCount > 0 ? '#34a853' : '#9aa0a6';
+
+      document.getElementById('crxStatusWidget').classList.remove('loading');
+    })
+    .withFailureHandler(function() {
+      // Silent fail — widget just stays loading, doesn't block form
+    })
+    .getCRXStatusForL0();
+}
+
+// Load immediately on page open
+loadCRXStatus();
+
+// Refresh every 5 minutes
+// The server caches the result anyway, so even if multiple L0s hit this
+// at the same time, they all get the cached version — zero extra sheet reads
+crxStatusInterval = setInterval(loadCRXStatus, 300000); // 300000ms = 5 min
 
   // ── Static data (mirrors Code.gs arrays) ─────────────────
   const QUEUE_NAMES = [
