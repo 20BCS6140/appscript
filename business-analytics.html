@@ -1,0 +1,1538 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRX Business Review</title>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/charts/loader.js"></script>
+
+<style>
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --blue:       #1A73E8;
+  --blue-dark:  #1558B0;
+  --blue-pale:  #E8F0FE;
+  --navy:       #1C2640;
+  --navy-light: #253152;
+  --bg:         #F1F4FB;
+  --surface:    #FFFFFF;
+  --border:     #DCE3F0;
+  --text-1:     #111827;
+  --text-2:     #4B5563;
+  --text-3:     #9CA3AF;
+  --green:      #0F9D58;
+  --amber:      #E37400;
+  --red:        #C5221F;
+  --shadow-sm:  0 1px 3px rgba(15,20,45,0.06), 0 1px 2px rgba(15,20,45,0.04);
+  --shadow-md:  0 4px 12px rgba(15,20,45,0.08), 0 2px 4px rgba(15,20,45,0.04);
+}
+
+body {
+  font-family: 'Google Sans', Arial, sans-serif;
+  background: var(--bg);
+  height: 100vh;
+  overflow: hidden;
+  color: var(--text-1);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Login ── */
+#loginOverlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: linear-gradient(145deg, #EEF2FF 0%, #F1F4FB 60%, #E8F0FE 100%);
+  display: flex; align-items: center; justify-content: center;
+}
+.lc {
+  background: var(--surface);
+  border-radius: 24px;
+  padding: 48px 44px;
+  width: 420px; max-width: 94vw;
+  box-shadow: 0 20px 60px rgba(26,115,232,0.12), 0 4px 16px rgba(0,0,0,0.06);
+  border: 1px solid rgba(26,115,232,0.08);
+}
+.lc-brand { text-align: center; margin-bottom: 32px; }
+.lc-icon {
+  width: 56px; height: 56px; border-radius: 16px;
+  background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px;
+  box-shadow: 0 8px 24px rgba(26,115,232,0.3);
+}
+.lc-icon span { font-size: 26px; color: white; }
+.lc-title { font-size: 20px; font-weight: 600; color: var(--text-1); margin-bottom: 4px; }
+.lc-sub   { font-size: 13px; color: var(--text-3); }
+.lc-field { margin-bottom: 18px; }
+.lc-field label {
+  display: block; font-size: 11px; font-weight: 600; color: var(--text-2);
+  text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 7px;
+}
+.lc-input {
+  width: 100%; padding: 12px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px; font-size: 14px; outline: none;
+  font-family: 'Google Sans', Arial, sans-serif;
+  color: var(--text-1); background: var(--bg);
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.lc-input:focus {
+  border-color: var(--blue); background: var(--surface);
+  box-shadow: 0 0 0 3px rgba(26,115,232,0.1);
+}
+.lc-btn {
+  width: 100%; padding: 13px; margin-top: 6px;
+  background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+  color: white; border: none; border-radius: 10px;
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  font-family: 'Google Sans', Arial, sans-serif;
+  letter-spacing: 0.2px;
+  box-shadow: 0 4px 14px rgba(26,115,232,0.35);
+  transition: opacity 0.15s, transform 0.1s, box-shadow 0.15s;
+}
+.lc-btn:hover:not(:disabled) {
+  opacity: 0.93; transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(26,115,232,0.4);
+}
+.lc-btn:disabled { opacity: 0.55; cursor: not-allowed; box-shadow: none; transform: none; }
+.lc-err {
+  display: none; margin-top: 14px; padding: 10px 14px;
+  background: #FEF2F2; color: var(--red);
+  border: 1px solid #FECACA;
+  border-radius: 8px; font-size: 13px; text-align: center;
+}
+.lc-load {
+  display: none; text-align: center;
+  font-size: 12px; color: var(--text-3); margin-top: 12px;
+}
+
+/* ── Top Bar ── */
+.top-bar {
+  height: 54px; position: sticky; top: 0; z-index: 200;
+  background: var(--navy);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+}
+.tb-left { display: flex; align-items: center; gap: 14px; }
+.tb-logo { color: white; font-size: 16px; font-weight: 600; letter-spacing: -0.2px; }
+.tb-badge {
+  background: rgba(66,133,244,0.25);
+  border: 1px solid rgba(66,133,244,0.4);
+  color: #93C5FD;
+  font-size: 10px; font-weight: 700; padding: 3px 10px;
+  border-radius: 20px; text-transform: uppercase; letter-spacing: 0.8px;
+}
+.tb-links a {
+  color: rgba(255,255,255,0.6); text-decoration: none;
+  font-size: 12px; font-weight: 500; margin-left: 20px;
+  transition: color 0.15s;
+}
+.tb-links a:hover { color: rgba(255,255,255,0.9); }
+.tb-logout {
+  display: flex; align-items: center; gap: 5px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.75); padding: 6px 13px;
+  border-radius: 8px; font-size: 12px; cursor: pointer;
+  font-family: 'Google Sans', Arial, sans-serif; font-weight: 500;
+  transition: background 0.15s, color 0.15s;
+}
+.tb-logout:hover { background: rgba(255,255,255,0.14); color: white; }
+
+/* ── Filter Bar ── */
+.filter-bar {
+  height: 52px; position: sticky; top: 54px; z-index: 190;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; padding: 0 24px; gap: 10px;
+  box-shadow: 0 1px 6px rgba(15,20,45,0.06);
+}
+.fb-label {
+  font-size: 11px; font-weight: 700; color: var(--text-3);
+  text-transform: uppercase; letter-spacing: 0.7px; white-space: nowrap;
+}
+.fb-date {
+  padding: 6px 11px; border: 1.5px solid var(--border); border-radius: 8px;
+  font-size: 13px; font-family: 'Google Sans', Arial, sans-serif;
+  outline: none; color: var(--text-1); background: var(--bg);
+  transition: border-color 0.15s;
+}
+.fb-date:focus { border-color: var(--blue); background: var(--surface); }
+.fb-to-sep { font-size: 12px; color: var(--text-3); }
+.fb-apply {
+  background: var(--blue); color: white; border: none;
+  padding: 7px 18px; border-radius: 8px; font-size: 13px;
+  font-weight: 600; cursor: pointer;
+  font-family: 'Google Sans', Arial, sans-serif;
+  box-shadow: 0 2px 6px rgba(26,115,232,0.25);
+  transition: background 0.15s, box-shadow 0.15s;
+}
+.fb-apply:hover { background: var(--blue-dark); box-shadow: 0 3px 10px rgba(26,115,232,0.3); }
+.fb-reset {
+  background: var(--surface); color: var(--text-2);
+  border: 1.5px solid var(--border);
+  padding: 6px 14px; border-radius: 8px; font-size: 13px; cursor: pointer;
+  font-family: 'Google Sans', Arial, sans-serif; font-weight: 500;
+  transition: border-color 0.15s, color 0.15s;
+}
+.fb-reset:hover { border-color: var(--blue); color: var(--blue); }
+.fb-info { margin-left: auto; font-size: 12px; color: var(--text-3); white-space: nowrap; }
+.fb-count { font-weight: 700; color: var(--blue); font-size: 15px; }
+
+/* ── Layout ── */
+.layout {
+  display: flex;
+  height: calc(100vh - 106px);
+}
+
+/* ── Sidebar — dark professional ── */
+.sidebar {
+  width: 240px; min-width: 240px;
+  background: var(--navy);
+  overflow-y: auto; padding: 14px 0 20px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+.sidebar-group-label {
+  font-size: 9px; font-weight: 700; letter-spacing: 1.2px;
+  color: rgba(255,255,255,0.3); text-transform: uppercase;
+  padding: 10px 20px 8px;
+}
+.sidebar-item {
+  display: flex; align-items: center; gap: 11px;
+  padding: 10px 20px; cursor: pointer;
+  font-size: 13px; color: rgba(255,255,255,0.6); font-weight: 500;
+  border-left: 3px solid transparent;
+  transition: all 0.12s; position: relative;
+  margin: 1px 0;
+}
+.sidebar-item:hover {
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.88);
+}
+.sidebar-item.active {
+  background: rgba(66,133,244,0.14);
+  color: #93C5FD;
+  border-left-color: #4285F4;
+}
+.si-icon {
+  font-size: 18px !important; flex-shrink: 0;
+  color: inherit; opacity: 0.8;
+}
+.sidebar-item.active .si-icon { opacity: 1; }
+.si-label { flex: 1; font-size: 13px; }
+.si-num {
+  font-size: 10px; font-weight: 700;
+  background: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.5);
+  padding: 2px 7px; border-radius: 10px;
+  min-width: 24px; text-align: center;
+}
+.sidebar-item.active .si-num {
+  background: rgba(66,133,244,0.35);
+  color: #93C5FD;
+}
+
+/* ── Main Content ── */
+.main { flex: 1; overflow-y: auto; padding: 22px 26px; }
+
+.section { display: none; }
+.section.active { display: block; }
+
+.sec-head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 18px; padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.sec-title-wrap { display: flex; align-items: center; gap: 10px; }
+.sec-dot {
+  width: 4px; height: 26px; border-radius: 4px;
+  background: linear-gradient(180deg, var(--blue), #4285F4);
+  flex-shrink: 0;
+}
+.sec-title { font-size: 18px; font-weight: 600; color: var(--text-1); }
+.sec-sub   { font-size: 12px; color: var(--text-3); margin-top: 3px; }
+
+/* ── Stat Cards ── */
+.sum-row {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
+  gap: 12px; margin-bottom: 20px;
+}
+.sum-card {
+  background: var(--surface);
+  border-radius: 14px; padding: 18px 20px 14px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  position: relative; overflow: hidden;
+  transition: box-shadow 0.15s;
+}
+.sum-card:hover { box-shadow: var(--shadow-md); }
+.sum-card::after {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--blue) 0%, #4285F4 100%);
+  border-radius: 14px 14px 0 0;
+}
+.sc-top {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px;
+}
+.sc-lbl {
+  font-size: 10px; font-weight: 700; color: var(--text-3);
+  text-transform: uppercase; letter-spacing: 0.6px;
+}
+.sc-ico {
+  font-size: 16px !important; color: var(--blue); opacity: 0.5;
+}
+.sc-val {
+  font-size: 28px; font-weight: 700; color: var(--text-1);
+  line-height: 1.1; letter-spacing: -0.5px;
+}
+.sc-val.red   { color: var(--red); }
+.sc-val.green { color: var(--green); }
+.sc-val.amber { color: var(--amber); }
+.sc-val.text  { font-size: 14px; font-weight: 600; color: var(--text-2); }
+
+/* ── Split Layout ── */
+.split {
+  display: grid; grid-template-columns: 56% 44%;
+  gap: 14px; align-items: start; margin-bottom: 14px;
+}
+.split.flip { grid-template-columns: 44% 56%; }
+
+/* ── Cards ── */
+.card {
+  background: var(--surface); border-radius: 14px; padding: 18px 20px;
+  border: 1px solid var(--border); box-shadow: var(--shadow-sm);
+}
+.card-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px; padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.card-title {
+  font-size: 11px; font-weight: 700; color: var(--text-3);
+  text-transform: uppercase; letter-spacing: 0.6px;
+  display: flex; align-items: center; gap: 6px;
+}
+.card-title span.material-icons-outlined { font-size: 14px !important; color: var(--blue); opacity: 0.6; }
+
+/* ── Chart ── */
+.chart-area { height: 268px; }
+.no-chart {
+  height: 268px; display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 10px;
+  color: var(--text-3); font-size: 13px;
+}
+.no-chart .material-icons-outlined { font-size: 36px !important; opacity: 0.3; }
+
+/* ── Table ── */
+.tbl-search {
+  width: 100%; padding: 8px 12px;
+  border: 1.5px solid var(--border); border-radius: 8px;
+  font-size: 12px; outline: none; margin-bottom: 10px;
+  font-family: 'Google Sans', Arial, sans-serif; color: var(--text-1);
+  background: var(--bg);
+  transition: border-color 0.15s, background 0.15s;
+}
+.tbl-search:focus { border-color: var(--blue); background: var(--surface); }
+
+.tbl-wrap { overflow-x: auto; overflow-y: auto; max-height: 290px; }
+.dtbl { width: 100%; border-collapse: collapse; font-size: 12px; }
+
+.dtbl thead th {
+  background: var(--bg);
+  color: var(--text-3); font-weight: 700;
+  padding: 8px 12px; text-align: left;
+  border-bottom: 2px solid var(--border);
+  position: sticky; top: 0; white-space: nowrap;
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;
+  cursor: pointer; user-select: none;
+  transition: color 0.1s, background 0.1s;
+}
+.dtbl thead th:hover { color: var(--blue); background: var(--blue-pale); }
+.dtbl thead th.asc::after  { content: ' ↑'; color: var(--blue); }
+.dtbl thead th.desc::after { content: ' ↓'; color: var(--blue); }
+
+.dtbl tbody tr { border-bottom: 1px solid rgba(220,227,240,0.6); transition: background 0.08s; }
+.dtbl tbody tr:last-child { border-bottom: none; }
+.dtbl tbody tr:hover { background: #F5F8FF; }
+
+.dtbl tbody td { padding: 8px 12px; color: var(--text-1); }
+.dtbl td.num { text-align: right; font-weight: 600; }
+.dtbl td.pct { text-align: right; color: var(--text-3); font-size: 11px; }
+.dtbl td.mono {
+  font-family: 'Roboto Mono', monospace; font-size: 11px; color: var(--text-2);
+}
+
+.tbl-rank {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; border-radius: 50%;
+  font-size: 10px; font-weight: 700;
+  background: var(--bg); color: var(--text-3);
+  border: 1px solid var(--border);
+}
+.tbl-rank.g { background: linear-gradient(135deg, #FFD700, #FFA500); color: #5C3D00; border: none; }
+.tbl-rank.s { background: linear-gradient(135deg, #E0E0E0, #C0C0C0); color: #333; border: none; }
+.tbl-rank.b { background: linear-gradient(135deg, #CD7F32, #A0522D); color: white; border: none; }
+
+.bar-cell { display: flex; align-items: center; gap: 8px; }
+.bar-fill {
+  height: 5px; border-radius: 3px; min-width: 2px; flex-shrink: 0;
+  background: linear-gradient(90deg, var(--blue), #4285F4);
+}
+
+.export-row { text-align: right; margin-top: 10px; }
+.btn-csv {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--surface); border: 1.5px solid var(--border);
+  color: var(--text-2); padding: 5px 12px; border-radius: 7px;
+  font-size: 11px; cursor: pointer; font-weight: 600;
+  font-family: 'Google Sans', Arial, sans-serif;
+  transition: all 0.12s;
+}
+.btn-csv:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-pale); }
+.btn-csv .material-icons-outlined { font-size: 13px !important; }
+
+/* ── Loading ── */
+#loadingOverlay {
+  position: absolute; inset: 0;
+  background: rgba(241,244,251,0.88);
+  backdrop-filter: blur(4px);
+  display: none; align-items: center; justify-content: center;
+  flex-direction: column; gap: 16px; z-index: 50;
+  font-size: 13px; color: var(--text-2); font-weight: 500;
+}
+.spin {
+  width: 36px; height: 36px;
+  border: 3px solid var(--border);
+  border-top-color: var(--blue);
+  border-radius: 50%; animation: rot 0.7s linear infinite;
+}
+@keyframes rot { to { transform: rotate(360deg); } }
+
+/* ── Toast ── */
+.toast {
+  position: fixed; bottom: 20px; right: 20px;
+  padding: 11px 18px; border-radius: 10px; font-size: 13px;
+  z-index: 500; opacity: 0; transition: opacity 0.3s;
+  pointer-events: none; font-weight: 500;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  display: flex; align-items: center; gap: 7px;
+}
+.toast.show  { opacity: 1; pointer-events: auto; }
+.toast.ok    { background: #0F9D58; color: white; }
+.toast.err   { background: var(--red); color: white; }
+
+/* ── Empty ── */
+.empty { text-align: center; padding: 48px 20px; color: var(--text-3); }
+.empty .e-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.4; }
+.empty .e-msg  { font-size: 13px; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════ LOGIN ═══════════════════════ -->
+<div id="loginOverlay">
+  <div class="lc">
+    <div class="lc-brand">
+      <div class="lc-icon">
+        <span class="material-icons-outlined">bar_chart</span>
+      </div>
+      <div class="lc-title">CRX Business Review</div>
+      <div class="lc-sub">Sign in to access analytics</div>
+    </div>
+    <div class="lc-field">
+      <label>LDAP</label>
+      <input class="lc-input" type="text" id="loginLdap" placeholder="yourldap"
+             onkeydown="if(event.key==='Enter')document.getElementById('loginPasskey').focus()">
+    </div>
+    <div class="lc-field">
+      <label>Passkey</label>
+      <input class="lc-input" type="password" id="loginPasskey" placeholder="Enter passkey"
+             onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="lc-btn" id="loginBtn" onclick="doLogin()">Sign In</button>
+    <div class="lc-err"  id="loginError"></div>
+    <div class="lc-load" id="loginLoading">Verifying…</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ TOP BAR ═══════════════════════ -->
+<div class="top-bar">
+  <div class="tb-left">
+    <div class="tb-logo">CRX Doubt Management</div>
+    <div class="tb-badge">Business Review</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:16px">
+    <div class="tb-links">
+      <a href="?page=l0" target="_blank">L0 Form</a>
+      <a href="?page=crx" target="_blank">Dashboard</a>
+      <a href="?page=analytics" target="_blank">Analytics</a>
+    </div>
+    <button class="tb-logout" onclick="doLogout()">
+      <span class="material-icons-outlined" style="font-size:14px">logout</span>
+      Sign Out
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════ FILTER BAR ═══════════════════════ -->
+<div class="filter-bar">
+  <span class="fb-label">Date Range</span>
+  <input class="fb-date" type="date" id="dateFrom" title="From date">
+  <span style="font-size:12px;color:#9aa0a6">to</span>
+  <input class="fb-date" type="date" id="dateTo"   title="To date">
+  <button class="fb-apply" onclick="loadData()">Apply</button>
+  <button class="fb-reset" onclick="resetFilters()">All Time</button>
+  <div class="fb-info">
+    Showing <span class="fb-count" id="totalCount">—</span> resolved consults
+  </div>
+</div>
+
+<!-- ═══════════════════════ LAYOUT ═══════════════════════ -->
+<div class="layout">
+
+  <!-- ── Sidebar ── -->
+  <div class="sidebar">
+    <div class="sidebar-group-label">Analytics Sections</div>
+
+    <div class="sidebar-item active" data-sec="s1" onclick="showSection('s1')">
+      <span class="material-icons-outlined si-icon">groups</span>
+      <span class="si-label">CRX Members</span>
+      <span class="si-num" id="n1">—</span>
+    </div>
+    <div class="sidebar-item" data-sec="s2" onclick="showSection('s2')">
+      <span class="material-icons-outlined si-icon">apartment</span>
+      <span class="si-label">POD Wise</span>
+      <span class="si-num" id="n2">—</span>
+    </div>
+    <div class="sidebar-item" data-sec="s3" onclick="showSection('s3')">
+      <span class="material-icons-outlined si-icon">list_alt</span>
+      <span class="si-label">Queue Names</span>
+      <span class="si-num" id="n3">—</span>
+    </div>
+    <div class="sidebar-item" data-sec="s4" onclick="showSection('s4')">
+      <span class="material-icons-outlined si-icon">gavel</span>
+      <span class="si-label">L2 Verdict Combos</span>
+      <span class="si-num" id="n4">—</span>
+    </div>
+    <div class="sidebar-item" data-sec="s5" onclick="showSection('s5')">
+      <span class="material-icons-outlined si-icon">badge</span>
+      <span class="si-label">L0 Members</span>
+      <span class="si-num" id="n5">—</span>
+    </div>
+    <div class="sidebar-item" data-sec="s6" onclick="showSection('s6')">
+      <span class="material-icons-outlined si-icon">policy</span>
+      <span class="si-label">L0 Violations</span>
+      <span class="si-num" id="n6">—</span>
+    </div>
+    <div class="sidebar-item" data-sec="s7" onclick="showSection('s7')">
+      <span class="material-icons-outlined si-icon">category</span>
+      <span class="si-label">Category</span>
+      <span class="si-num" id="n7">—</span>
+    </div>
+    <div class="sidebar-item" data-sec="s8" onclick="showSection('s8')">
+      <span class="material-icons-outlined si-icon">folder_open</span>
+      <span class="si-label">Sub Category</span>
+      <span class="si-num" id="n8">—</span>
+    </div>
+    <div class="sidebar-item" data-sec="s9" onclick="showSection('s9')">
+      <span class="material-icons-outlined si-icon">settings_applications</span>
+      <span class="si-label">Functionality</span>
+      <span class="si-num" id="n9">—</span>
+    </div>
+    <div class="sidebar-item" data-sec="s10" onclick="showSection('s10')">
+      <span class="material-icons-outlined si-icon">query_stats</span>
+      <span class="si-label">Stage of Query</span>
+      <span class="si-num" id="n10">—</span>
+    </div>
+  </div>
+
+  <!-- ── Main ── -->
+  <div class="main" id="mainArea" style="position:relative">
+
+    <!-- Loading overlay -->
+    <div id="loadingOverlay">
+      <div class="spin"></div>
+      <span>Loading data…</span>
+    </div>
+
+    <!-- ══ S1: CRX Members ══ -->
+    <div class="section active" id="s1">
+      <div class="sec-head">
+        <div>
+          <div class="sec-title-wrap">
+            <div class="sec-dot"></div>
+            <div class="sec-title">CRX Member Performance</div>
+          </div>
+          <div class="sec-sub">Consult counts, type breakdown, escalate rate, AHT and avg pickup time per reviewer</div>
+        </div>
+      </div>
+      <div class="sum-row" id="s1sum"></div>
+      <div class="split flip">
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">
+              <span class="material-icons-outlined">bar_chart</span>
+                Total Consults by Member
+            </span>
+          </div>
+          <div class="chart-area" id="s1chart"></div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title"><span class="material-icons-outlined">table_chart</span>Detail Table</span>
+            <button class="btn-csv" onclick="exportCSV('s1tbl')"><span class="material-icons-outlined">download</span> CSV</button>
+          </div>
+          <div id="s1tblWrap"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ S2: POD Wise ══ -->
+    <div class="section" id="s2">
+      <div class="sec-head">
+        <div>
+          <div class="sec-title-wrap">
+            <div class="sec-dot"></div>
+            <div class="sec-title">POD-wise Consult Analysis</div>
+          </div>
+          <div class="sec-sub">Consult distribution and percentage across teams (PODs)</div>
+        </div>
+      </div>
+      <div class="sum-row" id="s2sum"></div>
+      <div class="split">
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">
+              <span class="material-icons-outlined">bar_chart</span>
+                Consults by POD
+            </span>
+          </div>
+          <div class="chart-area" id="s2chart"></div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title"><span class="material-icons-outlined">table_chart</span>POD Breakdown</span>
+            <button class="btn-csv" onclick="exportCSV('s2tbl')"><span class="material-icons-outlined">download</span>CSV</button>
+          </div>
+          <div id="s2tblWrap"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ S3: Queue Names ══ -->
+    <div class="section" id="s3">
+      <div class="sec-head">
+        <div>
+          <div class="sec-title-wrap">
+            <div class="sec-dot"></div>
+            <div class="sec-title">Queue Name Analysis</div>
+          </div>
+          <div class="sec-sub">Total consults and escalations per queue, with top handling member</div>
+        </div>
+      </div>
+      <div class="sum-row" id="s3sum"></div>
+      <div class="split">
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">
+              <span class="material-icons-outlined">bar_chart</span>
+                Top 10 Queues (Total vs Escalated)
+            </span>
+          </div>
+          <div class="chart-area" id="s3chart"></div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title"><span class="material-icons-outlined">table_chart</span>All Queues</span>
+            <button class="btn-csv" onclick="exportCSV('s3tbl')"><span class="material-icons-outlined">download</span>CSV</button>
+          </div>
+          <div id="s3tblWrap"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ S4: L2 Verdict Combinations ══ -->
+    <div class="section" id="s4">
+      <div class="sec-head">
+        <div>
+          <div class="sec-title-wrap">
+            <div class="sec-dot"></div>
+            <div class="sec-title">L2 Verdict Combinations</div>
+          </div>
+          
+          <div class="sec-sub">Each unique combination of policies in L2 Reason for the verdict counted as one row</div>
+        </div>
+      </div>
+      <div class="sum-row" id="s4sum"></div>
+      <div class="split">
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">
+              <span class="material-icons-outlined">bar_chart</span>
+                Top 10 Combinations
+            </span>
+          </div>
+          <div class="chart-area" id="s4chart"></div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title"><span class="material-icons-outlined">table_chart</span>All Combinations (Policies → Count)</span>
+            <button class="btn-csv" onclick="exportCSV('s4tbl')"><span class="material-icons-outlined">download</span>CSV</button>
+          </div>
+          <div id="s4tblWrap"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ S5: L0 Members ══ -->
+    <div class="section" id="s5">
+      <div class="sec-head">
+        <div>
+          <div class="sec-title-wrap">
+            <div class="sec-dot"></div>
+            <div class="sec-title">L0 Member Consult Count</div>
+          </div>
+          <div class="sec-sub">Number of doubts raised per L0 reviewer (by email address)</div>
+        </div>
+      </div>
+      <div class="sum-row" id="s5sum"></div>
+      <div class="split">
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">
+              <span class="material-icons-outlined">bar_chart</span>
+                Top 15 L0 Members
+            </span>
+          </div>
+          <div class="chart-area" id="s5chart"></div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title"><span class="material-icons-outlined">table_chart</span>All L0 Members</span>
+            <button class="btn-csv" onclick="exportCSV('s5tbl')"><span class="material-icons-outlined">download</span>CSV</button>
+          </div>
+          <div id="s5tblWrap"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ S6: L0 Violations ══ -->
+    <div class="section" id="s6">
+      <div class="sec-head">
+        <div>
+          <div class="sec-title-wrap">
+            <div class="sec-dot"></div>
+            <div class="sec-title">L0 Reason for the Verdict</div>
+          </div>
+          <div class="sec-sub">Individual violation counts from L0's verdict selections (split, not combined)</div>
+        </div>
+      </div>
+      <div class="sum-row" id="s6sum"></div>
+      <div class="split">
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">
+              <span class="material-icons-outlined">bar_chart</span>
+                Top Violations by L0
+            </span>
+          </div>
+          <div class="chart-area" id="s6chart"></div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title"><span class="material-icons-outlined">table_chart</span>All L0 Violations</span>
+            <button class="btn-csv" onclick="exportCSV('s6tbl')"><span class="material-icons-outlined">download</span>CSV</button>
+          </div>
+          <div id="s6tblWrap"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ S7: Category ══ -->
+    <div class="section" id="s7">
+      <div class="sec-head">
+        <div>
+          <div class="sec-title-wrap">
+            <div class="sec-dot"></div>
+            <div class="sec-title">Category-wise Analysis</div>
+          </div>
+          <div class="sec-sub">Distribution of consults across doubt categories</div>
+        </div>
+      </div>
+      <div class="sum-row" id="s7sum"></div>
+      <div class="split">
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">
+              <span class="material-icons-outlined">bar_chart</span>
+              Category Distribution
+            </span>
+          </div>
+          <div class="chart-area" id="s7chart"></div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title"><span class="material-icons-outlined">table_chart</span>All Categories</span>
+            <button class="btn-csv" onclick="exportCSV('s7tbl')"><span class="material-icons-outlined">download</span>CSV</button>
+          </div>
+          <div id="s7tblWrap"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ S8: Sub Category ══ -->
+    <div class="section" id="s8">
+      <div class="sec-head">
+        <div>
+          <div class="sec-title-wrap">
+            <div class="sec-dot"></div>
+            <div class="sec-title">Sub Category Analysis</div>
+          </div>
+          <div class="sec-sub">Consult count per sub-category selection</div>
+        </div>
+      </div>
+      <div class="sum-row" id="s8sum"></div>
+      <div class="split">
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">
+              <span class="material-icons-outlined">bar_chart</span>
+              Top 10 Sub Categories
+            </span>
+          </div>
+          <div class="chart-area" id="s8chart"></div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title"><span class="material-icons-outlined">table_chart</span>All Sub Categories</span>
+            <button class="btn-csv" onclick="exportCSV('s8tbl')"><span class="material-icons-outlined">download</span>CSV</button>
+          </div>
+          <div id="s8tblWrap"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ S9: Functionality ══ -->
+    <div class="section" id="s9">
+      <div class="sec-head">
+        <div>
+          <div class="sec-title-wrap">
+            <div class="sec-dot"></div>
+            <div class="sec-title">Item's Functionality Analysis</div>
+          </div>
+          <div class="sec-sub">Consult distribution by item functionality type</div>
+        </div>
+      </div>
+      <div class="sum-row" id="s9sum"></div>
+      <div class="split">
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">
+              <span class="material-icons-outlined">bar_chart</span>
+              Functionality Distribution
+            </span>
+          </div>
+          <div class="chart-area" id="s9chart"></div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title"><span class="material-icons-outlined">table_chart</span>All Functionality Types</span>
+            <button class="btn-csv" onclick="exportCSV('s9tbl')"><span class="material-icons-outlined">download</span>CSV</button>
+          </div>
+          <div id="s9tblWrap"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ S10: Stage of Query ══ -->
+    <div class="section" id="s10">
+      <div class="sec-head">
+        <div>
+          <div class="sec-title-wrap">
+            <div class="sec-dot"></div>
+            <div class="sec-title">Stage of Query Analysis</div>
+          </div>
+          <div class="sec-sub">At which stage (static, dynamic, network logs, etc.) doubts are raised</div>
+        </div>
+      </div>
+      <div class="sum-row" id="s10sum"></div>
+      <div class="split">
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">
+              <span class="material-icons-outlined">bar_chart</span>
+                Stage Distribution
+            </span>
+          </div>
+          <div class="chart-area" id="s10chart"></div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title"><span class="material-icons-outlined">table_chart</span>All Stages</span>
+            <button class="btn-csv" onclick="exportCSV('s10tbl')"><span class="material-icons-outlined">download</span>CSV</button>
+          </div>
+          <div id="s10tblWrap"></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /.main -->
+</div><!-- /.layout -->
+
+<div class="toast" id="toast"></div>
+
+<!-- ═══════════════════════ SCRIPT ═══════════════════════ -->
+<script>
+
+// ── Auth ────────────────────────────────────────────────────────
+const SESSION_KEY = 'crx_mgmt_v1';
+
+function getTodayStr() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function getSession()   { try { return JSON.parse(localStorage.getItem(SESSION_KEY)||'null'); } catch(e) { return null; } }
+function saveSession(t,m){ try { localStorage.setItem(SESSION_KEY, JSON.stringify({token:t,member:m,date:getTodayStr()})); } catch(e) {} }
+function clearSession() { try { localStorage.removeItem(SESSION_KEY); } catch(e) {} }
+
+(function initAuth() {
+  const s = getSession();
+  if (s && s.token && s.date === getTodayStr()) {
+    document.getElementById('loginLoading').style.display = 'block';
+    google.script.run
+      .withSuccessHandler(function(ok) {
+        document.getElementById('loginLoading').style.display = 'none';
+        if (ok) onAuthOK(s.member); else clearSession();
+      })
+      .withFailureHandler(function() {
+        document.getElementById('loginLoading').style.display = 'none';
+      })
+      .validateSession(s.token);
+  }
+
+  // Auto-fill LDAP
+  google.script.run
+    .withSuccessHandler(function(ldap) {
+      if (!ldap) return;
+      const el = document.getElementById('loginLdap');
+      el.value = ldap; el.readOnly = true;
+      el.style.backgroundColor = '#f1f3f4';
+    })
+    .withFailureHandler(function(){})
+    .getUserLdap();
+})();
+
+function doLogin() {
+  const ldap    = document.getElementById('loginLdap').value.trim();
+  const passkey = document.getElementById('loginPasskey').value;
+  const btn     = document.getElementById('loginBtn');
+  const err     = document.getElementById('loginError');
+  const load    = document.getElementById('loginLoading');
+
+  err.style.display = 'none';
+  if (!passkey) { showLoginErr('Enter your passkey.'); return; }
+
+  btn.disabled = true; btn.textContent = 'Signing in…';
+  load.style.display = 'block';
+
+  google.script.run
+    .withSuccessHandler(function(r) {
+      btn.disabled = false; btn.textContent = 'Sign In';
+      load.style.display = 'none';
+      if (r.success) {
+        saveSession(r.token, r.member);
+        document.getElementById('loginPasskey').value = '';
+        onAuthOK(r.member);
+      } else {
+        showLoginErr(r.error || 'Invalid credentials.');
+      }
+    })
+    .withFailureHandler(function() {
+      btn.disabled = false; btn.textContent = 'Sign In';
+      load.style.display = 'none';
+      showLoginErr('Connection error. Try again.');
+    })
+    .loginCRX(ldap, passkey);
+}
+
+function showLoginErr(msg) {
+  const e = document.getElementById('loginError');
+  e.textContent = msg; e.style.display = 'block';
+}
+
+function onAuthOK(member) {
+  document.getElementById('loginOverlay').style.display = 'none';
+  loadData();
+}
+
+function doLogout() {
+  clearSession();
+  location.reload();
+}
+
+// ── Google Charts ────────────────────────────────────────────────
+let chartsReady = false;
+let bizData     = null;
+let activeSection = 's1';
+const sortState = {};
+
+google.charts.load('current', { packages: ['corechart'] });
+google.charts.setOnLoadCallback(function() { chartsReady = true; });
+
+// ── Data Loading ─────────────────────────────────────────────────
+function getDateRange() {
+  return {
+    from: document.getElementById('dateFrom').value || '',
+    to:   document.getElementById('dateTo').value   || ''
+  };
+}
+
+function resetFilters() {
+  document.getElementById('dateFrom').value = '';
+  document.getElementById('dateTo').value   = '';
+  loadData();
+}
+
+function loadData() {
+  const { from, to } = getDateRange();
+  const lo = document.getElementById('loadingOverlay');
+  lo.style.display = 'flex';
+
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+
+  google.script.run
+    .withSuccessHandler(function(data) {
+      lo.style.display = 'none';
+      if (!data) { showToast('No data returned', 'err'); return; }
+      bizData = data;
+      updateSidebar();
+      document.getElementById('totalCount').textContent = data.total.toLocaleString();
+      showSection(activeSection);
+    })
+    .withFailureHandler(function(e) {
+      lo.style.display = 'none';
+      showToast('Error loading data', 'err');
+      console.error(e);
+    })
+    .getBusinessData(from, to);
+}
+
+function updateSidebar() {
+  if (!bizData) return;
+  const map = {
+    n1: bizData.memberStats.length,
+    n2: bizData.podStats.length,
+    n3: bizData.queueStats.length,
+    n4: bizData.l2ComboStats.length,
+    n5: bizData.l0Stats.length,
+    n6: bizData.l0ReasonStats.length,
+    n7: bizData.categoryStats.length,
+    n8: bizData.subCategoryStats.length,
+    n9: bizData.itemFuncStats.length,
+    n10: bizData.stageStats.length
+  };
+  Object.entries(map).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+  });
+}
+
+// ── Navigation ───────────────────────────────────────────────────
+function showSection(id) {
+  activeSection = id;
+  document.querySelectorAll('.sidebar-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.sec === id);
+  });
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  const sec = document.getElementById(id);
+  if (sec) {
+    sec.classList.add('active');
+    if (bizData && chartsReady) renderSection(id);
+  }
+}
+
+function renderSection(id) {
+  const fn = {
+    s1: renderMembers, s2: renderPod,     s3: renderQueue,
+    s4: renderL2Combo, s5: renderL0,      s6: renderL0Viol,
+    s7: renderCat,     s8: renderSubCat,  s9: renderFunc,
+    s10: renderStage
+  };
+  if (fn[id]) fn[id]();
+}
+
+// ── Chart Helpers ────────────────────────────────────────────────
+const PALETTE = ['#1a73e8','#34a853','#fbbc04','#ea4335','#ff6d00',
+                 '#ab47bc','#00acc1','#66bb6a','#ffa726','#ef5350',
+                 '#42a5f5','#26c6da'];
+
+function colChart(divId, rows, opts) {
+  const el = document.getElementById(divId);
+  if (!rows || rows.length < 2) { noChart(divId); return; }
+  const dt = new google.visualization.DataTable();
+  rows[0].forEach((col, i) => dt.addColumn(i === 0 ? 'string' : 'number', col));
+  rows.slice(1).forEach(r => dt.addRow(r));
+  new google.visualization.ColumnChart(el).draw(dt, Object.assign({
+    legend: {position:'none'}, chartArea: {width:'82%',height:'72%'},
+    colors: ['#1a73e8'], fontName: 'Google Sans', bar: {groupWidth:'62%'},
+    vAxis: {format:'0',minValue:0,textStyle:{fontName:'Google Sans',fontSize:11}},
+    hAxis: {textStyle:{fontName:'Google Sans',fontSize:10},slantedText:true,slantedTextAngle:30}
+  }, opts||{}));
+}
+
+function hbarChart(divId, rows, opts) {
+  const el = document.getElementById(divId);
+  if (!rows || rows.length < 2) { noChart(divId); return; }
+  const dt = new google.visualization.DataTable();
+  rows[0].forEach((col, i) => dt.addColumn(i === 0 ? 'string' : 'number', col));
+  rows.slice(1).forEach(r => dt.addRow(r));
+  new google.visualization.BarChart(el).draw(dt, Object.assign({
+    legend: {position:'none'}, chartArea: {width:'55%',height:'88%'},
+    colors: ['#1a73e8'], fontName: 'Google Sans', bar: {groupWidth:'65%'},
+    hAxis: {format:'0',minValue:0,textStyle:{fontName:'Google Sans',fontSize:11}},
+    vAxis: {textStyle:{fontName:'Google Sans',fontSize:11}}
+  }, opts||{}));
+}
+
+function stackedHbarChart(divId, rows, colors) {
+  const el = document.getElementById(divId);
+  if (!rows || rows.length < 2) { noChart(divId); return; }
+  const dt = new google.visualization.DataTable();
+  rows[0].forEach((col, i) => dt.addColumn(i === 0 ? 'string' : 'number', col));
+  rows.slice(1).forEach(r => dt.addRow(r));
+  new google.visualization.BarChart(el).draw(dt, {
+    isStacked: true,
+    legend: {position:'top',textStyle:{fontName:'Google Sans',fontSize:11}},
+    chartArea: {width:'52%',height:'85%'},
+    colors: colors || ['#1a73e8','#ea4335'],
+    fontName: 'Google Sans', bar: {groupWidth:'65%'},
+    hAxis: {format:'0',minValue:0,textStyle:{fontName:'Google Sans',fontSize:11}},
+    vAxis: {textStyle:{fontName:'Google Sans',fontSize:10}}
+  });
+}
+
+function donutChart(divId, rows, opts) {
+  const el = document.getElementById(divId);
+  if (!rows || rows.length < 2) { noChart(divId); return; }
+  const dt = new google.visualization.DataTable();
+  dt.addColumn('string', rows[0][0]);
+  dt.addColumn('number', rows[0][1]);
+  rows.slice(1).forEach(r => dt.addRow(r));
+  new google.visualization.PieChart(el).draw(dt, Object.assign({
+    pieHole: 0.42,
+    legend: {position:'right',textStyle:{fontName:'Google Sans',fontSize:11}},
+    chartArea: {width:'62%',height:'88%'},
+    colors: PALETTE, fontName: 'Google Sans',
+    tooltip: {textStyle:{fontName:'Google Sans'}}
+  }, opts||{}));
+}
+
+function noChart(divId) {
+  document.getElementById(divId).innerHTML =
+    '<div class="no-chart"><span class="material-icons-outlined">insert_chart_outlined</span>No data for current filters</div>';
+}
+
+// ── Table Helpers ────────────────────────────────────────────────
+function makeTable(wrapId, tblId, headers, rows, opts) {
+  const wrap = document.getElementById(wrapId);
+  if (!rows || !rows.length) {
+    wrap.innerHTML = '<div class="empty"><div class="e-icon">📋</div><div class="e-msg">No data available</div></div>';
+    return;
+  }
+  opts = opts || {};
+  const maxVal = opts.barCol !== undefined
+    ? Math.max(...rows.map(r => Number(r[opts.barCol]) || 0)) : 0;
+  const total  = opts.pctOf !== undefined ? opts.pctOf : 0;
+
+  let html = '';
+  if (opts.searchable !== false) {
+    html += `<input class="tbl-search" placeholder="🔍 Search…" oninput="filterTbl('${tblId}',this.value)">`;
+  }
+  html += `<div class="tbl-wrap"><table class="dtbl" id="${tblId}"><thead><tr>`;
+  headers.forEach((h, i) => {
+    html += `<th onclick="sortTbl('${tblId}',${i})">${h}</th>`;
+  });
+  html += `</tr></thead><tbody>`;
+
+  rows.forEach((row, ri) => {
+    html += '<tr>';
+    row.forEach((cell, ci) => {
+      let cls = '', content = escHtml(String(cell ?? ''));
+
+      if (opts.numCols && opts.numCols.includes(ci)) cls = 'num';
+      if (opts.pctCols && opts.pctCols.includes(ci)) cls = 'pct';
+      if (opts.monoCol === ci) cls = 'mono';
+
+      if (opts.rankCol === ci) {
+        const badge = ri === 0 ? 'g' : ri === 1 ? 's' : ri === 2 ? 'b' : '';
+        content = `<span class="tbl-rank ${badge}">${ri+1}</span>`;
+      }
+
+      if (opts.barCol === ci && maxVal > 0) {
+        const pct = Math.round(Number(cell)/maxVal*80);
+        content = `<div class="bar-cell">
+          <div class="bar-fill" style="width:${pct}px"></div>
+          <span>${escHtml(String(cell))}</span>
+        </div>`;
+        cls = 'num';
+      }
+
+      if (opts.autoPct === ci && total > 0) {
+        content += `<span style="color:#9aa0a6;font-size:10px;margin-left:4px">${Math.round(Number(cell)/total*100)}%</span>`;
+        cls = 'num';
+      }
+
+      html += `<td class="${cls}">${content}</td>`;
+    });
+    html += '</tr>';
+  });
+
+  html += `</tbody></table></div>`;
+  wrap.innerHTML = html;
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function filterTbl(tblId, q) {
+  const tbl = document.getElementById(tblId);
+  if (!tbl) return;
+  q = q.toLowerCase();
+  tbl.querySelectorAll('tbody tr').forEach(row => {
+    row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+function sortTbl(tblId, col) {
+  const tbl = document.getElementById(tblId);
+  if (!tbl) return;
+  const key = tblId + '_' + col;
+  sortState[key] = sortState[key] === 'asc' ? 'desc' : 'asc';
+  const dir = sortState[key];
+
+  tbl.querySelectorAll('thead th').forEach((th, i) => {
+    th.classList.remove('asc', 'desc');
+    if (i === col) th.classList.add(dir);
+  });
+
+  const rows = [...tbl.querySelectorAll('tbody tr')];
+  rows.sort((a, b) => {
+    const av = a.cells[col]?.textContent.trim() || '';
+    const bv = b.cells[col]?.textContent.trim() || '';
+    const an = parseFloat(av.replace(/[^\d.-]/g, ''));
+    const bn = parseFloat(bv.replace(/[^\d.-]/g, ''));
+    if (!isNaN(an) && !isNaN(bn)) return dir === 'asc' ? an - bn : bn - an;
+    return dir === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av);
+  });
+  const tbody = tbl.querySelector('tbody');
+  rows.forEach(r => tbody.appendChild(r));
+}
+
+function exportCSV(tblId) {
+  const tbl = document.getElementById(tblId);
+  if (!tbl) return;
+  const rows = [...tbl.querySelectorAll('tr')];
+  const csv = rows.map(row =>
+    [...row.querySelectorAll('th,td')]
+      .map(cell => '"' + cell.textContent.trim().replace(/"/g,'""') + '"')
+      .join(',')
+  ).join('\n');
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = tblId + '.csv';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+  showToast('CSV downloaded', 'ok');
+}
+
+function sumCard(val, lbl, cls, icon) {
+  cls = cls || '';
+  const ico = icon
+    ? `<span class="material-icons-outlined sc-ico">${icon}</span>` : '';
+  return `<div class="sum-card">
+    <div class="sc-top"><span class="sc-lbl">${lbl}</span>${ico}</div>
+    <div class="sc-val ${cls}">${val}</div>
+  </div>`;
+}
+
+// ── Section Renderers ────────────────────────────────────────────
+
+// 1. CRX Members
+function renderMembers() {
+  const data = bizData.memberStats || [];
+  const grand = data.reduce((s,d)=>s+d.total, 0);
+  const totalEsc = data.reduce((s,d)=>s+d.escalated, 0);
+
+  document.getElementById('s1sum').innerHTML =
+    sumCard(grand, 'Total Consults', '', 'summarize') +
+    sumCard(data.length, 'CRX Members', '', 'groups') +
+    sumCard(totalEsc, 'Escalated', 'red', 'warning') +
+    sumCard(grand>0?Math.round(totalEsc/grand*100)+'%':'—', 'Escalate Rate', 'amber', 'percent')
+
+
+  // Chart
+  const chartRows = [['Member','Consults']];
+  data.forEach(d => chartRows.push([d.member, d.total]));
+  colChart('s1chart', chartRows);
+
+  // Table
+  const rows = data.map((d,i) => [
+    i+1, d.member, d.total, d.easy, d.medium, d.complex,
+    d.escalated, d.escalatePct+'%', d.avgAHT, d.avgPickup
+  ]);
+  makeTable('s1tblWrap', 's1tbl',
+    ['#','Member','Total','Easy','Med','Complex','Escalate','Esc%','Avg AHT','Avg Pickup'],
+    rows, {numCols:[2,3,4,5,6], barCol:2, rankCol:0}
+  );
+}
+
+// 2. POD Wise
+function renderPod() {
+  const data = bizData.podStats || [];
+  const grand = data.reduce((s,d)=>s+d.count, 0);
+  const topPod = data[0]?.pod || '—';
+
+  document.getElementById('s2sum').innerHTML =
+    sumCard(grand, 'Total Consults', '', 'summarize') +
+    sumCard(data.length, 'PODs', '', 'apartment') +
+    sumCard(topPod, 'Top POD', 'text', 'emoji_events') +
+    sumCard(data[0]?.count||0, 'Top POD Consults', '', 'leaderboard')
+
+
+  const chartRows = [['POD','Count']];
+  data.forEach(d => chartRows.push([d.pod||'Unknown', d.count]));
+  donutChart('s2chart', chartRows);
+
+  const rows = data.map((d,i) => [i+1, d.pod||'Unknown', d.count, d.pct+'%']);
+  makeTable('s2tblWrap', 's2tbl',
+    ['#','POD','Consults','%'],
+    rows, {numCols:[2], pctCols:[3], barCol:2, rankCol:0}
+  );
+}
+
+// 3. Queue Names
+function renderQueue() {
+  const data = bizData.queueStats || [];
+  const grand = data.reduce((s,d)=>s+d.total, 0);
+  const totalEsc = data.reduce((s,d)=>s+d.escalated, 0);
+
+  document.getElementById('s3sum').innerHTML =
+    sumCard(grand, 'Total Consults', '', 'summarize') +
+    sumCard(data.length, 'Queues', '', 'list_alt') +
+    sumCard(totalEsc, 'Escalated', 'red', 'warning') +
+    sumCard(data[0]?.queue?data[0].queue.substring(0,16)+(data[0].queue.length>16?'…':''):'—', 'Top Queue', 'text', 'emoji_events')
+
+
+  // Stacked bar: top 10
+  const top10 = data.slice(0, 10);
+  const chartRows = [['Queue','Non-Escalated','Escalated']];
+  top10.forEach(d => chartRows.push([
+    d.queue.length > 22 ? d.queue.substring(0,22)+'…' : d.queue,
+    d.total - d.escalated, d.escalated
+  ]));
+  stackedHbarChart('s3chart', chartRows, ['#1a73e8','#ea4335']);
+
+  const rows = data.map((d,i) => [i+1, d.queue, d.total, d.escalated, d.topMember]);
+  makeTable('s3tblWrap', 's3tbl',
+    ['#','Queue Name','Total','Escalated','Top Member'],
+    rows, {numCols:[2,3], barCol:2, rankCol:0}
+  );
+}
+
+// 4. L2 Verdict Combinations
+function renderL2Combo() {
+  const data = bizData.l2ComboStats || [];
+  const grand = data.reduce((s,d)=>s+d.count, 0);
+  const topCount = data[0]?.count || 0;
+
+  document.getElementById('s4sum').innerHTML =
+    sumCard(grand, 'Total Resolved', '', 'task_alt') +
+    sumCard(data.length, 'Unique Combinations', '', 'join_inner') +
+    sumCard(topCount, 'Top Combo Count', '', 'leaderboard') +
+    sumCard(grand>0?Math.round(topCount/grand*100)+'%':'—', 'Top Combo Share', 'amber', 'percent')
+
+
+  // Top 10 horizontal bar
+  const top10 = data.slice(0, 10);
+  const chartRows = [['Policies Combination','Count']];
+  top10.forEach(d => chartRows.push([
+    d.combo.length > 28 ? d.combo.substring(0,28)+'…' : d.combo,
+    d.count
+  ]));
+  hbarChart('s4chart', chartRows);
+
+  const rows = data.map((d,i) => [
+    i+1, d.combo,
+    d.count,
+    grand>0 ? Math.round(d.count/grand*100)+'%' : '0%'
+  ]);
+  makeTable('s4tblWrap', 's4tbl',
+    ['#','Policies Combination','Count','%'],
+    rows, {numCols:[2], pctCols:[3], barCol:2, rankCol:0}
+  );
+}
+
+// 5. L0 Members
+function renderL0() {
+  const data = bizData.l0Stats || [];
+  const grand = data.reduce((s,d)=>s+d.count, 0);
+
+  document.getElementById('s5sum').innerHTML =
+    sumCard(grand, 'Total Consults', '', 'summarize') +
+    sumCard(data.length, 'L0 Members', '', 'badge') +
+    sumCard(data.length>0?Math.round(grand/data.length):0, 'Avg per L0', '', 'avg') +
+    sumCard(data[0]?.email?.split('@')[0]||'—', 'Most Active', 'text', 'emoji_events')
+
+
+  const top15 = data.slice(0, 15);
+  const chartRows = [['L0 (LDAP)','Count']];
+  top15.forEach(d => chartRows.push([d.email.split('@')[0], d.count]));
+  hbarChart('s5chart', chartRows);
+
+  const rows = data.map((d,i) => [i+1, d.email, d.count]);
+  makeTable('s5tblWrap', 's5tbl',
+    ['#','Email Address','Consults'],
+    rows, {numCols:[2], barCol:2, rankCol:0}
+  );
+}
+
+// 6. L0 Violations
+function renderL0Viol() {
+  const data = bizData.l0ReasonStats || [];
+  const grand = data.reduce((s,d)=>s+d.count, 0);
+
+  document.getElementById('s6sum').innerHTML =
+    sumCard(grand, 'Total Tags', '', 'label') +
+    sumCard(data.length, 'Unique Violations', '', 'policy') +
+    sumCard(data[0]?.reason||'—', 'Most Common', 'text', 'emoji_events') +
+    sumCard(data[0]?.count||0, 'Top Count', '', 'leaderboard')
+
+  const top10 = data.slice(0, 10);
+  const chartRows = [['Violation','Count']];
+  top10.forEach(d => chartRows.push([
+    d.reason.length > 28 ? d.reason.substring(0,28)+'…' : d.reason,
+    d.count
+  ]));
+  hbarChart('s6chart', chartRows);
+
+  const rows = data.map((d,i) => [i+1, d.reason, d.count, grand>0?Math.round(d.count/grand*100)+'%':'0%']);
+  makeTable('s6tblWrap', 's6tbl',
+    ['#','L0 Violation','Count','%'],
+    rows, {numCols:[2], pctCols:[3], barCol:2, rankCol:0}
+  );
+}
+
+// 7. Category
+function renderCat() {
+  const data = bizData.categoryStats || [];
+  const grand = data.reduce((s,d)=>s+d.count, 0);
+
+  document.getElementById('s7sum').innerHTML =
+    sumCard(grand, 'Total Consults', '', 'summarize') +
+    sumCard(data.length, 'Categories', '', 'category') +
+    sumCard(data[0]?.category||'—', 'Top Category', 'text', 'emoji_events') +
+    sumCard(data[0]?.count||0, 'Top Count', '', 'leaderboard')
+
+  const top10 = data.slice(0, 10);
+  const chartRows = [['Category','Count']];
+  top10.forEach(d => chartRows.push([d.category.length>22?d.category.substring(0,22)+'…':d.category, d.count]));
+  donutChart('s7chart', chartRows);
+
+  const rows = data.map((d,i) => [i+1, d.category, d.count, grand>0?Math.round(d.count/grand*100)+'%':'0%']);
+  makeTable('s7tblWrap', 's7tbl',
+    ['#','Category','Count','%'],
+    rows, {numCols:[2], pctCols:[3], barCol:2, rankCol:0}
+  );
+}
+
+// 8. Sub Category
+function renderSubCat() {
+  const data = bizData.subCategoryStats || [];
+  const grand = data.reduce((s,d)=>s+d.count, 0);
+
+  document.getElementById('s8sum').innerHTML =
+    sumCard(grand, 'Total Consults', '', 'summarize') +
+    sumCard(data.length, 'Sub Categories', '', 'folder_open') +
+    sumCard(data[0]?.subCategory||'—', 'Top Sub Cat', 'text', 'emoji_events') +
+    sumCard(data[0]?.count||0, 'Top Count', '', 'leaderboard')
+
+  const top10 = data.slice(0,10);
+  const chartRows = [['Sub Category','Count']];
+  top10.forEach(d => chartRows.push([d.subCategory.length>24?d.subCategory.substring(0,24)+'…':d.subCategory, d.count]));
+  hbarChart('s8chart', chartRows);
+
+  const rows = data.map((d,i) => [i+1, d.subCategory, d.count, grand>0?Math.round(d.count/grand*100)+'%':'0%']);
+  makeTable('s8tblWrap', 's8tbl',
+    ['#','Sub Category','Count','%'],
+    rows, {numCols:[2], pctCols:[3], barCol:2, rankCol:0}
+  );
+}
+
+// 9. Functionality
+function renderFunc() {
+  const data = bizData.itemFuncStats || [];
+  const grand = data.reduce((s,d)=>s+d.count, 0);
+
+  document.getElementById('s9sum').innerHTML =
+    sumCard(grand, 'Total Consults', '', 'summarize') +
+    sumCard(data.length, 'Functionality Types', '', 'settings_applications') +
+    sumCard(data[0]?.func||'—', 'Most Common', 'text', 'emoji_events') +
+    sumCard(data[0]?.count||0, 'Top Count', '', 'leaderboard')
+
+  const top12 = data.slice(0,12);
+  const chartRows = [["Item's Functionality",'Count']];
+  top12.forEach(d => chartRows.push([d.func.length>22?d.func.substring(0,22)+'…':d.func, d.count]));
+  donutChart('s9chart', chartRows);
+
+  const rows = data.map((d,i) => [i+1, d.func, d.count, grand>0?Math.round(d.count/grand*100)+'%':'0%']);
+  makeTable('s9tblWrap', 's9tbl',
+    ["#","Item's Functionality",'Count','%'],
+    rows, {numCols:[2], pctCols:[3], barCol:2, rankCol:0}
+  );
+}
+
+// 10. Stage of Query
+function renderStage() {
+  const data = bizData.stageStats || [];
+  const grand = data.reduce((s,d)=>s+d.count, 0);
+
+  document.getElementById('s10sum').innerHTML =
+    sumCard(grand, 'Total Consults', '', 'summarize') +
+    sumCard(data.length, 'Stages', '', 'query_stats') +
+    sumCard(data[0]?.stage||'—', 'Top Stage', 'text', 'emoji_events') +
+    sumCard(data[0]?.count||0, 'Top Count', '', 'leaderboard')
+
+  const chartRows = [['Stage','Count']];
+  data.forEach(d => chartRows.push([d.stage.length>22?d.stage.substring(0,22)+'…':d.stage, d.count]));
+  donutChart('s10chart', chartRows);
+
+  const rows = data.map((d,i) => [i+1, d.stage, d.count, grand>0?Math.round(d.count/grand*100)+'%':'0%']);
+  makeTable('s10tblWrap', 's10tbl',
+    ['#','Stage of Query','Count','%'],
+    rows, {numCols:[2], pctCols:[3], barCol:2, rankCol:0}
+  );
+}
+
+// ── Toast ─────────────────────────────────────────────────────────
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + (type === 'err' ? 'err' : 'ok');
+  setTimeout(() => t.className = 'toast', 3500);
+}
+
+</script>
+</body>
+</html>
