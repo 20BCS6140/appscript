@@ -153,43 +153,44 @@
 /* ── CRX Status Widget ── */
 .crx-status-widget {
   position: fixed;
-  top: 54px;          /* sits just below the nav bar */
+  top: 70px;         /* ← was 54px, now has 16px gap below nav */
   right: 16px;
   z-index: 500;
-  background: white;
-  border: 1px solid #e8eaed;
-  border-radius: 10px;
-  padding: 10px 14px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  min-width: 190px;
+  background: var(--surface, white);
+  border: 1px solid #DDE3EE;
+  border-radius: 12px;
+  padding: 12px 16px;
+  box-shadow: 0 4px 16px rgba(15,20,45,0.10), 0 1px 4px rgba(15,20,45,0.06);
+  min-width: 200px;
   font-family: 'Google Sans', Arial, sans-serif;
   transition: opacity 0.3s;
 }
-.crx-status-widget.loading { opacity: 0.5; }
+.crx-status-widget.loading { opacity: 0.45; }
 .crx-status-title {
-  font-size: 10px; font-weight: 600; color: #5f6368;
-  text-transform: uppercase; letter-spacing: 0.5px;
-  margin-bottom: 8px; display: flex; justify-content: space-between;
-  align-items: center;
+  font-size: 9px; font-weight: 700; color: #9CA3AF;
+  text-transform: uppercase; letter-spacing: 0.9px;
+  margin-bottom: 10px;
+  display: flex; justify-content: space-between; align-items: center;
 }
 .crx-status-refresh {
-  font-size: 10px; color: #9aa0a6; cursor: default;
+  font-size: 10px; font-weight: 700;
 }
 .crx-status-row {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 4px 0; border-bottom: 1px solid #f1f3f4; font-size: 12px;
+  padding: 5px 0; border-bottom: 1px solid #F1F4FB; font-size: 12px;
 }
-.crx-status-row:last-child { border-bottom: none; padding-bottom: 0; }
-.crx-status-label { color: #5f6368; }
+.crx-status-row:last-of-type { border-bottom: none; }
+.crx-status-label { color: #6B7280; font-size: 12px; }
 .crx-status-val {
-  font-weight: 600; font-size: 13px; padding: 1px 8px;
-  border-radius: 10px;
+  font-weight: 700; font-size: 14px; padding: 1px 9px;
+  border-radius: 12px; letter-spacing: -0.2px;
 }
-.crx-status-val.present  { background: #e6f4ea; color: #1e8e3e; }
-.crx-status-val.assigned { background: #fef3e0; color: #b06000; }
-.crx-status-val.open     { background: #e8f0fe; color: #1a73e8; }
+.crx-status-val.present  { background: #ECFDF5; color: #065F46; }
+.crx-status-val.assigned { background: #FFF7ED; color: #92400E; }
+.crx-status-val.open     { background: #EFF6FF; color: #1E40AF; }
 .crx-status-footer {
-  font-size: 10px; color: #b0b8c1; margin-top: 7px; text-align: right;
+  font-size: 10px; color: #D1D5DB; margin-top: 8px;
+  text-align: right; font-style: italic;
 }
 
   </style>
