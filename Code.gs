@@ -218,7 +218,7 @@ function doGet(e) {
   const page = e.parameter.page || 'l0';
 
   // ── Access control — CRX and Analytics restricted to CRX members only ──
-  if (page === 'crx' || page === 'analytics') {
+  if (page === 'crx' || page === 'analytics' || page === 'business') {
     const auth = checkCRXAccess();
     if (!auth.allowed) {
       return HtmlService.createHtmlOutput(`
@@ -262,6 +262,7 @@ function doGet(e) {
   if (page === 'l0')             template = HtmlService.createTemplateFromFile('l0-form');
   else if (page === 'crx')       template = HtmlService.createTemplateFromFile('crx-dashboard');
   else if (page === 'analytics') template = HtmlService.createTemplateFromFile('analytics-dashboard');
+  else if (page === 'business')  template = HtmlService.createTemplateFromFile('business-analytics');
   else return HtmlService.createHtmlOutput('<h2>Page not found</h2>');
 
   return template.evaluate()
@@ -1653,7 +1654,207 @@ function getAnalyticsData(filters) {
 //   }
 // }
 
+// ── BUSINESS ANALYTICS — all-data aggregation ─────────────────
+// Independent from existing analytics. Uses header-name lookup so
+// column order changes in the sheet never break it.
+function getBusinessData(dateFrom, dateTo) {
+  try {
+    const ss    = SpreadsheetApp.openById(SHEET_ID);
+    const sheet = ss.getSheetByName('Resolved');
+    const all   = sheet.getDataRange().getValues();
+    if (all.length <= 1) return null;
 
+    const headers = all[0].map(h => h.toString().trim());
+    const H = {};
+    headers.forEach((h, i) => { H[h] = i; });
+
+    const tz   = Session.getScriptTimeZone();
+    const from = dateFrom ? new Date(dateFrom)              : null;
+    const to   = dateTo   ? new Date(dateTo + 'T23:59:59') : null;
+
+    // ── Helpers ─────────────────────────────────────────────────
+    function v(row, name) {
+      const idx = H[name];
+      if (idx === undefined || idx < 0) return '';
+      const cell = row[idx];
+      if (cell === null || cell === undefined) return '';
+      if (cell instanceof Date) return Utilities.formatDate(cell, tz, 'yyyy-MM-dd HH:mm:ss');
+      return cell.toString().trim();
+    }
+
+    function parseDur(s) {
+      if (!s) return 0;
+      const str = s.toString();
+      const h = str.match(/(\d+)h/);
+      const m = str.match(/(\d+)m/);
+      return (h ? parseInt(h[1]) : 0) * 60 + (m ? parseInt(m[1]) : 0);
+    }
+
+    function fmtDur(mins) {
+      if (!mins || mins <= 0) return '—';
+      return Math.floor(mins / 60) + 'h ' + (mins % 60) + 'm';
+    }
+
+    function isEscalated(row) {
+      const l2r = v(row, 'L2 Reason for the verdict');
+      return l2r.split(',').some(x => x.trim().toLowerCase() === 'escalate');
+    }
+
+    // ── Filter rows by Consult Date ──────────────────────────────
+    const rows = [];
+    for (let i = 1; i < all.length; i++) {
+      const row = all[i];
+      let d = row[H['Consult Date']];
+      if (!d || d === '') d = row[H['Timestamp']];
+      if (!(d instanceof Date)) d = new Date(d.toString());
+      if (isNaN(d)) continue;
+      if (from && d < from) continue;
+      if (to   && d > to)   continue;
+      rows.push(row);
+    }
+
+    // ── 1. CRX Member Stats ──────────────────────────────────────
+    const memberMap = {};
+    rows.forEach(row => {
+      const m  = v(row, 'L2 LDAP') || 'Unknown';
+      const ct = v(row, 'Type of consult').toLowerCase();
+      const esc = isEscalated(row);
+      if (!memberMap[m]) memberMap[m] = {total:0,easy:0,medium:0,complex:0,escalated:0,aht:0,wait:0};
+      memberMap[m].total++;
+      if (ct === 'easy')    memberMap[m].easy++;
+      else if (ct === 'medium')  memberMap[m].medium++;
+      else if (ct === 'complex') memberMap[m].complex++;
+      if (esc) memberMap[m].escalated++;
+      memberMap[m].aht  += parseDur(v(row, 'Consult AHT'));
+      memberMap[m].wait += parseDur(v(row, 'Wait Time'));
+    });
+    const memberStats = Object.entries(memberMap)
+      .sort((a, b) => b[1].total - a[1].total)
+      .map(([member, s]) => ({
+        member, total: s.total, easy: s.easy, medium: s.medium, complex: s.complex,
+        escalated: s.escalated,
+        escalatePct: s.total > 0 ? Math.round(s.escalated / s.total * 100) : 0,
+        avgAHT:   s.total > 0 ? fmtDur(Math.round(s.aht  / s.total)) : '—',
+        avgPickup: s.total > 0 ? fmtDur(Math.round(s.wait / s.total)) : '—'
+      }));
+
+    // ── 2. POD Wise ──────────────────────────────────────────────
+    const podMap = {};
+    rows.forEach(row => {
+      const pod = v(row, 'POD') || 'Unknown';
+      podMap[pod] = (podMap[pod] || 0) + 1;
+    });
+    const podTotal = rows.length;
+    const podStats = Object.entries(podMap)
+      .sort((a, b) => b[1] - a[1])
+      .map(([pod, count]) => ({
+        pod, count, pct: podTotal > 0 ? Math.round(count / podTotal * 100) : 0
+      }));
+
+    // ── 3. Queue Name Wise ───────────────────────────────────────
+    const queueMap = {};
+    rows.forEach(row => {
+      const q      = v(row, 'Queue Name') || 'Unknown';
+      const member = v(row, 'L2 LDAP')    || 'Unknown';
+      const esc    = isEscalated(row);
+      if (!queueMap[q]) queueMap[q] = { total: 0, escalated: 0, members: {} };
+      queueMap[q].total++;
+      if (esc) queueMap[q].escalated++;
+      queueMap[q].members[member] = (queueMap[q].members[member] || 0) + 1;
+    });
+    const queueStats = Object.entries(queueMap)
+      .sort((a, b) => b[1].total - a[1].total)
+      .map(([queue, s]) => ({
+        queue, total: s.total, escalated: s.escalated,
+        topMember: Object.entries(s.members).sort((a, b) => b[1] - a[1])[0]?.[0] || '—'
+      }));
+
+    // ── 4. L2 Verdict Combinations (full string = one row) ───────
+    const l2ComboMap = {};
+    rows.forEach(row => {
+      const combo = v(row, 'L2 Reason for the verdict');
+      if (combo) l2ComboMap[combo] = (l2ComboMap[combo] || 0) + 1;
+    });
+    const l2ComboStats = Object.entries(l2ComboMap)
+      .sort((a, b) => b[1] - a[1])
+      .map(([combo, count]) => ({ combo, count }));
+
+    // ── 5. L0 Wise ───────────────────────────────────────────────
+    const l0Map = {};
+    rows.forEach(row => {
+      const l0 = v(row, 'Email Address') || 'Unknown';
+      l0Map[l0] = (l0Map[l0] || 0) + 1;
+    });
+    const l0Stats = Object.entries(l0Map)
+      .sort((a, b) => b[1] - a[1])
+      .map(([email, count]) => ({ email, count }));
+
+    // ── 6. L0 Reason Wise (split by comma) ───────────────────────
+    const l0ReasonMap = {};
+    rows.forEach(row => {
+      const reasons = v(row, 'L0 Reason for the verdict');
+      if (reasons) {
+        reasons.split(',').forEach(r => {
+          r = r.trim(); if (r) l0ReasonMap[r] = (l0ReasonMap[r] || 0) + 1;
+        });
+      }
+    });
+    const l0ReasonStats = Object.entries(l0ReasonMap)
+      .sort((a, b) => b[1] - a[1])
+      .map(([reason, count]) => ({ reason, count }));
+
+    // ── 7. Category Wise ─────────────────────────────────────────
+    const catMap = {};
+    rows.forEach(row => {
+      const cat = v(row, 'Category') || 'Unknown';
+      catMap[cat] = (catMap[cat] || 0) + 1;
+    });
+    const categoryStats = Object.entries(catMap)
+      .sort((a, b) => b[1] - a[1])
+      .map(([category, count]) => ({ category, count }));
+
+    // ── 8. Sub Category Wise ─────────────────────────────────────
+    const subMap = {};
+    rows.forEach(row => {
+      const sc = v(row, 'Sub Category') || 'Unknown';
+      subMap[sc] = (subMap[sc] || 0) + 1;
+    });
+    const subCategoryStats = Object.entries(subMap)
+      .sort((a, b) => b[1] - a[1])
+      .map(([subCategory, count]) => ({ subCategory, count }));
+
+    // ── 9. Item's Functionality Wise ─────────────────────────────
+    const funcMap = {};
+    rows.forEach(row => {
+      const f = v(row, "Item's Functionality") || 'Unknown';
+      funcMap[f] = (funcMap[f] || 0) + 1;
+    });
+    const itemFuncStats = Object.entries(funcMap)
+      .sort((a, b) => b[1] - a[1])
+      .map(([func, count]) => ({ func, count }));
+
+    // ── 10. Stage of Query Wise ──────────────────────────────────
+    const stageMap = {};
+    rows.forEach(row => {
+      const s = v(row, 'Stage of query') || 'Unknown';
+      stageMap[s] = (stageMap[s] || 0) + 1;
+    });
+    const stageStats = Object.entries(stageMap)
+      .sort((a, b) => b[1] - a[1])
+      .map(([stage, count]) => ({ stage, count }));
+
+    return {
+      total: rows.length,
+      memberStats, podStats, queueStats, l2ComboStats,
+      l0Stats, l0ReasonStats, categoryStats, subCategoryStats,
+      itemFuncStats, stageStats
+    };
+
+  } catch (err) {
+    Logger.log('getBusinessData ERROR: ' + err.message);
+    return null;
+  }
+}
 
 
 // ── exportResolvedCSV — updated to filter by Consult Date (index 37) ──
