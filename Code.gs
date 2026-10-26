@@ -331,8 +331,10 @@ function getUserEmail() {
 }
 
 function getUserLdap() {
-  try { return Session.getActiveUser().getEmail().split('@')[0].toLowerCase() || ''; }
-  catch (e) { return ''; }
+  try {
+    const email = Session.getActiveUser().getEmail() || '';
+    return email.split('@')[0]; // returns just the LDAP part
+  } catch(e) { return ''; }
 }
 
 // function getUserLdap() {
@@ -1852,6 +1854,332 @@ function getBusinessData(dateFrom, dateTo) {
 
   } catch (err) {
     Logger.log('getBusinessData ERROR: ' + err.message);
+    return null;
+  }
+}
+
+
+function getDetailData(type, id, dateFrom, dateTo) {
+  try {
+    const ss      = SpreadsheetApp.openById(SHEET_ID);
+    const sheet   = ss.getSheetByName('Resolved');
+    const all     = sheet.getDataRange().getValues();
+    if (all.length <= 1) return null;
+
+    const headers = all[0].map(h => h.toString().trim());
+    const H = {};
+    headers.forEach((h, i) => { H[h] = i; });
+    const tz = Session.getScriptTimeZone();
+
+    function v(row, name) {
+      const idx = H[name];
+      if (idx === undefined) return '';
+      const cell = row[idx];
+      if (!cell && cell !== 0) return '';
+      if (cell instanceof Date) return Utilities.formatDate(cell, tz, 'yyyy-MM-dd');
+      return cell.toString().trim();
+    }
+    function parseDur(s) {
+      if (!s) return 0;
+      const h = s.toString().match(/(\d+)h/);
+      const m = s.toString().match(/(\d+)m/);
+      return (h ? parseInt(h[1]) : 0) * 60 + (m ? parseInt(m[1]) : 0);
+    }
+    function fmtDur(mins) {
+      if (!mins || mins <= 0) return '—';
+      return Math.floor(mins/60) + 'h ' + (mins%60) + 'm';
+    }
+    function isEsc(row) {
+      return v(row, 'L2 Reason for the verdict')
+        .split(',').some(x => x.trim().toLowerCase() === 'escalate');
+    }
+
+    // ── Date filter (same fix as getBusinessData) ──────────────
+    const allRows = [];
+    for (let i = 1; i < all.length; i++) {
+      const row = all[i];
+      let raw = row[H['Consult Date']];
+      if (!raw || raw === '') raw = row[H['Timestamp']];
+      let ds = raw instanceof Date
+        ? Utilities.formatDate(raw, tz, 'yyyy-MM-dd')
+        : (raw ? raw.toString().substring(0, 10) : '');
+      if (!ds || ds.length < 10) continue;
+      if (dateFrom && ds < dateFrom) continue;
+      if (dateTo   && ds > dateTo)   continue;
+      allRows.push(row);
+    }
+
+    // ── Filter by entity ───────────────────────────────────────
+    const rows = allRows.filter(r => {
+      switch(type) {
+        case 'member':       return v(r,'L2 LDAP')                       === id;
+        case 'pod':          return v(r,'POD')                            === id;
+        case 'queue':        return v(r,'Queue Name')                     === id;
+        case 'l0':           return v(r,'Email Address')                  === id;
+        case 'l0violation':  return v(r,'L0 Reason for the verdict')
+                               .split(',').some(x => x.trim() === id);
+        case 'category':     return v(r,'Category')                       === id;
+        case 'subcategory':  return v(r,'Sub Category')                   === id;
+        case 'functionality':return v(r,"Item's Functionality")           === id;
+        case 'stage':        return v(r,'Stage of query')                 === id;
+        default: return true;
+      }
+    });
+
+    const total = rows.length;
+    const detail = { type, id, total };
+
+    // ── Helper: count map → sorted array ──────────────────────
+    function sortedMap(map, keyName, valName) {
+      return Object.entries(map).sort((a,b)=>b[1]-a[1])
+        .map(([k,c])=>({ [keyName]:k, [valName]:c }));
+    }
+    function trendArr(map) {
+      return Object.entries(map).sort((a,b)=>a[0].localeCompare(b[0]))
+        .map(([d,c])=>({d,c}));
+    }
+
+    // ════════════════════════════════════════════
+    // 1. MEMBER DETAIL
+    // ════════════════════════════════════════════
+    if (type === 'member') {
+      let easy=0,med=0,complex=0,esc=0,aht=0,wait=0;
+      const violMap={},queueMap={},l0Map={},trendMap={};
+
+      rows.forEach(r => {
+        const ct = v(r,'Type of consult').toLowerCase();
+        if (ct==='easy') easy++; else if (ct==='medium') med++; else if (ct==='complex') complex++;
+        if (isEsc(r)) esc++;
+        v(r,'L2 Reason for the verdict').split(',').forEach(x => { x=x.trim(); if(x) violMap[x]=(violMap[x]||0)+1; });
+        aht  += parseDur(v(r,'Consult AHT'));
+        wait += parseDur(v(r,'Wait Time'));
+        const q=v(r,'Queue Name')||'Unknown';     queueMap[q]=(queueMap[q]||0)+1;
+        const l=v(r,'Email Address')||'Unknown';  l0Map[l]=(l0Map[l]||0)+1;
+        const d=v(r,'Consult Date')||'Unknown';   trendMap[d]=(trendMap[d]||0)+1;
+      });
+
+      Object.assign(detail, {
+        easy, med, complex,
+        escalated: esc,
+        escalatePct: total>0 ? Math.round(esc/total*100) : 0,
+        avgAHT:   total>0 ? fmtDur(Math.round(aht/total))  : '—',
+        avgPickup: total>0 ? fmtDur(Math.round(wait/total)) : '—',
+        violations: sortedMap(violMap,'v','c'),
+        queues:     sortedMap(queueMap,'q','c'),
+        l0s:        sortedMap(l0Map,'l','c'),
+        trend:      trendArr(trendMap)
+      });
+    }
+
+    // ════════════════════════════════════════════
+    // 2. POD DETAIL
+    // ════════════════════════════════════════════
+    else if (type === 'pod') {
+      const violMap={},queueMap={},memberMap={},l0Map={},trendMap={};
+
+      // Members & supervisor from POD sheet
+      const podSheet = ss.getSheetByName('POD');
+      const podMembers=[], podData = podSheet ? podSheet.getDataRange().getValues() : [];
+      let supervisor='—';
+      for (let i=1;i<podData.length;i++) {
+        if ((podData[i][1]||'').toString().trim() === id) {
+          podMembers.push(podData[i][0].toString().trim());
+          supervisor = (podData[i][2]||'').toString().trim();
+        }
+      }
+
+      rows.forEach(r => {
+        v(r,'L0 Reason for the verdict').split(',').forEach(x=>{x=x.trim();if(x)violMap[x]=(violMap[x]||0)+1;});
+        const q=v(r,'Queue Name')||'Unknown';    queueMap[q]=(queueMap[q]||0)+1;
+        const m=v(r,'L2 LDAP')||'Unknown';       memberMap[m]=(memberMap[m]||0)+1;
+        const l=v(r,'Email Address')||'Unknown'; l0Map[l]=(l0Map[l]||0)+1;
+        const d=v(r,'Consult Date')||'Unknown';  trendMap[d]=(trendMap[d]||0)+1;
+      });
+
+      Object.assign(detail, {
+        podMembers, supervisor,
+        violations: sortedMap(violMap,'v','c'),
+        queues:     sortedMap(queueMap,'q','c'),
+        crxMembers: sortedMap(memberMap,'m','c'),
+        l0s:        sortedMap(l0Map,'l','c'),
+        trend:      trendArr(trendMap)
+      });
+    }
+
+    // ════════════════════════════════════════════
+    // 3. QUEUE DETAIL
+    // ════════════════════════════════════════════
+    else if (type === 'queue') {
+      let esc=0;
+      const l2ViolMap={},podMap={},memberMap={},l0Map={},catMap={},trendMap={};
+
+      rows.forEach(r => {
+        if (isEsc(r)) esc++;
+        v(r,'L2 Reason for the verdict').split(',').forEach(x=>{x=x.trim();if(x)l2ViolMap[x]=(l2ViolMap[x]||0)+1;});
+        const p=v(r,'POD')||'Unknown';           podMap[p]=(podMap[p]||0)+1;
+        const m=v(r,'L2 LDAP')||'Unknown';       memberMap[m]=(memberMap[m]||0)+1;
+        const l=v(r,'Email Address')||'Unknown'; l0Map[l]=(l0Map[l]||0)+1;
+        const c=v(r,'Category')||'Unknown';      catMap[c]=(catMap[c]||0)+1;
+        const d=v(r,'Consult Date')||'Unknown';  trendMap[d]=(trendMap[d]||0)+1;
+      });
+
+      Object.assign(detail, {
+        escalated: esc,
+        escalatePct: total>0 ? Math.round(esc/total*100) : 0,
+        l2Violations: sortedMap(l2ViolMap,'v','c'),
+        pods:         sortedMap(podMap,'p','c'),
+        members:      sortedMap(memberMap,'m','c'),
+        l0s:          sortedMap(l0Map,'l','c'),
+        categories:   sortedMap(catMap,'cat','c'),
+        trend:        trendArr(trendMap)
+      });
+    }
+
+    // ════════════════════════════════════════════
+    // 4. L0 DETAIL (with FP/FN/TP analysis)
+    // ════════════════════════════════════════════
+    else if (type === 'l0') {
+      const queueMap={},l0ViolMap={},l2ViolMap={},trendMap={};
+      let pod='—', supervisor='—';
+
+      // POD info
+      const podSheet = ss.getSheetByName('POD');
+      if (podSheet) {
+        const pd = podSheet.getDataRange().getValues();
+        for (let i=1;i<pd.length;i++) {
+          if ((pd[i][0]||'').toString().trim().toLowerCase() === id.toLowerCase()) {
+            pod = (pd[i][1]||'').toString().trim();
+            supervisor = (pd[i][2]||'').toString().trim();
+            break;
+          }
+        }
+      }
+
+      // Build violation universe for FP/FN/TP
+      const violSet = new Set();
+      rows.forEach(r => {
+        v(r,'L0 Reason for the verdict').split(',').forEach(x=>{x=x.trim();if(x)violSet.add(x);});
+        v(r,'L2 Reason for the verdict').split(',').forEach(x=>{x=x.trim();if(x)violSet.add(x);});
+      });
+
+      const fpfn = {};
+      violSet.forEach(viol => { fpfn[viol]={tp:0,fp:0,fn:0}; });
+
+      rows.forEach(r => {
+        const l0Set = new Set(v(r,'L0 Reason for the verdict').split(',').map(x=>x.trim()).filter(Boolean));
+        const l2Set = new Set(v(r,'L2 Reason for the verdict').split(',').map(x=>x.trim()).filter(Boolean));
+
+        violSet.forEach(viol => {
+          const l0=l0Set.has(viol), l2=l2Set.has(viol);
+          if (l0&&l2)       fpfn[viol].tp++;
+          else if (l0&&!l2) fpfn[viol].fp++;
+          else if (!l0&&l2) fpfn[viol].fn++;
+        });
+
+        const q=v(r,'Queue Name')||'Unknown'; queueMap[q]=(queueMap[q]||0)+1;
+        l0Set.forEach(x=>{ l0ViolMap[x]=(l0ViolMap[x]||0)+1; });
+        l2Set.forEach(x=>{ l2ViolMap[x]=(l2ViolMap[x]||0)+1; });
+        const d=v(r,'Consult Date')||'Unknown'; trendMap[d]=(trendMap[d]||0)+1;
+      });
+
+      const fpfnArr = Object.entries(fpfn)
+        .map(([viol,{tp,fp,fn}]) => ({
+          viol, tp, fp, fn,
+          precision: (tp+fp)>0 ? Math.round(tp/(tp+fp)*100) : 0, // how accurate when L0 flags it
+          recall:    (tp+fn)>0 ? Math.round(tp/(tp+fn)*100) : 0  // how often L0 catches it
+        }))
+        .sort((a,b)=>(b.tp+b.fp+b.fn)-(a.tp+a.fp+a.fn));
+
+      Object.assign(detail, {
+        pod, supervisor,
+        queues:       sortedMap(queueMap,'q','c'),
+        l0Violations: sortedMap(l0ViolMap,'v','c'),
+        l2Violations: sortedMap(l2ViolMap,'v','c'),
+        fpfn: fpfnArr,
+        trend: trendArr(trendMap)
+      });
+    }
+
+    // ════════════════════════════════════════════
+    // 5. L0 VIOLATION DETAIL
+    // ════════════════════════════════════════════
+    else if (type === 'l0violation') {
+      let confirmed=0;
+      const l0Map={},memberMap={},queueMap={},l2VerdictMap={},trendMap={};
+
+      rows.forEach(r => {
+        if (v(r,'L2 Reason for the verdict').split(',').some(x=>x.trim()===id)) confirmed++;
+        v(r,'L2 Reason for the verdict').split(',').forEach(x=>{x=x.trim();if(x)l2VerdictMap[x]=(l2VerdictMap[x]||0)+1;});
+        const l=v(r,'Email Address')||'Unknown'; l0Map[l]=(l0Map[l]||0)+1;
+        const m=v(r,'L2 LDAP')||'Unknown';       memberMap[m]=(memberMap[m]||0)+1;
+        const q=v(r,'Queue Name')||'Unknown';    queueMap[q]=(queueMap[q]||0)+1;
+        const d=v(r,'Consult Date')||'Unknown';  trendMap[d]=(trendMap[d]||0)+1;
+      });
+
+      Object.assign(detail, {
+        confirmed,
+        confirmationRate: total>0 ? Math.round(confirmed/total*100) : 0,
+        l0s:       sortedMap(l0Map,'l','c'),
+        crxMembers:sortedMap(memberMap,'m','c'),
+        queues:    sortedMap(queueMap,'q','c'),
+        l2Verdicts:sortedMap(l2VerdictMap,'v','c'),
+        trend:     trendArr(trendMap)
+      });
+    }
+
+    // ════════════════════════════════════════════
+    // 6. CATEGORY DETAIL
+    // ════════════════════════════════════════════
+    else if (type === 'category') {
+      const subCatMap={},l2ViolMap={},memberMap={},l0Map={},queueMap={},trendMap={};
+
+      rows.forEach(r => {
+        const sc=v(r,'Sub Category')||'Unknown'; subCatMap[sc]=(subCatMap[sc]||0)+1;
+        v(r,'L2 Reason for the verdict').split(',').forEach(x=>{x=x.trim();if(x)l2ViolMap[x]=(l2ViolMap[x]||0)+1;});
+        const m=v(r,'L2 LDAP')||'Unknown';       memberMap[m]=(memberMap[m]||0)+1;
+        const l=v(r,'Email Address')||'Unknown'; l0Map[l]=(l0Map[l]||0)+1;
+        const q=v(r,'Queue Name')||'Unknown';    queueMap[q]=(queueMap[q]||0)+1;
+        const d=v(r,'Consult Date')||'Unknown';  trendMap[d]=(trendMap[d]||0)+1;
+      });
+
+      Object.assign(detail, {
+        subCategories: sortedMap(subCatMap,'s','c'),
+        l2Violations:  sortedMap(l2ViolMap,'v','c'),
+        members:       sortedMap(memberMap,'m','c'),
+        l0s:           sortedMap(l0Map,'l','c'),
+        queues:        sortedMap(queueMap,'q','c'),
+        trend:         trendArr(trendMap)
+      });
+    }
+
+    // ════════════════════════════════════════════
+    // 7–10: SUB CATEGORY / FUNCTIONALITY / STAGE (same pattern)
+    // ════════════════════════════════════════════
+    else {
+      const l2ViolMap={},memberMap={},l0Map={},queueMap={},catMap={},trendMap={};
+
+      rows.forEach(r => {
+        v(r,'L2 Reason for the verdict').split(',').forEach(x=>{x=x.trim();if(x)l2ViolMap[x]=(l2ViolMap[x]||0)+1;});
+        const m=v(r,'L2 LDAP')||'Unknown';       memberMap[m]=(memberMap[m]||0)+1;
+        const l=v(r,'Email Address')||'Unknown'; l0Map[l]=(l0Map[l]||0)+1;
+        const q=v(r,'Queue Name')||'Unknown';    queueMap[q]=(queueMap[q]||0)+1;
+        const c=v(r,'Category')||'Unknown';      catMap[c]=(catMap[c]||0)+1;
+        const d=v(r,'Consult Date')||'Unknown';  trendMap[d]=(trendMap[d]||0)+1;
+      });
+
+      Object.assign(detail, {
+        l2Violations: sortedMap(l2ViolMap,'v','c'),
+        members:      sortedMap(memberMap,'m','c'),
+        l0s:          sortedMap(l0Map,'l','c'),
+        queues:       sortedMap(queueMap,'q','c'),
+        categories:   sortedMap(catMap,'cat','c'),
+        trend:        trendArr(trendMap)
+      });
+    }
+
+    return detail;
+  } catch(err) {
+    Logger.log('getDetailData ERROR: ' + err.message);
     return null;
   }
 }
